@@ -169,7 +169,7 @@
         <property name="valueGenerator" ref="valueGenerator" />
         <property name="catalogStylesFactory" ref="catalogStylesFactory" />
 
-        <property name="dir" value="d:/_PROJECT/KKR/kkr.ktm/wrk" />
+        <property name="dir" value="wrk" />
 
         <property name="review" value="false" />
         <property name="reviewSheet" value="REVIEW" />
