@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    "
+    default-init-method="config"
+>
+
+    <bean id="structureLoader" parent="structureLoaderH">
+        <property name="excelAdapter" ref="excelAdapter" />
+    </bean>
+    
+
+    <bean id="batchKtm" class="kkr.ktm.domains.orchestrator.components.batchktm.BatchKtm">
+        <property name="testLoader" ref="testLoaderExcel" />
+        <property name="testReporter" ref="testReporterExcel" />
+        <property name="testLancer" ref="testLancerDebug" />
+        <property name="trafficLights" ref="trafficLights" />
+        <property name="sysPrefix" value="KTM" />
+    </bean>
+
+    <bean id="trafficLights" class="kkr.ktm.domains.common.components.trafficlights.file.TrafficLightsFile">
+        <property name="file" value="STOP" />
+    </bean>
+
+    <bean id="testLancerDebug" class="kkr.ktm.domains.orchestrator.components.testlancer.debug.TestLancerDebug">
+    </bean>
+
+    <bean id="testLoaderExcel" class="kkr.ktm.domains.tests.components.testloader.excel.TestLoaderExcel">
+        <property name="excelAdapter" ref="excelAdapter" />
+        <property name="structureLoader" ref="structureLoader" />
+        <property name="valueGenerator" ref="valueGenerator" />
+    </bean>
+
+    <bean id="excelAdapter" class="kkr.ktm.domains.excel.components.exceladapter.poi.ExcelAdapterPoi">
+        <property name="formatDate" value="dd/MM/yyyy HH:mm:ss" />
+        <property name="formatTime" value="" />
+    </bean>
+
+    <bean abstract="true" id="structureLoaderV" class="kkr.ktm.domains.excel.components.structureloader.vertical.StructureLoaderVertical">
+        <property name="columnParameter" value="A" />
+        <property name="columnIo" value="B" />
+        <property name="rowCode" value="4" />
+        <property name="rowActive" value="3" />
+        <property name="rowName" value="1" />
+        <property name="rowDescription" value="2" />
+        <property name="rowGroup" value="6" />
+        <property name="rowOrder" value="7" />
+
+        <property name="rowStatusTest" value="5" />
+        <property name="cellStatusSheetOk" value="A3" />
+        <property name="cellStatusSheetKo" value="A4" />
+        <property name="cellStatusSheetSkip" value="A5" />
+
+        <property name="columnsIgnored">
+            <set>
+                <value>C</value>
+            </set>
+        </property>
+
+        <property name="rowsIgnored">
+            <set>
+            </set>
+        </property>
+
+        <property name="selectionSheets">
+            <bean class="kkr.ktm.domains.common.components.selection.pattern.SelectionPattern">
+                <property name="mode" value="EXCLUDE" />
+                <property name="patterns">
+                    <set>
+                        <value>REVIEW</value>
+                        <value>H_.*</value>
+                    </set>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean abstract="true" id="structureLoaderHX" class="kkr.ktm.domains.excel.components.structureloader.horizontal.StructureLoaderHorizontal">
+        <property name="rowParameter" value="1" />
+        <property name="rowIo" value="2" />
+        <property name="columnCode" value="B" />
+        <property name="columnActive" value="A" />
+
+        <property name="columnStatusTest" value="C" />
+        <property name="cellStatusSheetOk" value="A1" />
+        <property name="cellStatusSheetKo" value="B1" />
+
+        <property name="columnsIgnored">
+            <set>
+            </set>
+        </property>
+
+        <property name="rowsIgnored">
+            <set>
+                <value>3</value>
+            </set>
+        </property>
+
+        <property name="selectionSheets">
+            <bean class="kkr.ktm.domains.common.components.selection.pattern.SelectionPattern">
+                <property name="mode" value="EXCLUDE" />
+                <property name="patterns">
+                    <set>
+                        <value>REVIEW</value>
+                        <value>V_.*</value>
+                    </set>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+
+    <bean abstract="true" id="structureLoaderH" class="kkr.ktm.domains.excel.components.structureloader.horizontal.StructureLoaderHorizontal">
+        <property name="rowParameter" value="1" />
+        <property name="rowIo" value="2" />
+        <property name="columnCode" value="D" />
+        <property name="columnActive" value="C" />
+        <property name="columnName" value="A" />
+        <property name="columnDescription" value="B" />
+        <property name="columnGroup" value="F" />
+        <property name="columnOrder" value="G" />
+
+        <property name="columnStatusTest" value="E" />
+        <property name="cellStatusSheetOk" value="C1" />
+        <property name="cellStatusSheetKo" value="D1" />
+        <property name="cellStatusSheetSkip" value="E1" />
+
+        <property name="columnsIgnored">
+            <set>
+            </set>
+        </property>
+
+        <property name="rowsIgnored">
+            <set>
+                <value>3</value>
+            </set>
+        </property>
+
+        <property name="selectionSheets">
+            <bean class="kkr.ktm.domains.common.components.selection.pattern.SelectionPattern">
+                <property name="mode" value="EXCLUDE" />
+                <property name="patterns">
+                    <set>
+                        <value>REVIEW</value>
+                        <value>V_.*</value>
+                    </set>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="valueGenerator" class="kkr.ktm.domains.excel.components.valuegenerator.generic.ValueGeneratorGeneric">
+        <property name="excelAdapter" ref="excelAdapter" />
+        <property name="dateFormat" value="dd/MM/yyyy HH:mm:ss" />
+    </bean>
+
+
+    <bean id="testReporterExcel" class="kkr.ktm.domains.tests.components.testreporter.excel.TestReporterExcel">
+        <property name="excelAdapter" ref="excelAdapter" />
+
+        <property name="structureLoader" ref="structureLoader" />
+        <property name="valueGenerator" ref="valueGenerator" />
+        <property name="catalogStylesFactory" ref="catalogStylesFactory" />
+
+        <property name="dir" value="d:/_PROJECT/KKR/kkr.ktm/wrk" />
+
+        <property name="review" value="false" />
+        <property name="reviewSheet" value="REVIEW" />
+
+        <property name="reviewRowHeader" value="2" />
+        <property name="reviewRowFirst" value="3" />
+        <property name="reviewColumnName" value="C" />
+        <property name="reviewColumnStatusOk" value="D" />
+        <property name="reviewColumnStatusKo" value="E" />
+        <property name="reviewColumnStatusSkip" value="F" />
+    </bean>
+
+    <bean abstract="true" id="abstractStyle" class="kkr.ktm.domains.excelpoi.style.generic.StyleGeneric">
+    </bean>
+
+    <bean id="catalogStylesFactory" class="kkr.ktm.domains.excel.components.catalogstyles.poi.CatalogStylesFactoryPoi">
+        <property name="styles">
+            <list>
+                <bean parent="abstractStyle">
+                    <property name="name" value="OK" />
+                    <property name="backgroundColor" value="GREEN" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="KO" />
+                    <property name="backgroundColor" value="RED" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="SKIP" />
+                    <property name="backgroundColor" value="GREY_50_PERCENT" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="NO" />
+                    <property name="backgroundColor" value="GREY_25_PERCENT" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="EXPECTED_OK" />
+                    <property name="backgroundColor" value="LIGHT_GREEN" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="EXPECTED_KO" />
+                    <property name="backgroundColor" value="CORAL" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="OUTPUT_OK" />
+                    <property name="backgroundColor" value="LIGHT_GREEN" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="OUTPUT_KO" />
+                    <property name="backgroundColor" value="TAN" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="HEADER" />
+                    <property name="backgroundColor" value="GREY_50_PERCENT" />
+                    <property name="boldweight" value="BOLD" />
+                    <property name="alignment" value="CENTER" />
+                </bean>
+                <bean parent="abstractStyle">
+                    <property name="name" value="ITEM" />
+                    <property name="backgroundColor" value="GREY_25_PERCENT" />
+                    <property name="boldweight" value="BOLD" />
+                    <property name="alignment" value="LEFT" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+</beans>
+    
