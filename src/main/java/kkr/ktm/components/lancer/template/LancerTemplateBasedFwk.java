@@ -1,6 +1,5 @@
 package kkr.ktm.components.lancer.template;
 
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +7,9 @@ import java.util.Map;
 import kkr.ktm.components.executant.Executant;
 import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
-
 
 /**
  * LancerTemplateBasedFwk
@@ -19,11 +17,11 @@ import kkr.ktm.exception.ConfigurationException;
  * @author KRALOVEC-99999
  */
 public abstract class LancerTemplateBasedFwk {
-    private boolean configured;
+	private boolean configured;
 
 	protected TemplateArchiv templateArchiv;
 
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 
 	protected Executant executant;
 
@@ -48,71 +46,50 @@ public abstract class LancerTemplateBasedFwk {
 			traceResult = false;
 		}
 		if ((traceSource || traceResult) && dirTrace == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter dirTrace is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter dirTrace is not configured");
 		}
 		if (repeatUnsuccessful == null) {
 			repeatUnsuccessful = 1;
 		} else if (repeatUnsuccessful < 1) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter repeatUnsuccessful must be 1 or more");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter repeatUnsuccessful must be 1 or more");
 		}
 		if (executant == null && (executantByType == null || executantByType.isEmpty())) {
-			throw new ConfigurationException(
-					getClass().getSimpleName()
-							+ ": Neither parameter executant nor executantByType are configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Neither parameter executant nor executantByType are configured");
 		}
 		if (executantByType == null) {
 			executantByType = new HashMap<String, Executant>();
 		}
 		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter resultParser is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
 		}
 		configured = true;
 	}
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
 	public String toString() {
-		final StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 		buffer.append("[").append(this.getClass().getName()).append("]\n");
-		buffer.append("    ").append("templateArchiv").append("=").append(
-				templateArchiv == null ? "" : templateArchiv.getClass()
-						.getName()).append("\n");
-		buffer.append("    ").append("templateParser").append("=").append(
-				templateParser == null ? "" : templateParser.getClass()
-						.getName()).append("\n");
-		buffer.append("    ").append("executant").append("=").append(
-				executant == null ? "" : executant.getClass().getName())
+		buffer.append("    ").append("templateArchiv").append("=").append(templateArchiv == null ? "" : templateArchiv.getClass().getName())
 				.append("\n");
+		buffer.append("    ").append("formatterParameters").append("=")
+				.append(formatterParameters == null ? "" : formatterParameters.getClass().getName()).append("\n");
+		buffer.append("    ").append("executant").append("=").append(executant == null ? "" : executant.getClass().getName()).append("\n");
 		buffer.append("    ").append("executants").append(":").append("\n");
 		if (executantByType != null) {
-			for (final Map.Entry<String, Executant> entry : executantByType
-					.entrySet()) {
-				buffer.append("    ").append("    ").append(entry.getKey())
-						.append(" -> ").append(
-								entry.getValue().getClass().getName()).append(
-								"\n");
+			for (Map.Entry<String, Executant> entry : executantByType.entrySet()) {
+				buffer.append("    ").append("    ").append(entry.getKey()).append(" -> ").append(entry.getValue().getClass().getName()).append("\n");
 			}
 		}
-		buffer.append("    ").append("resultParser").append("=").append(
-				resultParser == null ? "" : resultParser.getClass().getName())
-				.append("\n");
-		buffer.append("    ").append("dirTrace").append("=").append(
-				dirTrace == null ? "" : dirTrace).append("\n");
-		buffer.append("    ").append("traceSource").append("=").append(
-				traceSource == null ? "" : traceSource).append("\n");
-		buffer.append("    ").append("traceResult").append("=").append(
-				traceResult == null ? "" : traceResult).append("\n");
-		buffer.append("    ").append("repeatUnsuccessful").append("=").append(
-				repeatUnsuccessful == null ? "" : repeatUnsuccessful).append(
-				"\n");
+		buffer.append("    ").append("resultParser").append("=").append(resultParser == null ? "" : resultParser.getClass().getName()).append("\n");
+		buffer.append("    ").append("dirTrace").append("=").append(dirTrace == null ? "" : dirTrace).append("\n");
+		buffer.append("    ").append("traceSource").append("=").append(traceSource == null ? "" : traceSource).append("\n");
+		buffer.append("    ").append("traceResult").append("=").append(traceResult == null ? "" : traceResult).append("\n");
+		buffer.append("    ").append("repeatUnsuccessful").append("=").append(repeatUnsuccessful == null ? "" : repeatUnsuccessful).append("\n");
 		return buffer.toString();
 	}
 
@@ -120,23 +97,23 @@ public abstract class LancerTemplateBasedFwk {
 		return templateArchiv;
 	}
 
-	public void setTemplateArchiv(final TemplateArchiv pTemplateArchiv) {
+	public void setTemplateArchiv(TemplateArchiv pTemplateArchiv) {
 		this.templateArchiv = pTemplateArchiv;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getFormatterParameters() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(final TemplateParser pTemplateParser) {
-		this.templateParser = pTemplateParser;
+	public void setFormatterParameters(FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public Executant getExecutant() {
 		return executant;
 	}
 
-	public void setExecutant(final Executant pExecutant) {
+	public void setExecutant(Executant pExecutant) {
 		this.executant = pExecutant;
 	}
 
@@ -152,7 +129,7 @@ public abstract class LancerTemplateBasedFwk {
 		return resultParser;
 	}
 
-	public void setResultParser(final ResultParser pResultParser) {
+	public void setResultParser(ResultParser pResultParser) {
 		this.resultParser = pResultParser;
 	}
 
@@ -160,7 +137,7 @@ public abstract class LancerTemplateBasedFwk {
 		return dirTrace;
 	}
 
-	public void setDirTrace(final File pDir) {
+	public void setDirTrace(File pDir) {
 		this.dirTrace = pDir;
 	}
 

@@ -1,30 +1,27 @@
 package kkr.ktm.components.runner.shellcommand;
 
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
-
 
 public abstract class RunnerShellCommandFwk {
 	private boolean configured;
 	protected String command;
 
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 
 	protected String sysParamPrefix;
 
 	public void config() throws BaseException {
 		configured = false;
-		if (templateParser == null) {
+		if (formatterParameters == null) {
 			// OK
 		}
 		if (command == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter command is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter command is not configured");
 		}
 		if (sysParamPrefix == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter sysPrefix is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter sysPrefix is not configured");
 		} else if (!sysParamPrefix.isEmpty() && !sysParamPrefix.endsWith("/")) {
 			sysParamPrefix += "/";
 		}
@@ -33,8 +30,7 @@ public abstract class RunnerShellCommandFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
@@ -46,12 +42,12 @@ public abstract class RunnerShellCommandFwk {
 		this.command = command;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getTemplateParser() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(TemplateParser templateParser) {
-		this.templateParser = templateParser;
+	public void setTemplateParser(FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public String getSysParamPrefix() {

@@ -248,7 +248,7 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 		try {
 			String templateData = templateArchiv.loadTemplate(testInput.getType());
 
-			String templateDataParsed = templateParser.parse(templateData, inputParameters);
+			String templateDataParsed = formatterParameters.format(templateData, inputParameters);
 			resultMap.put(sysParamPrefix + PARAM_DATA_INPUT, templateDataParsed);
 
 			File destinationFile;

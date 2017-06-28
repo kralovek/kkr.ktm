@@ -35,7 +35,6 @@ import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.TechnicalException;
 import kkr.ktm.utils.UtilsFile;
 
-
 public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 	private static final Logger LOG = Logger.getLogger(RunnerRequeaWs.class);
 
@@ -53,12 +52,10 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			return new X509Certificate[0];
 		}
 
-		public void checkClientTrusted(X509Certificate[] pCerts,
-				String pAuthType) {
+		public void checkClientTrusted(X509Certificate[] pCerts, String pAuthType) {
 		}
 
-		public void checkServerTrusted(X509Certificate[] pCerts,
-				String pAuthType) {
+		public void checkServerTrusted(X509Certificate[] pCerts, String pAuthType) {
 		}
 	}
 
@@ -78,8 +75,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 	 */
 	private static final int BUFFER_SIZE = 50;
 
-	public Map<String, Object> run(Map<String, Object> parameters)
-			throws BaseException {
+	public Map<String, Object> run(Map<String, Object> parameters) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			Date date = new Date();
@@ -104,14 +100,12 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			}
 
 			String templateBody = templateArchiv.loadTemplate(templateBodyName);
-			String parsedBody = templateParser.parse(templateBody,
-					allInputParameters);
+			String parsedBody = formatterParameters.format(templateBody, allInputParameters);
 
 			allInputParameters.put(PARAM_SOAP_LENGTH, parsedBody.length());
 
 			String templateHeader = loadTemplate(templateHeadName);
-			String parsedHeader = templateParser.parse(templateHeader,
-					allInputParameters);
+			String parsedHeader = formatterParameters.format(templateHeader, allInputParameters);
 
 			generateTraceFileRequest(parsedHeader, parsedBody, date);
 
@@ -145,8 +139,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 		}
 	}
 
-	private String callWebService(final String header, final String body)
-			throws BaseException {
+	private String callWebService(final String header, final String body) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			final String hostname = url.getHost();
@@ -157,8 +150,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 
 			if (port == -1) {
 				port = 80;
-				LOG.debug("The port is not set. The default value " + port
-						+ " is used");
+				LOG.debug("The port is not set. The default value " + port + " is used");
 			}
 
 			Socket socket = null;
@@ -172,9 +164,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 				}
 
 				try {
-					final BufferedWriter bufferWriter = new BufferedWriter(
-							new OutputStreamWriter(socket.getOutputStream(),
-									encoding));
+					final BufferedWriter bufferWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), encoding));
 
 					bufferWriter.write(header);
 					bufferWriter.write(body);
@@ -182,24 +172,20 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 					// NO CLOSE !!!
 				} catch (final IOException ex) {
 					LOG.error(ex);
-					throw new TechnicalException(
-							"Problem to connect to the remote service: "
-									+ url.toString(), ex);
+					throw new TechnicalException("Problem to connect to the remote service: " + url.toString(), ex);
 				}
 
 				final String content = readAnswer(socket, protocol);
 
 				socket.close();
 				socket = null;
-				
+
 				LOG.info("WS-RETURN");
 
 				LOG.trace("OK");
 				return content;
 			} catch (final IOException ex) {
-				throw new TechnicalException(
-						"Problem to communicate witch the remote service: "
-								+ url.toString(), ex);
+				throw new TechnicalException("Problem to communicate witch the remote service: " + url.toString(), ex);
 			} finally {
 				closeRessource(socket);
 			}
@@ -208,8 +194,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 		}
 	}
 
-	private Socket openSocketHttp(final String pHostname, final int pPort)
-			throws BaseException {
+	private Socket openSocketHttp(final String pHostname, final int pPort) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			final InetAddress inetAddress = InetAddress.getByName(pHostname);
@@ -218,44 +203,38 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			return socket;
 		} catch (Exception ex) {
 			LOG.error(ex);
-			throw new TechnicalException("Cannot open the HTTP connection to "
-					+ pHostname + ":" + pPort, ex);
+			throw new TechnicalException("Cannot open the HTTP connection to " + pHostname + ":" + pPort, ex);
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Socket openSocketHttps(final String pHostname, final int pPort)
-			throws BaseException {
+	private Socket openSocketHttps(final String pHostname, final int pPort) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			final X509TrustManager trustManager = new TrustManagerInst();
-			final TrustManager[] trustManagers = new TrustManager[] { trustManager };
+			final TrustManager[] trustManagers = new TrustManager[]{trustManager};
 
 			final HostnameVerifier hostnameVerifier = new HostnameVerifierInst();
 
 			SSLContext sslContext = SSLContext.getInstance("SSL");
 			sslContext.init(null, trustManagers, new SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sslContext
-					.getSocketFactory());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 			HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-			SSLSocketFactory ssf = HttpsURLConnection
-					.getDefaultSSLSocketFactory();
+			SSLSocketFactory ssf = HttpsURLConnection.getDefaultSSLSocketFactory();
 			Socket socket = ssf.createSocket(pHostname, pPort);
 			((SSLSocket) socket).startHandshake();
 			LOG.trace("OK");
 			return socket;
 		} catch (Exception ex) {
 			LOG.error(ex);
-			throw new TechnicalException("Cannot open the HTTPS connection to "
-					+ pHostname + ":" + pPort, ex);
+			throw new TechnicalException("Cannot open the HTTPS connection to " + pHostname + ":" + pPort, ex);
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private String readAnswer(final Socket pSocket, final String pProtocol)
-			throws BaseException {
+	private String readAnswer(final Socket pSocket, final String pProtocol) throws BaseException {
 		LOG.trace("BEGIN");
 		InputStream responseInputStream = null;
 		try {
@@ -267,8 +246,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			cleanBuffer(byteBuffer);
 			int readChars;
 			while ((readChars = responseInputStream.read(byteBuffer)) != -1) {
-				if (!writeAndContinue(byteArrayOutputStream, byteBuffer,
-						readChars, BUFFER_SIZE, pProtocol)) {
+				if (!writeAndContinue(byteArrayOutputStream, byteBuffer, readChars, BUFFER_SIZE, pProtocol)) {
 					break;
 				}
 				cleanBuffer(byteBuffer);
@@ -283,14 +261,11 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			bytes = cleanBytes(bytes);
 
 			final String responseEncoding = findResponseEncoding(bytes);
-			final String content = responseEncoding != null ? new String(bytes,
-					responseEncoding) : new String(bytes);
+			final String content = responseEncoding != null ? new String(bytes, responseEncoding) : new String(bytes);
 			LOG.trace("OK");
 			return content;
 		} catch (final IOException ex) {
-			throw new TechnicalException(
-					"Problem to receive the answer from the remote service: "
-							+ url.toString(), ex);
+			throw new TechnicalException("Problem to receive the answer from the remote service: " + url.toString(), ex);
 		} finally {
 			closeRessource(responseInputStream);
 			LOG.trace("END");
@@ -330,9 +305,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 	 * @param pExpectedChars
 	 * @return
 	 */
-	private boolean writeAndContinue(
-			final ByteArrayOutputStream pByteArrayOutputStream,
-			final byte[] pBuffer, final int pReadChars,
+	private boolean writeAndContinue(final ByteArrayOutputStream pByteArrayOutputStream, final byte[] pBuffer, final int pReadChars,
 			final int pExpectedChars, final String pProtocol) {
 		try {
 			Thread.sleep(PAUSE);
@@ -361,9 +334,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			// Mark
 			// Replace it by &apos;
 			//
-			if (iS + 2 < pBytes.length && pBytes[iS + 0] == (byte) 0xE2
-					&& pBytes[iS + 1] == (byte) 0x80
-					&& pBytes[iS + 2] == (byte) 0x99) {
+			if (iS + 2 < pBytes.length && pBytes[iS + 0] == (byte) 0xE2 && pBytes[iS + 1] == (byte) 0x80 && pBytes[iS + 2] == (byte) 0x99) {
 				if (cB + 3 >= buffer.length) {
 					buffer = extendBuffer(buffer);
 				}
@@ -390,8 +361,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 	}
 
 	private String findResponseEncoding(final byte[] pBytes) {
-		final BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(pBytes)));
+		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(pBytes)));
 
 		try {
 			String line;
@@ -421,23 +391,17 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 		}
 	}
 
-	private void generateTraceFileRequest(String requestHeader, String requestBody,
-			Date date) throws BaseException {
+	private void generateTraceFileRequest(String requestHeader, String requestBody, Date date) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			if (traceRequestPattern != null) {
 				String path = traceRequestPattern.format(date);
 				File file = new File(path);
 				LOG.debug("Logging the REQUEST to: " + file.toString());
-				if (file.getParentFile() != null
-						&& !file.getParentFile().isDirectory()
-						&& !file.getParentFile().mkdirs()) {
-					throw new TechnicalException(
-							"Cannot create the directory: "
-									+ file.getParentFile().getAbsolutePath());
+				if (file.getParentFile() != null && !file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) {
+					throw new TechnicalException("Cannot create the directory: " + file.getParentFile().getAbsolutePath());
 				}
-				UtilsFile.getInstance().contentToFile(
-						requestHeader + requestBody, file);
+				UtilsFile.getInstance().contentToFile(requestHeader + requestBody, file);
 			}
 			LOG.trace("OK");
 		} finally {
@@ -445,20 +409,15 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 		}
 	}
 
-	private void generateTraceFileResponse(String response, Date date)
-			throws BaseException {
+	private void generateTraceFileResponse(String response, Date date) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			if (traceResponsePattern != null) {
 				String path = traceResponsePattern.format(date);
 				File file = new File(path);
 				LOG.debug("Logging the RESPONSE to: " + file.toString());
-				if (file.getParentFile() != null
-						&& !file.getParentFile().isDirectory()
-						&& !file.getParentFile().mkdirs()) {
-					throw new TechnicalException(
-							"Cannot create the directory: "
-									+ file.getParentFile().getAbsolutePath());
+				if (file.getParentFile() != null && !file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) {
+					throw new TechnicalException("Cannot create the directory: " + file.getParentFile().getAbsolutePath());
 				}
 				UtilsFile.getInstance().contentToFile(response, file);
 			}

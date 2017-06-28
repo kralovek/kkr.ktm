@@ -8,11 +8,9 @@ import java.util.Map;
 
 import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
-
-
 
 public abstract class RunnerRequeaWsFwk {
 	private static final String ENCODE_UTF_8 = "UTF-8";
@@ -27,7 +25,7 @@ public abstract class RunnerRequeaWsFwk {
 
 	protected TemplateArchiv templateArchiv;
 
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 
 	protected ResultParser resultParser;
 
@@ -46,49 +44,37 @@ public abstract class RunnerRequeaWsFwk {
 			parameters = new HashMap<String, String>();
 		}
 		if (url == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter url is not configured");
-		} else if (!"http".equals(url.getProtocol())
-				&& !"https".equals(url.getProtocol())) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter url is not configured");
+		} else if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
 			throw new ConfigurationException(
-					getClass().getSimpleName()
-							+ ": Parameter url contains unsupported protocol (supported are http|https): "
-							+ url.getProtocol());
+					getClass().getSimpleName() + ": Parameter url contains unsupported protocol (supported are http|https): " + url.getProtocol());
 		}
 		if (templateHeadName == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateHeadName is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter templateHeadName is not configured");
 		}
 		if (templateBodyName == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateBodyName is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter templateBodyName is not configured");
 		}
-		if (templateParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateParser is not configured");
+		if (formatterParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
 		}
 
 		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter resultParser is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
 		}
 
 		if (traceRequestFile != null) {
 			try {
 				traceRequestPattern = new SimpleDateFormat(traceRequestFile);
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName()
-						+ ": Parameter traceRequestFile has bad value: "
-						+ ex.getMessage());
+				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter traceRequestFile has bad value: " + ex.getMessage());
 			}
 		}
 		if (traceResponseFile != null) {
 			try {
 				traceResponsePattern = new SimpleDateFormat(traceResponseFile);
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName()
-						+ ": Parameter traceResponseFile has bad value: "
-						+ ex.getMessage());
+				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter traceResponseFile has bad value: " + ex.getMessage());
 			}
 		}
 
@@ -96,8 +82,7 @@ public abstract class RunnerRequeaWsFwk {
 			encoding = ENCODE_UTF_8;
 		}
 		if (sysParamPrefix == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter sysPrefix is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter sysPrefix is not configured");
 		} else if (!sysParamPrefix.isEmpty() && !sysParamPrefix.endsWith("/")) {
 			sysParamPrefix += "/";
 		}
@@ -106,8 +91,7 @@ public abstract class RunnerRequeaWsFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
@@ -127,12 +111,12 @@ public abstract class RunnerRequeaWsFwk {
 		this.encoding = encoding;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getTemplateParser() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(TemplateParser templateParser) {
-		this.templateParser = templateParser;
+	public void setTemplateParser(FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public Map<String, String> getParameters() {

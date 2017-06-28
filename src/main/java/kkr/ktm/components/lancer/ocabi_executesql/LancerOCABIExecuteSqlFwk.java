@@ -14,19 +14,17 @@ import kkr.ktm.components.locker.Locker;
 import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.utils.UtilsParameters;
-
-
 
 public abstract class LancerOCABIExecuteSqlFwk {
 	private boolean configured;
 
 	protected TemplateArchiv templateArchiv;
 
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 
 	protected Runner runner;
 	private Map<String, Runner> runnerByType;
@@ -51,30 +49,27 @@ public abstract class LancerOCABIExecuteSqlFwk {
 	private String traceDestinationFile;
 	protected DateFormat traceDestinationFilePattern;
 
-    protected String sysParamPrefix;
+	protected String sysParamPrefix;
 
-    protected Locker locker;
+	protected Locker locker;
 
 	public void config() throws BaseException {
 		configured = false;
 		if (templateArchiv == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateArchiv is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter templateArchiv is not configured");
 		}
-		if (templateParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateParser is not configured");
+		if (formatterParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
 		}
 
 		if (runnerByType == null) {
 			runnerByType = new HashMap<String, Runner>();
 		}
 		if (runner == null && (runnerByType.isEmpty())) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Neither parameter runner nor runnerByType are configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Neither parameter runner nor runnerByType are configured");
 		}
 		runnerByTypePattern = UtilsParameters.toByTypePattern(getClass(), runnerByType);
-		
+
 		if (diffManagersByType == null) {
 			diffManagersByType = new LinkedHashMap<String, List<DiffManager>>();
 		}
@@ -82,53 +77,44 @@ public abstract class LancerOCABIExecuteSqlFwk {
 			diffManagers = new ArrayList<DiffManager>();
 		}
 		diffManagersByTypePattern = UtilsParameters.toByTypePattern(getClass(), diffManagersByType);
-		
+
 		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter resultParser is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
 		}
 		if (dirDestinationByType == null) {
 			dirDestinationByType = new LinkedHashMap<String, String>();
 		}
 		if (dirDestination == null && dirDestinationByType.isEmpty()) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter dirReception or at least one dirReceptionByType are not configured");
+			throw new ConfigurationException(
+					getClass().getSimpleName() + ": Parameter dirReception or at least one dirReceptionByType are not configured");
 		}
 		dirDestinationByTypePattern = UtilsParameters.toByTypePattern(getClass(), dirDestinationByType);
-		
+
 		if (traceDiffFile != null) {
 			try {
 				traceDiffPattern = new SimpleDateFormat(traceDiffFile);
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName()
-						+ ": Parameter traceDiffFile has bad value: "
-						+ ex.getMessage());
+				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter traceDiffFile has bad value: " + ex.getMessage());
 			}
 		}
 		if (traceDestinationFile != null) {
 			try {
 				traceDestinationFilePattern = new SimpleDateFormat(traceDestinationFile);
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName()
-						+ ": Parameter traceDestinationFile has bad value: "
-						+ ex.getMessage());
+				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter traceDestinationFile has bad value: " + ex.getMessage());
 			}
 		}
 		if (destinationFile == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter destinationFilename is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter destinationFilename is not configured");
 		} else {
 			try {
 				destinationFilePattern = new SimpleDateFormat(destinationFile);
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName()
-						+ ": Parameter destinationFilename has bad value: "
-						+ ex.getMessage());
+				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter destinationFilename has bad value: " + ex.getMessage());
 			}
 		}
 		if (sysParamPrefix == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter sysPrefix is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter sysPrefix is not configured");
 		} else if (!sysParamPrefix.isEmpty() && !sysParamPrefix.endsWith("/")) {
 			sysParamPrefix += "/";
 		}
@@ -140,8 +126,7 @@ public abstract class LancerOCABIExecuteSqlFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
@@ -153,12 +138,12 @@ public abstract class LancerOCABIExecuteSqlFwk {
 		this.templateArchiv = pTemplateArchiv;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getTemplateParser() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(final TemplateParser pTemplateParser) {
-		this.templateParser = pTemplateParser;
+	public void setTemplateParser(final FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public ResultParser getResultParser() {

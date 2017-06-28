@@ -1,6 +1,5 @@
 package kkr.ktm.components.resultparser;
 
-
 import java.util.Map;
 
 import kkr.ktm.exception.BaseException;
@@ -11,5 +10,5 @@ import kkr.ktm.exception.BaseException;
  * @author KRALOVEC-99999
  */
 public interface ResultParser {
-    Map<String, Object> parse(final String pSource) throws BaseException;
+	Map<String, Object> parse(String pSource) throws BaseException;
 }

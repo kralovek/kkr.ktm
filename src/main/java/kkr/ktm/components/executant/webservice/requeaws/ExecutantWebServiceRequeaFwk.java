@@ -5,11 +5,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
-
-
 
 public abstract class ExecutantWebServiceRequeaFwk {
 
@@ -20,12 +18,12 @@ public abstract class ExecutantWebServiceRequeaFwk {
 	private static final String PARAM_SOAP_PORT = "SOAP_PORT";
 
 	private boolean configured;
-	
+
 	protected URL url;
 	protected String encoding;
-	
+
 	protected File fileTemplate;
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 	protected Map<String, String> parameters;
 
 	public void config() throws BaseException {
@@ -34,14 +32,10 @@ public abstract class ExecutantWebServiceRequeaFwk {
 			parameters = new HashMap<String, String>();
 		}
 		if (url == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter url is not configured");
-		} else if (!"http".equals(url.getProtocol())
-				&& !"https".equals(url.getProtocol())) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter url is not configured");
+		} else if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
 			throw new ConfigurationException(
-					getClass().getSimpleName()
-							+ ": Parameter url contains unsupported protocol (supported are http|https): "
-							+ url.getProtocol());
+					getClass().getSimpleName() + ": Parameter url contains unsupported protocol (supported are http|https): " + url.getProtocol());
 		} else {
 			if (!parameters.containsKey(PARAM_SOAP_PATH)) {
 				parameters.put(PARAM_SOAP_PATH, url.getHost());
@@ -54,12 +48,10 @@ public abstract class ExecutantWebServiceRequeaFwk {
 			}
 		}
 		if (fileTemplate == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter fileTemplate is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter fileTemplate is not configured");
 		}
-		if (templateParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter templateParser is not configured");
+		if (formatterParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
 		}
 		if (encoding == null) {
 			encoding = ENCODE_UTF_8;
@@ -69,19 +61,17 @@ public abstract class ExecutantWebServiceRequeaFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
 	public String toString() {
 		final StringBuffer buffer = new StringBuffer();
 		buffer.append("[").append(this.getClass().getName()).append("]\n");
-		buffer.append("    ").append("url").append("=")
-				.append(url == null ? "" : url.toString()).append("\n");
+		buffer.append("    ").append("url").append("=").append(url == null ? "" : url.toString()).append("\n");
 		return buffer.toString();
 	}
-	
+
 	public URL getUrl() {
 		return url;
 	}
@@ -105,12 +95,12 @@ public abstract class ExecutantWebServiceRequeaFwk {
 		this.fileTemplate = fileTemplate;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getFormatterParameters() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(TemplateParser templateParser) {
-		this.templateParser = templateParser;
+	public void setFormatterParameters(FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public Map<String, String> getParameters() {

@@ -47,7 +47,7 @@ public class LancerInfotelExecuteSql extends LancerInfotelExecuteSqlFwk implemen
 
 				String templateData = templateArchiv.loadTemplate(testInput.getType());
 
-				String query = templateParser.parse(templateData, inputParameters);
+				String query = formatterParameters.format(templateData, inputParameters);
 
 				testOutput.getDataOutput().put(sysParamPrefix + PARAM_QUERY, query);
 

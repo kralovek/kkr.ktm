@@ -242,7 +242,7 @@ public class LancerM2OImportFile extends LancerM2OImportFileFwk implements Lance
 			if (!noFile) {
 				String templateData = templateArchiv.loadTemplate(testInput.getType() + ".data");
 
-				String templateDataParsed = templateParser.parse(templateData, inputParameters);
+				String templateDataParsed = formatterParameters.format(templateData, inputParameters);
 				resultMap.put(sysParamPrefix + PARAM_DATA_INPUT, templateDataParsed);
 
 				String filename = UtilsParameters.getStringParam(inputParameters, sysParamPrefix + PARAM_INPUT_DATA_FILE_NAME);

@@ -7,5 +7,5 @@ package kkr.ktm.components.entrypoint;
  */
 public interface Entrypoint {
 
-    Object run(final Object pObject) throws Exception;
+	Object run(Object pObject) throws Exception;
 }

@@ -2,7 +2,7 @@ package kkr.ktm.components.testsinitializer.infotel_table;
 
 import kkr.ktm.components.tablereader.TableReader;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.components.templateparser.TemplateParser;
+import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
 import kkr.ktm.exception.ConfigurationException;
 
 public abstract class TestsInitializerInfotelTableFwk {
@@ -10,7 +10,7 @@ public abstract class TestsInitializerInfotelTableFwk {
 
 	protected String keyData;
 	protected TemplateArchiv templateArchiv;
-	protected TemplateParser templateParser;
+	protected FormatterParameters formatterParameters;
 	protected TableReader tableReader;
 
 	public void config() throws ConfigurationException {
@@ -18,8 +18,8 @@ public abstract class TestsInitializerInfotelTableFwk {
 		if (templateArchiv == null) {
 			throw new ConfigurationException("Parameter 'templateArchiv' is not configured");
 		}
-		if (templateParser == null) {
-			throw new ConfigurationException("Parameter 'templateParser' is not configured");
+		if (formatterParameters == null) {
+			throw new ConfigurationException("Parameter 'formatterParameters' is not configured");
 		}
 		if (tableReader == null) {
 			throw new ConfigurationException("Parameter 'tableReader' is not configured");
@@ -52,12 +52,12 @@ public abstract class TestsInitializerInfotelTableFwk {
 		this.templateArchiv = templateArchiv;
 	}
 
-	public TemplateParser getTemplateParser() {
-		return templateParser;
+	public FormatterParameters getTemplateParser() {
+		return formatterParameters;
 	}
 
-	public void setTemplateParser(TemplateParser templateParser) {
-		this.templateParser = templateParser;
+	public void setTemplateParser(FormatterParameters formatterParameters) {
+		this.formatterParameters = formatterParameters;
 	}
 
 	public TableReader getTableReader() {

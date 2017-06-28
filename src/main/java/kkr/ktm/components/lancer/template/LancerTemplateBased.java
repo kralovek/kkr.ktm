@@ -75,7 +75,7 @@ public class LancerTemplateBased extends LancerTemplateBasedFwk implements Lance
 			inputParameters.putAll(systemInputParameters(testInput));
 			inputParameters.putAll(testInput.getDataInput());
 
-			final String templateParsed = templateParser.parse(template, inputParameters);
+			final String templateParsed = formatterParameters.format(template, inputParameters);
 			resultMap.put(PARAM_REQUEST, templateParsed);
 
 			if (traceSource) {
