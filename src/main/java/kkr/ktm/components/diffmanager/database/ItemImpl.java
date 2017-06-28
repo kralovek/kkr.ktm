@@ -3,13 +3,13 @@ package kkr.ktm.components.diffmanager.database;
 import java.util.Map;
 import java.util.TreeMap;
 
-import kkr.ktm.components.diffmanager.DiffManager.Item;
-import kkr.ktm.components.diffmanager.DiffManager.Status;
+import kkr.ktm.components.diffmanager.data.DiffItem;
+import kkr.ktm.components.diffmanager.data.DiffStatus;
 
-public class ItemImpl implements Item, Comparable<Item> {
+public class ItemImpl implements DiffItem, Comparable<DiffItem> {
 	private String name;
 	private IndexImpl index;
-	private Status status;
+	private DiffStatus diffStatus;
 	private Map<String, String> parameters = new TreeMap<String, String>();
 
 	public void setName(String name) {
@@ -24,23 +24,23 @@ public class ItemImpl implements Item, Comparable<Item> {
 		return index;
 	}
 
-	public Status getStatus() {
-		return status;
+	public DiffStatus getStatus() {
+		return diffStatus;
 	}
 
 	public void setIndex(IndexImpl index) {
 		this.index = index;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
+	public void setStatus(DiffStatus diffStatus) {
+		this.diffStatus = diffStatus;
 	}
 
 	public Map<String, String> getParameters() {
 		return parameters;
 	}
 
-	public int compareTo(Item item) {
-		return name.compareTo(item.getName());
+	public int compareTo(DiffItem diffItem) {
+		return name.compareTo(diffItem.getName());
 	}
 }

@@ -301,7 +301,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 				applyStyle(tCellRt, KtmStyle.SKIP, catalogStyles);
 				break;
 			default :
-				throw new IllegalArgumentException("Unsupported Status: " + status);
+				throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
 		}
 	}
 
@@ -316,7 +316,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			case SKIP :
 				return KtmStyle.SKIP;
 			default :
-				throw new IllegalArgumentException("Unsupported Status: " + status);
+				throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
 		}
 	}
 

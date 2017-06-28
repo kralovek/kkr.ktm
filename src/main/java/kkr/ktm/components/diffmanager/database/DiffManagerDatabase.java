@@ -18,40 +18,39 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.components.diffmanager.DiffManager;
+import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffItem;
+import kkr.ktm.components.diffmanager.data.DiffStatus;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.exception.TechnicalException;
 import kkr.ktm.utils.database.ConstantsDatabase;
 import kkr.ktm.utils.database.UtilsDatabase;
 
-public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
-		DiffManager, ConstantsDatabase {
+public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffManager, ConstantsDatabase {
 
-	private static final Logger LOG = Logger
-			.getLogger(DiffManagerDatabase.class);
+	private static final Logger LOG = Logger.getLogger(DiffManagerDatabase.class);
 
-	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat(
-			"yyyyMMdd HHmmss SSS");
+	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat("yyyyMMdd HHmmss SSS");
 
-	public List<Group> loadDiffs(List<Group> groupStates) throws BaseException {
+	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			Connection connection = null;
 			try {
 				connection = dataSource.getConnection();
 
 				for (TableInfo tableInfo : tableInfos) {
-					Group groupState = findGroup(groupStates,
-							tableInfo.getName());
+					DiffGroup groupState = findGroup(groupStates, tableInfo.getName());
 
 					IndexImpl lastIndexImpl = (IndexImpl) groupState.getLastIndex();
 
 					long date = groupState != null ? lastIndexImpl.getMs() : 0L;
-					Group group = readDiffTable(connection, tableInfo, date);
-					groups.add(group);
+					DiffGroup diffGroup = readDiffTable(connection, tableInfo, date);
+					diffGroups.add(diffGroup);
 				}
 
 				connection.close();
@@ -62,27 +61,27 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				UtilsDatabase.getInstance().closeResource(connection);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Group findGroup(List<Group> groups, String name) {
-		for (Group group : groups) {
-			if (name.equals(group.getName())) {
-				return group;
+	private DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+		for (DiffGroup diffGroup : diffGroups) {
+			if (name.equals(diffGroup.getName())) {
+				return diffGroup;
 			}
 		}
 		return null;
 	}
 
-	public List<Group> loadCurrents() throws BaseException {
+	public List<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			Connection connection = null;
 			try {
@@ -91,8 +90,8 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				// VDate dateCurrentTimestamp = loadCurrentTimestamp(connection);
 
 				for (TableInfo tableInfo : tableInfos) {
-					Group group = readCurrentTable(connection, tableInfo);
-					groups.add(group);
+					DiffGroup diffGroup = readCurrentTable(connection, tableInfo);
+					diffGroups.add(diffGroup);
 				}
 
 				connection.close();
@@ -103,26 +102,23 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				UtilsDatabase.getInstance().closeResource(connection);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Group readDiffTable(Connection connection, TableInfo tableInfo,
-			long index) throws BaseException {
+	private DiffGroup readDiffTable(Connection connection, TableInfo tableInfo, long index) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			List<ItemCruid> groupCruid = new ArrayList<ItemCruid>();
 			PreparedStatement statement = null;
 			ResultSet resultSet = null;
 			try {
-				int typeSort = determineSortType(connection,
-						tableInfo.getName(), tableInfo.getColumnSort());
+				int typeSort = determineSortType(connection, tableInfo.getName(), tableInfo.getColumnSort());
 
 				GroupImpl group = new GroupImpl(tableInfo.getName());
-				boolean columnsListed = tableInfo.getColumns() != null
-						&& !tableInfo.getColumns().isEmpty();
+				boolean columnsListed = tableInfo.getColumns() != null && !tableInfo.getColumns().isEmpty();
 
 				String query = null;
 				if (columnsListed) {
@@ -131,9 +127,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 						columns.append(", ").append(column);
 					}
 					query = "" //
-							+ " SELECT " + tableInfo.getColumnName()
-							+ ", "
-							+ tableInfo.getColumnSort() + columns //
+							+ " SELECT " + tableInfo.getColumnName() + ", " + tableInfo.getColumnSort() + columns //
 							+ " FROM " + tableInfo.getName();
 				} else {
 					query = "" //
@@ -146,38 +140,32 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 					columnsSortMore += "," + columnSortMore + " ASC";
 				}
 
-				query += " WHERE " + tableInfo.getColumnSort()
-						+ " > ?" //
-						+ " ORDER BY " + tableInfo.getColumnSort() + " ASC "
-						+ columnsSortMore; //
+				query += " WHERE " + tableInfo.getColumnSort() + " > ?" //
+						+ " ORDER BY " + tableInfo.getColumnSort() + " ASC " + columnsSortMore; //
 				statement = connection.prepareStatement(query);
 
 				String queryRep = query;
 
 				switch (typeSort) {
-				case Types.TIMESTAMP:
-				case Types.DATE:
-				case Types.TIME: {
-					Timestamp timestamp = new Timestamp(index);
-					statement.setTimestamp(1, timestamp);
-					queryRep = query
-							.replaceFirst("\\?", toStringSqlDate(index));
-					break;
-				}
-				case Types.NUMERIC:
-				case Types.INTEGER:
-				case Types.DECIMAL: {
-					statement.setLong(1, index);
-					queryRep = query.replaceFirst("\\?", "'" + index + "'");
-					break;
-				}
-				default: {
-					throw new ConfigurationException("The sortColumn "
-							+ tableInfo.getName() + "."
-							+ tableInfo.getColumnSort()
-							+ " is not timestamp or a decimal number: type="
-							+ typeSort);
-				}
+					case Types.TIMESTAMP :
+					case Types.DATE :
+					case Types.TIME : {
+						Timestamp timestamp = new Timestamp(index);
+						statement.setTimestamp(1, timestamp);
+						queryRep = query.replaceFirst("\\?", toStringSqlDate(index));
+						break;
+					}
+					case Types.NUMERIC :
+					case Types.INTEGER :
+					case Types.DECIMAL : {
+						statement.setLong(1, index);
+						queryRep = query.replaceFirst("\\?", "'" + index + "'");
+						break;
+					}
+					default : {
+						throw new ConfigurationException("The sortColumn " + tableInfo.getName() + "." + tableInfo.getColumnSort()
+								+ " is not timestamp or a decimal number: type=" + typeSort);
+					}
 				}
 
 				LOG.debug("QUERY: " + queryRep);
@@ -187,25 +175,22 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 
 				while (resultSet.next()) {
 					ItemCruid itemCruid = new ItemCruid(patternDate);
-					itemCruid.setName(resultSet.getString(tableInfo
-							.getColumnName()));
+					itemCruid.setName(resultSet.getString(tableInfo.getColumnName()));
 
 					long indexSort = 0;
 
 					switch (typeSort) {
-					case Types.TIMESTAMP:
-					case Types.DATE:
-					case Types.TIME: {
-						Date dateSort = resultSet.getTimestamp(tableInfo
-								.getColumnSort());
-						dateSort = roundDateToMs(dateSort);
-						indexSort = dateSort.getTime();
-						break;
-					}
-					default: {
-						indexSort = resultSet
-								.getLong(tableInfo.getColumnSort());
-					}
+						case Types.TIMESTAMP :
+						case Types.DATE :
+						case Types.TIME : {
+							Date dateSort = resultSet.getTimestamp(tableInfo.getColumnSort());
+							dateSort = roundDateToMs(dateSort);
+							indexSort = dateSort.getTime();
+							break;
+						}
+						default : {
+							indexSort = resultSet.getLong(tableInfo.getColumnSort());
+						}
 					}
 
 					IndexImpl indexSortImpl = new IndexImpl();
@@ -216,39 +201,37 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 						String columnName = metaData.getColumnName(i);
 
 						switch (metaData.getColumnType(i)) {
-						case Types.DATE:
-						case Types.TIME:
-						case Types.TIMESTAMP: {
-							Date valueDate = resultSet.getTimestamp(i);
-							itemCruid.getParameters()
-									.put(columnName, valueDate);
-							break;
-						}
-						case Types.DECIMAL:
-						case Types.INTEGER: {
-							Object object = resultSet.getObject(i);
-							itemCruid.getParameters().put(columnName, object);
-							break;
-						}
-						case Types.NUMERIC:
-						case Types.DOUBLE: {
-							Object object = resultSet.getObject(i);
-							itemCruid.getParameters().put(columnName, object);
-							break;
-						}
-						default:
-							String value = resultSet.getString(i);
-							itemCruid.getParameters().put(columnName, value);
+							case Types.DATE :
+							case Types.TIME :
+							case Types.TIMESTAMP : {
+								Date valueDate = resultSet.getTimestamp(i);
+								itemCruid.getParameters().put(columnName, valueDate);
+								break;
+							}
+							case Types.DECIMAL :
+							case Types.INTEGER : {
+								Object object = resultSet.getObject(i);
+								itemCruid.getParameters().put(columnName, object);
+								break;
+							}
+							case Types.NUMERIC :
+							case Types.DOUBLE : {
+								Object object = resultSet.getObject(i);
+								itemCruid.getParameters().put(columnName, object);
+								break;
+							}
+							default :
+								String value = resultSet.getString(i);
+								itemCruid.getParameters().put(columnName, value);
 						}
 					}
 					groupCruid.add(itemCruid);
 
 					if (tableInfo.getCheckerStatus() != null) {
-						Status status = tableInfo.getCheckerStatus()
-								.checkStatus(index, itemCruid);
-						itemCruid.setStatus(status);
+						DiffStatus diffStatus = tableInfo.getCheckerStatus().checkStatus(index, itemCruid);
+						itemCruid.setStatus(diffStatus);
 					} else {
-						itemCruid.setStatus(Status.NEW);
+						itemCruid.setStatus(DiffStatus.NEW);
 					}
 				}
 
@@ -259,8 +242,8 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				}
 
 				for (ItemCruid itemCruid : groupCruid) {
-					Item item = itemCruid.toItem();
-					group.getItems().add(item);
+					DiffItem diffItem = itemCruid.toItem();
+					group.getItems().add(diffItem);
 				}
 
 				resultSet.close();
@@ -280,17 +263,14 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 		}
 	}
 
-	private Group readCurrentTable(Connection connection, TableInfo tableInfo)
-			throws BaseException {
+	private DiffGroup readCurrentTable(Connection connection, TableInfo tableInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			Statement statement = null;
 			ResultSet resultSet = null;
-			String query = "SELECT max(" + tableInfo.getColumnSort()
-					+ ") AS LAST_MODIFIED FROM " + tableInfo.getName();
+			String query = "SELECT max(" + tableInfo.getColumnSort() + ") AS LAST_MODIFIED FROM " + tableInfo.getName();
 			try {
-				int typeSort = determineSortType(connection,
-						tableInfo.getName(), tableInfo.getColumnSort());
+				int typeSort = determineSortType(connection, tableInfo.getName(), tableInfo.getColumnSort());
 
 				GroupImpl group = new GroupImpl(tableInfo.getName());
 
@@ -303,43 +283,37 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 					long index = 0;
 
 					switch (typeSort) {
-					case Types.TIMESTAMP:
-					case Types.DATE:
-					case Types.TIME: {
-						Date date = resultSet.getTimestamp("LAST_MODIFIED");
-						if (date != null) {
-							date = roundDateToMs(date);
-							LOG.debug("Value sort: "
-									+ DATE_FORMAT_TODATE.format(date));
-							index = date.getTime();
-						} else {
-							LOG.debug("Table is empty");
-							index = 0;
+						case Types.TIMESTAMP :
+						case Types.DATE :
+						case Types.TIME : {
+							Date date = resultSet.getTimestamp("LAST_MODIFIED");
+							if (date != null) {
+								date = roundDateToMs(date);
+								LOG.debug("Value sort: " + DATE_FORMAT_TODATE.format(date));
+								index = date.getTime();
+							} else {
+								LOG.debug("Table is empty");
+								index = 0;
+							}
+							break;
 						}
-						break;
-					}
-					case Types.NUMERIC:
-					case Types.INTEGER:
-					case Types.DECIMAL: {
-						Object object = resultSet.getObject("LAST_MODIFIED");
-						if (object != null) {
-							index = resultSet.getLong("LAST_MODIFIED");
-							LOG.debug("Value sort: " + index);
-						} else {
-							LOG.debug("Table is empty");
-							index = 0;
+						case Types.NUMERIC :
+						case Types.INTEGER :
+						case Types.DECIMAL : {
+							Object object = resultSet.getObject("LAST_MODIFIED");
+							if (object != null) {
+								index = resultSet.getLong("LAST_MODIFIED");
+								LOG.debug("Value sort: " + index);
+							} else {
+								LOG.debug("Table is empty");
+								index = 0;
+							}
+							break;
 						}
-						break;
-					}
-					default: {
-						throw new ConfigurationException(
-								"The sortColumn "
-										+ tableInfo.getName()
-										+ "."
-										+ tableInfo.getColumnSort()
-										+ " is not timestamp or a decimal number: type="
-										+ typeSort);
-					}
+						default : {
+							throw new ConfigurationException("The sortColumn " + tableInfo.getName() + "." + tableInfo.getColumnSort()
+									+ " is not timestamp or a decimal number: type=" + typeSort);
+						}
 					}
 
 					IndexImpl indexImpl = new IndexImpl();
@@ -347,8 +321,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 
 					group.setLastIndex(indexImpl);
 				} else {
-					throw new TechnicalException("No line in the result set: "
-							+ query);
+					throw new TechnicalException("No line in the result set: " + query);
 				}
 
 				resultSet.close();
@@ -359,11 +332,9 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				return group;
 			} catch (SQLException ex) {
 				if (ex.getErrorCode() == DB_ERROR_TABLE_NOT_EXIST) {
-					throw new TechnicalException("The table does not exist: "
-							+ tableInfo.getName(), ex);
+					throw new TechnicalException("The table does not exist: " + tableInfo.getName(), ex);
 				} else {
-					throw new TechnicalException(
-							"Cannot execute the statement: " + query, ex);
+					throw new TechnicalException("Cannot execute the statement: " + query, ex);
 				}
 			} finally {
 				UtilsDatabase.getInstance().closeResource(resultSet);
@@ -378,8 +349,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 		return new Date(date.getTime() + 1);
 	}
 
-	private int determineSortType(Connection connection, String table,
-			String column) throws BaseException {
+	private int determineSortType(Connection connection, String table, String column) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			String query = "SELECT " + column + " FROM " + table;
@@ -402,19 +372,13 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 				return columnType;
 			} catch (SQLException ex) {
 				if (ex.getErrorCode() == DB_ERROR_TABLE_NOT_EXIST) {
-					throw new TechnicalException("The table does not existe: "
-							+ table, ex);
+					throw new TechnicalException("The table does not existe: " + table, ex);
 				} else if (ex.getErrorCode() == DB_ERROR_COLUMN_NOT_EXIST) {
-					throw new TechnicalException("The column does not existe: "
-							+ table + "." + column, ex);
+					throw new TechnicalException("The column does not existe: " + table + "." + column, ex);
 				}
-				throw new TechnicalException(
-						"Cannot determinate the type of the column: " + table
-								+ "." + column, ex);
+				throw new TechnicalException("Cannot determinate the type of the column: " + table + "." + column, ex);
 			} catch (Exception ex) {
-				throw new TechnicalException(
-						"Cannot determinate the type of the column: " + table
-								+ "." + column, ex);
+				throw new TechnicalException("Cannot determinate the type of the column: " + table + "." + column, ex);
 			} finally {
 				UtilsDatabase.getInstance().closeResource(statement);
 				UtilsDatabase.getInstance().closeResource(rs);
@@ -425,7 +389,6 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements
 	}
 
 	private String toStringSqlDate(long ms) {
-		return "to_timestamp('" + DATE_FORMAT_TODATE.format(new Date(ms))
-				+ "','YYYYMMDD HH24MISS FF')";
+		return "to_timestamp('" + DATE_FORMAT_TODATE.format(new Date(ms)) + "','YYYYMMDD HH24MISS FF')";
 	}
 }

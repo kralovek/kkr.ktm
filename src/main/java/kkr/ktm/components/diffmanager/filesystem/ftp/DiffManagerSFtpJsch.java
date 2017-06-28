@@ -12,24 +12,25 @@ import org.apache.log4j.Logger;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
-
-import kkr.ktm.components.diffmanager.filesystem.DirInfo;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
+import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffItem;
+import kkr.ktm.components.diffmanager.data.DiffStatus;
+import kkr.ktm.components.diffmanager.filesystem.DirInfo;
+import kkr.ktm.exception.BaseException;
+import kkr.ktm.exception.TechnicalException;
+
 public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 	private static final String UNIX_PATH_SEPARATOR = "/";
 
-	private static final Logger LOG = Logger
-			.getLogger(DiffManagerSFtpJsch.class);
+	private static final Logger LOG = Logger.getLogger(DiffManagerSFtpJsch.class);
 
-	private static Comparator<Item> comparatorItem = new Comparator<Item>() {
-		public int compare(Item item1, Item item2) {
+	private static Comparator<DiffItem> comparatorItem = new Comparator<DiffItem>() {
+		public int compare(DiffItem item1, DiffItem item2) {
 			return item1.getName().compareTo(item2.getName());
 		}
 	};
@@ -55,82 +56,73 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 	}
 
-	public List<Group> loadDiffs(List<Group> groupStates) throws BaseException {
+	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return groups;
+				return diffGroups;
 			}
 			Client client = connect();
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
-					Group groupState = findGroup(groupStates, dirInfo.getName());
-					Group group = loadDiff(client, dirInfo, groupState);
-					groups.add(group);
+					DiffGroup groupState = findGroup(groupStates, dirInfo.getName());
+					DiffGroup diffGroup = loadDiff(client, dirInfo, groupState);
+					diffGroups.add(diffGroup);
 				}
 			} finally {
 				disconnect(client);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Group loadDiff(Client client, DirInfo dirInfo, Group groupState)
-			throws BaseException {
+	private DiffGroup loadDiff(Client client, DirInfo dirInfo, DiffGroup groupState) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("dir: " + dirInfo.getPath());
-			long date = groupState != null ? ((IndexImpl) groupState
-					.getLastIndex()).getMs() : 0;
-			List<Item> items = null;
-			if (dirInfo.isContent() && groupState != null
-					&& groupState.getItems() != null) {
-				List<ItemImpl> existingItems = getItems(client,
-						dirInfo.getPath(), dirInfo.getPath(), 0,
-						dirInfo.getPattern());
+			long date = groupState != null ? ((IndexImpl) groupState.getLastIndex()).getMs() : 0;
+			List<DiffItem> diffItems = null;
+			if (dirInfo.isContent() && groupState != null && groupState.getItems() != null) {
+				List<ItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
 
-				items = new ArrayList<Item>();
+				diffItems = new ArrayList<DiffItem>();
 
-				for (Item itemState : groupState.getItems()) {
-					ItemImpl existingItem = findItem(existingItems,
-							itemState.getName());
+				for (DiffItem itemState : groupState.getItems()) {
+					ItemImpl existingItem = findItem(existingItems, itemState.getName());
 					if (existingItem != null) {
-						if (((IndexImpl) existingItem.getIndex()).getMs() <= ((IndexImpl) itemState
-								.getIndex()).getMs()) {
+						if (((IndexImpl) existingItem.getIndex()).getMs() <= ((IndexImpl) itemState.getIndex()).getMs()) {
 							existingItems.remove(existingItem);
 						} else {
-							existingItem.setStatus(Status.UPD);
+							existingItem.setStatus(DiffStatus.UPD);
 						}
 					} else {
 						ItemImpl newItem = new ItemImpl(itemState);
-						newItem.setStatus(Status.DEL);
-						items.add(newItem);
+						newItem.setStatus(DiffStatus.DEL);
+						diffItems.add(newItem);
 					}
 				}
-				items.addAll(existingItems);
-				Collections.sort(items, comparatorItem);
+				diffItems.addAll(existingItems);
+				Collections.sort(diffItems, comparatorItem);
 			} else {
-				List<ItemImpl> existingItems = getItems(client,
-						dirInfo.getPath(), dirInfo.getPath(), date,
-						dirInfo.getPattern());
-				items = new ArrayList<Item>();
-				items.addAll(existingItems);
+				List<ItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date, dirInfo.getPattern());
+				diffItems = new ArrayList<DiffItem>();
+				diffItems.addAll(existingItems);
 			}
 
-			long lastModified = getLastModified(items);
+			long lastModified = getLastModified(diffItems);
 			GroupImpl group = new GroupImpl(dirInfo.getName());
 			IndexImpl indexImpl = new IndexImpl();
 			indexImpl.setMs(lastModified);
 			group.setLastIndex(indexImpl);
-			group.getItems().addAll(items);
+			group.getItems().addAll(diffItems);
 			LOG.trace("OK");
 			return group;
 		} finally {
@@ -147,27 +139,25 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return null;
 	}
 
-	private static long getLastModified(List<Item> items) {
+	private static long getLastModified(List<DiffItem> diffItems) {
 		long lastModified = 0;
-		for (Item item : items) {
+		for (DiffItem diffItem : diffItems) {
 			// To je divny ... ta podminka ma byt naopak !!!
-			if (lastModified > ((IndexImpl) item.getIndex()).getMs()) {
-				lastModified = ((IndexImpl) item.getIndex()).getMs();
+			if (lastModified > ((IndexImpl) diffItem.getIndex()).getMs()) {
+				lastModified = ((IndexImpl) diffItem.getIndex()).getMs();
 			}
 		}
 		return lastModified;
 	}
 
-	private static List<ItemImpl> getItems(Client client, String dirRoot,
-			String dir, long index, Pattern pattern) throws BaseException {
+	private static List<ItemImpl> getItems(Client client, String dirRoot, String dir, long index, Pattern pattern) throws BaseException {
 		List<ItemImpl> items = new ArrayList<ItemImpl>();
 
 		Vector<LsEntry> files = null;
 		try {
 			files = client.getChannel().ls(dir);
 		} catch (SftpException ex) {
-			throw new TechnicalException(
-					"Cannot read the content of the directory: " + dir, ex);
+			throw new TechnicalException("Cannot read the content of the directory: " + dir, ex);
 		}
 
 		if (files == null) {
@@ -192,16 +182,14 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 				IndexImpl indexImpl = new IndexImpl();
 				indexImpl.setMs(ms);
 				item.setIndex(indexImpl);
-				item.setStatus(Status.NEW);
+				item.setStatus(DiffStatus.NEW);
 				items.add(item);
 			} else if (file.getAttrs().isDir()) {
-				if (".".equals(file.getFilename())
-						|| "..".equals(file.getFilename())) {
+				if (".".equals(file.getFilename()) || "..".equals(file.getFilename())) {
 					continue;
 				}
 				String path = dir + file.getFilename() + PATH_SEPARATOR;
-				List<ItemImpl> itemsLocal = getItems(client, dirRoot, path,
-						index, pattern);
+				List<ItemImpl> itemsLocal = getItems(client, dirRoot, path, index, pattern);
 				items.addAll(itemsLocal);
 			}
 		}
@@ -211,46 +199,43 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return items;
 	}
 
-	public List<Group> loadCurrents() throws BaseException {
+	public List<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 			LOG.debug("diff: " + name);
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return groups;
+				return diffGroups;
 			}
 			Client client = connect();
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
 					if (dirInfo.isContent()) {
-						Group group = loadDiff(client, dirInfo, null);
-						groups.add(group);
+						DiffGroup diffGroup = loadDiff(client, dirInfo, null);
+						diffGroups.add(diffGroup);
 					} else {
-						Group group = loadCurrent(client, dirInfo);
-						groups.add(group);
+						DiffGroup diffGroup = loadCurrent(client, dirInfo);
+						diffGroups.add(diffGroup);
 					}
 				}
 			} finally {
 				disconnect(client);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Group loadCurrent(Client client, DirInfo dirInfo)
-			throws BaseException {
+	private DiffGroup loadCurrent(Client client, DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			long lastModified = getLastModifiedDirectory(client,
-					dirInfo.getPath(), dirInfo.getPath(), 0,
-					dirInfo.getPattern());
+			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
 			GroupImpl group = new GroupImpl(dirInfo.getName());
 			IndexImpl indexImpl = new IndexImpl();
 			indexImpl.setMs(lastModified);
@@ -262,16 +247,13 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 	}
 
-	private static long getLastModifiedDirectory(Client client, String dirRoot,
-			String dir, long lastModified, Pattern pattern)
-			throws BaseException {
+	private static long getLastModifiedDirectory(Client client, String dirRoot, String dir, long lastModified, Pattern pattern) throws BaseException {
 
 		Vector<LsEntry> files = null;
 		try {
 			files = client.getChannel().ls(dir);
 		} catch (SftpException ex) {
-			throw new TechnicalException(
-					"Cannot read the content of the directory: " + dir, ex);
+			throw new TechnicalException("Cannot read the content of the directory: " + dir, ex);
 		}
 
 		if (files == null) {
@@ -291,10 +273,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 				lastModified = lastModified >= ms ? lastModified : ms;
 			} else if (file.getAttrs().isDir()) {
 				String path = dir + file.getFilename() + PATH_SEPARATOR;
-				long lastModifiedLocal = getLastModifiedDirectory(client,
-						dirRoot, path, lastModified, pattern);
-				lastModified = lastModified >= lastModifiedLocal ? lastModified
-						: lastModifiedLocal;
+				long lastModifiedLocal = getLastModifiedDirectory(client, dirRoot, path, lastModified, pattern);
+				lastModified = lastModified >= lastModifiedLocal ? lastModified : lastModifiedLocal;
 			}
 		}
 
@@ -306,16 +286,15 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		if (relativePath.startsWith(PATH_SEPARATOR)) {
 			relativePath = relativePath.substring(PATH_SEPARATOR.length());
 		}
-		relativePath = relativePath
-				.replace(PATH_SEPARATOR, UNIX_PATH_SEPARATOR);
+		relativePath = relativePath.replace(PATH_SEPARATOR, UNIX_PATH_SEPARATOR);
 		return relativePath;
 	}
 
-	private static Group findGroup(List<Group> groups, String name) {
-		if (groups != null) {
-			for (Group group : groups) {
-				if (name.equals(group.getName())) {
-					return group;
+	private static DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+		if (diffGroups != null) {
+			for (DiffGroup diffGroup : diffGroups) {
+				if (name.equals(diffGroup.getName())) {
+					return diffGroup;
 				}
 			}
 		}
@@ -341,8 +320,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 			client.setChannel(sftpChannel);
 			return client;
 		} catch (JSchException ex) {
-			throw new TechnicalException("SFTP Cannot connect to the server: "
-					+ ftpHost + ":" + ftpPort, ex);
+			throw new TechnicalException("SFTP Cannot connect to the server: " + ftpHost + ":" + ftpPort, ex);
 		}
 	}
 

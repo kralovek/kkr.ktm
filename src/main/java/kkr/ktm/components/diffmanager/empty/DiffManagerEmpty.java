@@ -6,21 +6,20 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.components.diffmanager.DiffManager;
+import kkr.ktm.components.diffmanager.data.DiffGroup;
 import kkr.ktm.exception.BaseException;
 
-
 public class DiffManagerEmpty implements DiffManager {
-	private static final Logger LOG = Logger
-			.getLogger(DiffManagerEmpty.class);
+	private static final Logger LOG = Logger.getLogger(DiffManagerEmpty.class);
 
 	public String getName() {
 		return "EMPTY";
 	}
 
-	public List<Group> loadDiffs(List<Group> groupStates) throws BaseException {
+	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			List<Group> retval = new ArrayList<DiffManager.Group>();
+			List<DiffGroup> retval = new ArrayList<DiffGroup>();
 			LOG.trace("OK");
 			return retval;
 		} finally {
@@ -28,10 +27,10 @@ public class DiffManagerEmpty implements DiffManager {
 		}
 	}
 
-	public List<Group> loadCurrents() throws BaseException {
+	public List<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			List<Group> retval = new ArrayList<DiffManager.Group>();
+			List<DiffGroup> retval = new ArrayList<DiffGroup>();
 			LOG.trace("OK");
 			return retval;
 		} finally {

@@ -18,20 +18,18 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.components.diffmanager.DiffManager;
+import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffStatus;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.TechnicalException;
 import kkr.ktm.utils.database.ConstantsDatabase;
 import kkr.ktm.utils.database.UtilsDatabase;
 
-public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
-		implements DiffManager, ConstantsDatabase {
-	private static final Logger LOG = Logger
-			.getLogger(DiffManagerDatabaseTrigger.class);
+public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk implements DiffManager, ConstantsDatabase {
+	private static final Logger LOG = Logger.getLogger(DiffManagerDatabaseTrigger.class);
 
-	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat(
-			"yyyyMMdd HHmmss SSSSSS");
-	private static final DateFormat DATE_FORMAT_STRING = new SimpleDateFormat(
-			"HH:mm:ss.SSSSSS dd/MM/yyyy");
+	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat("yyyyMMdd HHmmss SSSSSS");
+	private static final DateFormat DATE_FORMAT_STRING = new SimpleDateFormat("HH:mm:ss.SSSSSS dd/MM/yyyy");
 
 	private static final String KTM_PREFIX_PK = "KTM_PK_";
 
@@ -54,8 +52,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 
 		private int compareToString(String s1, String s2) {
-			return s1 != null && s2 != null ? s1.compareTo(s2)
-					: s1 != null ? +1 : s2 != null ? -1 : 0;
+			return s1 != null && s2 != null ? s1.compareTo(s2) : s1 != null ? +1 : s2 != null ? -1 : 0;
 		}
 
 		public int compareTo(List<String> pks) {
@@ -87,23 +84,21 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 	}
 
-	public List<Group> loadDiffs(List<Group> groupStates) throws BaseException {
+	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			Connection connection = null;
 			try {
 				connection = dataSource.getConnection();
 
 				for (TableInfo tableInfo : tableInfos) {
-					Group groupState = findGroup(groupStates,
-							tableInfo.getName());
-					IndexImpl index = groupState != null ? (IndexImpl) groupState
-							.getLastIndex() : null;
-					Group group = readDiffTable(connection, tableInfo, index);
-					groups.add(group);
+					DiffGroup groupState = findGroup(groupStates, tableInfo.getName());
+					IndexImpl index = groupState != null ? (IndexImpl) groupState.getLastIndex() : null;
+					DiffGroup diffGroup = readDiffTable(connection, tableInfo, index);
+					diffGroups.add(diffGroup);
 
 					cleanTriggeredTable(index, tableInfo, connection);
 				}
@@ -116,26 +111,26 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 				UtilsDatabase.getInstance().closeResource(connection);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	public List<Group> loadCurrents() throws BaseException {
+	public List<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 
-			List<Group> groups = new ArrayList<Group>();
+			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			Connection connection = null;
 			try {
 				connection = dataSource.getConnection();
 
 				for (TableInfo tableInfo : tableInfos) {
-					Group group = readCurrentTable(connection, tableInfo);
-					groups.add(group);
+					DiffGroup diffGroup = readCurrentTable(connection, tableInfo);
+					diffGroups.add(diffGroup);
 				}
 
 				connection.close();
@@ -146,31 +141,29 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 				UtilsDatabase.getInstance().closeResource(connection);
 			}
 			LOG.trace("OK");
-			return groups;
+			return diffGroups;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Group findGroup(List<Group> groups, String name) {
-		for (Group group : groups) {
-			if (name.equals(group.getName())) {
-				return group;
+	private DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+		for (DiffGroup diffGroup : diffGroups) {
+			if (name.equals(diffGroup.getName())) {
+				return diffGroup;
 			}
 		}
 		return null;
 	}
 
-	private Group readCurrentTable(Connection connection, TableInfo tableInfo)
-			throws BaseException {
+	private DiffGroup readCurrentTable(Connection connection, TableInfo tableInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		String triggeredTableSchemaName = null;
 		try {
 			Statement statement = null;
 			ResultSet resultSet = null;
 			triggeredTableSchemaName = getTriggeredTableSchemaName(tableInfo);
-			String query = "SELECT max(KTM_TS) FROM "
-					+ triggeredTableSchemaName;
+			String query = "SELECT max(KTM_TS) FROM " + triggeredTableSchemaName;
 			GroupImpl group = new GroupImpl(tableInfo.getName());
 
 			try {
@@ -185,9 +178,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 						index = resultSet.getTimestamp(1);
 						LOG.debug("max ID: " + index);
 					} catch (SQLException ex) {
-						throw new TechnicalException(
-								"The KTM_TS is NULL ot is not a TIMESTAMP in the table: "
-										+ triggeredTableSchemaName);
+						throw new TechnicalException("The KTM_TS is NULL ot is not a TIMESTAMP in the table: " + triggeredTableSchemaName);
 					}
 				}
 
@@ -204,11 +195,9 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 				return group;
 			} catch (SQLException ex) {
 				if (ex.getErrorCode() == DB_ERROR_TABLE_NOT_EXIST) {
-					throw new TechnicalException("The table does not exist: "
-							+ triggeredTableSchemaName, ex);
+					throw new TechnicalException("The table does not exist: " + triggeredTableSchemaName, ex);
 				} else {
-					throw new TechnicalException(
-							"Cannot execute the statement: " + query, ex);
+					throw new TechnicalException("Cannot execute the statement: " + query, ex);
 				}
 			} finally {
 				UtilsDatabase.getInstance().closeResource(resultSet);
@@ -224,25 +213,20 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 	}
 
 	private String getTableSchemaName(TableInfo tableInfo) {
-		return (tableInfo.getSchema() != null ? tableInfo.getSchema() + "."
-				: "") + tableInfo.getName();
+		return (tableInfo.getSchema() != null ? tableInfo.getSchema() + "." : "") + tableInfo.getName();
 	}
 
 	private String getTriggeredTableSchemaName(TableInfo tableInfo) {
-		return (tableInfo.getKtmSchema() != null ? tableInfo.getKtmSchema()
-				+ "." : "")
-				+ tableInfo.getKtmNamePrefix() + tableInfo.getName();
+		return (tableInfo.getKtmSchema() != null ? tableInfo.getKtmSchema() + "." : "") + tableInfo.getKtmNamePrefix() + tableInfo.getName();
 	}
 
-	private void cleanTriggeredTable(IndexImpl index, TableInfo tableInfo,
-			Connection connection) throws BaseException {
+	private void cleanTriggeredTable(IndexImpl index, TableInfo tableInfo, Connection connection) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			PreparedStatement statement = null;
 
 			String triggeredTableName = getTriggeredTableSchemaName(tableInfo);
-			String query = "DELETE FROM " + triggeredTableName
-					+ " WHERE KTM_TS < ?";
+			String query = "DELETE FROM " + triggeredTableName + " WHERE KTM_TS < ?";
 
 			try {
 				LOG.debug("QUERY: " + query);
@@ -265,14 +249,12 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 	}
 
-	private Group readDiffTable(Connection connection, TableInfo tableInfo,
-			IndexImpl index) throws BaseException {
+	private DiffGroup readDiffTable(Connection connection, TableInfo tableInfo, IndexImpl index) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("Table: " + tableInfo.getName());
-			
-			if ("M2OVOIE"
-					.equalsIgnoreCase(tableInfo.getName())) {
+
+			if ("M2OVOIE".equalsIgnoreCase(tableInfo.getName())) {
 				int k = 0;
 			}
 
@@ -283,7 +265,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 				if (index.getTimestamp() == null) {
 					index.setTimestamp(new Timestamp(0L));
 				}
-				
+
 				GroupImpl group = new GroupImpl(tableInfo.getName());
 
 				String triggeredTableSchemaName = getTriggeredTableSchemaName(tableInfo);
@@ -293,20 +275,14 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 
 				String query = "" //
 						+ " SELECT * FROM (" //
-						+ "   SELECT KTM_STATE, KTM_TS, "
-						+ sqlListPKs //
-						+ "   FROM "
-						+ triggeredTableSchemaName //
-						+ "   WHERE KTM_TS > ?"
-						+ " ) tt" //
-						+ " LEFT JOIN " + tableSchemaName
-						+ " t ON "
-						+ toSqlListJoinKtuPKs(tableInfo, "t", "tt") //
+						+ "   SELECT KTM_STATE, KTM_TS, " + sqlListPKs //
+						+ "   FROM " + triggeredTableSchemaName //
+						+ "   WHERE KTM_TS > ?" + " ) tt" //
+						+ " LEFT JOIN " + tableSchemaName + " t ON " + toSqlListJoinKtuPKs(tableInfo, "t", "tt") //
 						+ " ORDER BY tt.KTM_TS ASC" //
 				;
 
-				String queryRep = query.replaceFirst("\\?",
-						toString(index.getTimestamp()));
+				String queryRep = query.replaceFirst("\\?", toString(index.getTimestamp()));
 
 				statement = connection.prepareStatement(query);
 
@@ -323,8 +299,8 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 					ItemCruid itemCruid = new ItemCruid(patternDate);
 
 					String state = resultSet.getString(1);
-					Status status = castStatus(state);
-					itemCruid.setStatus(status);
+					DiffStatus diffStatus = castStatus(state);
+					itemCruid.setStatus(diffStatus);
 
 					Timestamp timestamp = resultSet.getTimestamp(2);
 					IndexImpl indexImpl = new IndexImpl();
@@ -337,8 +313,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 						boolean isPK = false;
 						String columnName = metaData.getColumnName(i);
 						if (i <= 2 + tableInfo.getColumnsPK().size()) {
-							columnName = columnName.substring(KTM_PREFIX_PK
-									.length());
+							columnName = columnName.substring(KTM_PREFIX_PK.length());
 							isPK = true;
 						} else {
 							if (isPK(tableInfo, columnName)) {
@@ -349,34 +324,32 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 						Object valueFinal = null;
 
 						switch (metaData.getColumnType(i)) {
-						case Types.DATE:
-						case Types.TIME:
-						case Types.TIMESTAMP: {
-							Date valueDate = resultSet.getTimestamp(i);
-							valueFinal = valueDate;
-							if (isPK) {
-								valuesPK.add(valueDate != null ? DATE_FORMAT_STRING
-										.format(valueDate) : null);
+							case Types.DATE :
+							case Types.TIME :
+							case Types.TIMESTAMP : {
+								Date valueDate = resultSet.getTimestamp(i);
+								valueFinal = valueDate;
+								if (isPK) {
+									valuesPK.add(valueDate != null ? DATE_FORMAT_STRING.format(valueDate) : null);
+								}
+								break;
 							}
-							break;
-						}
-						case Types.DECIMAL:
-						case Types.INTEGER:
-						case Types.NUMERIC:
-						case Types.DOUBLE: {
-							valueFinal = resultSet.getObject(i);
-							if (isPK) {
-								valuesPK.add(valueFinal != null ? valueFinal
-										.toString() : null);
+							case Types.DECIMAL :
+							case Types.INTEGER :
+							case Types.NUMERIC :
+							case Types.DOUBLE : {
+								valueFinal = resultSet.getObject(i);
+								if (isPK) {
+									valuesPK.add(valueFinal != null ? valueFinal.toString() : null);
+								}
+								break;
 							}
-							break;
-						}
-						default: {
-							valueFinal = resultSet.getString(i);
-							if (isPK) {
-								valuesPK.add((String) valueFinal);
+							default : {
+								valueFinal = resultSet.getString(i);
+								if (isPK) {
+									valuesPK.add((String) valueFinal);
+								}
 							}
-						}
 						}
 
 						itemCruid.getParameters().put(columnName, valueFinal);
@@ -420,13 +393,12 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 				ItemCruid lastItem = pk.getItemCruids().get(0);
 				group.getItems().add(lastItem.toItem());
 			} else {
-				Status status = adaptStatuses(pk.getItemCruids());
-				if (status == null) { // line was added and removed after
+				DiffStatus diffStatus = adaptStatuses(pk.getItemCruids());
+				if (diffStatus == null) { // line was added and removed after
 					continue;
 				}
-				ItemCruid lastItem = pk.getItemCruids().get(
-						pk.getItemCruids().size() - 1);
-				lastItem.setStatus(status);
+				ItemCruid lastItem = pk.getItemCruids().get(pk.getItemCruids().size() - 1);
+				lastItem.setStatus(diffStatus);
 				group.getItems().add(lastItem.toItem());
 			}
 		}
@@ -451,23 +423,20 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		return buffer.toString();
 	}
 
-	private String toSqlListJoinKtuPKs(TableInfo tableInfo, String aliasTable,
-			String aliasTriggeredTable) {
+	private String toSqlListJoinKtuPKs(TableInfo tableInfo, String aliasTable, String aliasTriggeredTable) {
 		StringBuffer buffer = new StringBuffer();
 		for (String columnPK : tableInfo.getColumnsPK()) {
 			if (buffer.length() != 0) {
 				buffer.append(" AND ");
 			}
-			buffer.append(aliasTriggeredTable).append('.')
-					.append(KTM_PREFIX_PK).append(columnPK).append(" = ")
-					.append(aliasTable).append('.').append(columnPK);
+			buffer.append(aliasTriggeredTable).append('.').append(KTM_PREFIX_PK).append(columnPK).append(" = ").append(aliasTable).append('.')
+					.append(columnPK);
 		}
 		return buffer.toString();
 	}
 
 	private String toString(Timestamp timestamp) {
-		return "to_timestamp('" + DATE_FORMAT_TODATE.format(timestamp)
-				+ "','YYYYMMDD HH24MISS FF')";
+		return "to_timestamp('" + DATE_FORMAT_TODATE.format(timestamp) + "','YYYYMMDD HH24MISS FF')";
 	}
 
 	private boolean isPK(TableInfo tableInfo, String column) {
@@ -494,32 +463,32 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 	}
 
-	private Status castStatus(String status) {
+	private DiffStatus castStatus(String status) {
 		if (status == null || status.length() != 1) {
-			return Status.UNK;
+			return DiffStatus.UNK;
 		}
 		switch (status.charAt(0)) {
-		case STATE_INSERT:
-			return Status.NEW;
-		case STATE_UPDATE:
-			return Status.UPD;
-		case STATE_DELETE:
-			return Status.DEL;
-		default:
-			return Status.UNK;
+			case STATE_INSERT :
+				return DiffStatus.NEW;
+			case STATE_UPDATE :
+				return DiffStatus.UPD;
+			case STATE_DELETE :
+				return DiffStatus.DEL;
+			default :
+				return DiffStatus.UNK;
 		}
 	}
 
-	private Status adaptStatuses(List<ItemCruid> items) {
+	private DiffStatus adaptStatuses(List<ItemCruid> items) {
 		StringBuffer buffer = new StringBuffer();
 		for (ItemCruid item : items) {
-			if (item.getStatus().equals(Status.NEW)) {
+			if (item.getStatus().equals(DiffStatus.NEW)) {
 				buffer.append(STATE_INSERT);
-			} else if (item.getStatus().equals(Status.UPD)) {
+			} else if (item.getStatus().equals(DiffStatus.UPD)) {
 				buffer.append(STATE_UPDATE);
-			} else if (item.getStatus().equals(Status.DEL)) {
+			} else if (item.getStatus().equals(DiffStatus.DEL)) {
 				buffer.append(STATE_DELETE);
-			} else if (item.getStatus().equals(Status.UNK)) {
+			} else if (item.getStatus().equals(DiffStatus.UNK)) {
 				buffer.append(STATE_UNKNOWN);
 			}
 		}
@@ -532,77 +501,77 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 			char stateNew = states.charAt(i);
 
 			switch (stateIni) {
-			case STATE_INSERT:
-				switch (stateCur) {
-				case STATE_UNKNOWN:
-					return Status.UNK;
-				case STATE_INSERT:
-					switch (stateNew) {
-					case STATE_UPDATE:
-						stateCur = STATE_INSERT;
-						break;
-					case STATE_DELETE:
-						stateCur = STATE_IGNOR;
-						break;
-					default:
-						return Status.UNK;
+				case STATE_INSERT :
+					switch (stateCur) {
+						case STATE_UNKNOWN :
+							return DiffStatus.UNK;
+						case STATE_INSERT :
+							switch (stateNew) {
+								case STATE_UPDATE :
+									stateCur = STATE_INSERT;
+									break;
+								case STATE_DELETE :
+									stateCur = STATE_IGNOR;
+									break;
+								default :
+									return DiffStatus.UNK;
+							}
+							break;
+						case STATE_IGNOR :
+							switch (stateNew) {
+								case STATE_INSERT :
+									stateCur = STATE_INSERT;
+									break;
+								default :
+									return DiffStatus.UNK;
+							}
+							break;
+						default :
+							return DiffStatus.UNK;
 					}
 					break;
-				case STATE_IGNOR:
-					switch (stateNew) {
-					case STATE_INSERT:
-						stateCur = STATE_INSERT;
-						break;
-					default:
-						return Status.UNK;
+				case STATE_UPDATE :
+				case STATE_DELETE :
+					switch (stateCur) {
+						case STATE_UPDATE :
+							switch (stateNew) {
+								case STATE_UPDATE :
+									stateCur = STATE_UPDATE;
+									break;
+								case STATE_DELETE :
+									stateCur = STATE_DELETE;
+									break;
+								default :
+									return DiffStatus.UNK;
+							}
+							break;
+						case STATE_DELETE :
+							switch (stateNew) {
+								case STATE_INSERT :
+									stateCur = STATE_UPDATE;
+									break;
+								default :
+									return DiffStatus.UNK;
+							}
+							break;
+						default :
+							return DiffStatus.UNK;
 					}
 					break;
-				default:
-					return Status.UNK;
-				}
-				break;
-			case STATE_UPDATE:
-			case STATE_DELETE:
-				switch (stateCur) {
-				case STATE_UPDATE:
-					switch (stateNew) {
-					case STATE_UPDATE:
-						stateCur = STATE_UPDATE;
-						break;
-					case STATE_DELETE:
-						stateCur = STATE_DELETE;
-						break;
-					default:
-						return Status.UNK;
-					}
-					break;
-				case STATE_DELETE:
-					switch (stateNew) {
-					case STATE_INSERT:
-						stateCur = STATE_UPDATE;
-						break;
-					default:
-						return Status.UNK;
-					}
-					break;
-				default:
-					return Status.UNK;
-				}
-				break;
-			default:
-				return Status.UNK;
+				default :
+					return DiffStatus.UNK;
 			}
 		}
 
 		switch (stateCur) {
-		case STATE_IGNOR:
-			return null;
-		case STATE_INSERT:
-			return Status.NEW;
-		case STATE_UPDATE:
-			return Status.UPD;
-		case STATE_DELETE:
-			return Status.DEL;
+			case STATE_IGNOR :
+				return null;
+			case STATE_INSERT :
+				return DiffStatus.NEW;
+			case STATE_UPDATE :
+				return DiffStatus.UPD;
+			case STATE_DELETE :
+				return DiffStatus.DEL;
 		}
 		return null;
 	}

@@ -223,7 +223,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 							status = Status.valueOf(valueStatus);
 							structureTest.setStatus(status);
 						} catch (Exception ex) {
-							throw new ExcelConfigurationException(excelPosition, "Bad value on the Status: '" + valueStatus + "'");
+							throw new ExcelConfigurationException(excelPosition, "Bad value on the DiffStatus: '" + valueStatus + "'");
 						}
 					}
 				}
@@ -238,11 +238,11 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						try {
 							int group = Integer.parseInt(valueGroup);
 							if (group <= 0) {
-								throw new ExcelConfigurationException(excelPosition, "The Group must be positive integer: '" + valueGroup + "'");
+								throw new ExcelConfigurationException(excelPosition, "The DiffGroup must be positive integer: '" + valueGroup + "'");
 							}
 							structureTest.setGroup(group);
 						} catch (NumberFormatException ex) {
-							throw new ExcelConfigurationException(excelPosition, "The test Group is not a number: '" + valueGroup + "'");
+							throw new ExcelConfigurationException(excelPosition, "The test DiffGroup is not a number: '" + valueGroup + "'");
 						}
 					}
 				}

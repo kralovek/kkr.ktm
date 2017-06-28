@@ -3,21 +3,20 @@ package kkr.ktm.components.diffmanager.database.checkerstatus.updatecreatetime;
 import java.util.Date;
 import java.util.Map;
 
-import kkr.ktm.components.diffmanager.DiffManager.Status;
+import kkr.ktm.components.diffmanager.data.DiffStatus;
 import kkr.ktm.components.diffmanager.database.ItemCruid;
 import kkr.ktm.components.diffmanager.database.checkerstatus.CheckerStatus;
 import kkr.ktm.exception.BaseException;
 
-public class CheckerStatusUpdateCreateTime extends
-		CheckerStatusUpdateCreateTimeFwk implements CheckerStatus {
-	public Status checkStatus(long index, ItemCruid itemCruid) throws BaseException {
+public class CheckerStatusUpdateCreateTime extends CheckerStatusUpdateCreateTimeFwk implements CheckerStatus {
+	public DiffStatus checkStatus(long index, ItemCruid itemCruid) throws BaseException {
 		if (itemCruid == null || itemCruid.getParameters() == null || itemCruid.getParameters().isEmpty()) {
-			return Status.NEW;
+			return DiffStatus.NEW;
 		}
-		
+
 		Object valueCreate = null;
 		Object valueUpdate = null;
-		
+
 		for (Map.Entry<String, Object> entry : itemCruid.getParameters().entrySet()) {
 			if (this.columnCreate.equals(entry.getKey())) {
 				valueCreate = entry.getValue();
@@ -26,26 +25,26 @@ public class CheckerStatusUpdateCreateTime extends
 				valueUpdate = entry.getValue();
 			}
 		}
-		
+
 		if (valueCreate == null || valueUpdate == null) {
-			return Status.NEW;
+			return DiffStatus.NEW;
 		}
-		
+
 		if (valueCreate.equals(valueUpdate)) {
-			return Status.NEW;
+			return DiffStatus.NEW;
 		}
-		
+
 		Date dateTs = new Date(index);
 		Date dateCreate = null;
-		
+
 		if (valueCreate instanceof Date) {
 			dateCreate = (Date) valueCreate;
 		}
-		
+
 		if (dateTs.compareTo(dateCreate) > 0) {
-			return Status.UPD;
+			return DiffStatus.UPD;
 		}
-		
-		return Status.NEW;
+
+		return DiffStatus.NEW;
 	}
 }

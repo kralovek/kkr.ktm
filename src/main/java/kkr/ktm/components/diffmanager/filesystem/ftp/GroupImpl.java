@@ -3,20 +3,20 @@ package kkr.ktm.components.diffmanager.filesystem.ftp;
 import java.util.ArrayList;
 import java.util.List;
 
-import kkr.ktm.components.diffmanager.DiffManager.Group;
-import kkr.ktm.components.diffmanager.DiffManager.Item;
+import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffItem;
 
-public class GroupImpl implements Group, Comparable<Group> {
+public class GroupImpl implements DiffGroup, Comparable<DiffGroup> {
 	private String name;
 	private IndexImpl lastIndex;
-	private List<Item> items = new ArrayList<Item>();
+	private List<DiffItem> diffItems = new ArrayList<DiffItem>();
 
 	public GroupImpl(String name) {
 		this.name = name;
 	}
 
-	public List<Item> getItems() {
-		return items;
+	public List<DiffItem> getItems() {
+		return diffItems;
 	}
 
 	public String getName() {
@@ -31,7 +31,7 @@ public class GroupImpl implements Group, Comparable<Group> {
 		this.lastIndex = lastIndex;
 	}
 
-	public int compareTo(Group group) {
-		return name.compareTo(group.getName());
+	public int compareTo(DiffGroup diffGroup) {
+		return name.compareTo(diffGroup.getName());
 	}
 }

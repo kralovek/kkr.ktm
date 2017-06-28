@@ -16,6 +16,8 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.components.diffmanager.DiffManager;
+import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.lancer.Lancer;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.data.TestInput;
@@ -83,7 +85,7 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 				//
 				// CURRENT
 				//
-				Map<String, List<DiffManager.Group>> diffGroupsCurrent = createCurrents(diffManagers);
+				Map<String, List<DiffGroup>> diffGroupsCurrent = createCurrents(diffManagers);
 
 				//
 				// RUN
@@ -145,13 +147,13 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 		}
 	}
 
-	private Map<String, List<DiffManager.Group>> createCurrents(List<DiffManager> diffManagers) throws BaseException {
+	private Map<String, List<DiffGroup>> createCurrents(List<DiffManager> diffManagers) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Map<String, List<DiffManager.Group>> map = new HashMap<String, List<DiffManager.Group>>();
+			Map<String, List<DiffGroup>> map = new HashMap<String, List<DiffGroup>>();
 			for (DiffManager diffManager : diffManagers) {
-				List<DiffManager.Group> groups = diffManager.loadCurrents();
-				map.put(diffManager.getName(), groups);
+				List<DiffGroup> diffGroups = diffManager.loadCurrents();
+				map.put(diffManager.getName(), diffGroups);
 			}
 			LOG.trace("OK");
 			return map;
@@ -160,14 +162,14 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 		}
 	}
 
-	private void createDiff(List<DiffManager> diffManagers, Map<String, List<DiffManager.Group>> diffGroupsCurrent, Map<String, Object> resultMap,
-			Date date) throws BaseException {
+	private void createDiff(List<DiffManager> diffManagers, Map<String, List<DiffGroup>> diffGroupsCurrent, Map<String, Object> resultMap, Date date)
+			throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Map<String, List<DiffManager.Group>> diffGroupsDiff = new HashMap<String, List<DiffManager.Group>>();
+			Map<String, List<DiffGroup>> diffGroupsDiff = new HashMap<String, List<DiffGroup>>();
 			for (DiffManager diffManager : diffManagers) {
-				List<DiffManager.Group> groupsCurrent = diffGroupsCurrent.get(diffManager.getName());
-				List<DiffManager.Group> groupsDiff = diffManager.loadDiffs(groupsCurrent);
+				List<DiffGroup> groupsCurrent = diffGroupsCurrent.get(diffManager.getName());
+				List<DiffGroup> groupsDiff = diffManager.loadDiffs(groupsCurrent);
 				diffGroupsDiff.put(diffManager.getName(), groupsDiff);
 			}
 
@@ -289,23 +291,23 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 		return runner;
 	}
 
-	private String createResultDataXML(Map<String, List<DiffManager.Group>> namesGroups) {
+	private String createResultDataXML(Map<String, List<DiffGroup>> namesGroups) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("<DIFFS>").append('\n');
-		for (Map.Entry<String, List<DiffManager.Group>> entry : namesGroups.entrySet()) {
+		for (Map.Entry<String, List<DiffGroup>> entry : namesGroups.entrySet()) {
 			String diffTagName = adaptXmlTag(entry.getKey());
-			List<DiffManager.Group> groups = entry.getValue();
+			List<DiffGroup> diffGroups = entry.getValue();
 			buffer.append("    ").append("<" + diffTagName + ">").append('\n');
-			for (DiffManager.Group group : groups) {
-				String groupTagName = adaptXmlTag(group.getName());
+			for (DiffGroup diffGroup : diffGroups) {
+				String groupTagName = adaptXmlTag(diffGroup.getName());
 				buffer.append("        ").append("<" + groupTagName + ">").append('\n');
-				if (group.getItems() != null) {
-					for (DiffManager.Item item : group.getItems()) {
-						buffer.append("            ").append("<ITEM ").append("name=\"" + item.getName() + "\" ")
-								.append("status=\"" + item.getStatus() + "\" ").append("index=\"" + DATE_FORMAT.format(item.getIndex()) + "\" ")
-								.append(">").append("\n");
-						if (item.getParameters() != null) {
-							for (Map.Entry<String, String> entryParameter : item.getParameters().entrySet()) {
+				if (diffGroup.getItems() != null) {
+					for (DiffItem diffItem : diffGroup.getItems()) {
+						buffer.append("            ").append("<ITEM ").append("name=\"" + diffItem.getName() + "\" ")
+								.append("status=\"" + diffItem.getStatus() + "\" ")
+								.append("index=\"" + DATE_FORMAT.format(diffItem.getIndex()) + "\" ").append(">").append("\n");
+						if (diffItem.getParameters() != null) {
+							for (Map.Entry<String, String> entryParameter : diffItem.getParameters().entrySet()) {
 								String value = adaptXmlValue(entryParameter.getValue());
 								buffer.append("                ").append("<" + entryParameter.getKey() + ">")
 										//

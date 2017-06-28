@@ -4,11 +4,10 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import kkr.ktm.components.diffmanager.DiffManager.Index;
+import kkr.ktm.components.diffmanager.data.DiffIndex;
 
-public class IndexImpl implements Index, Comparable<Index> {
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss.SSS");
+public class IndexImpl implements DiffIndex, Comparable<DiffIndex> {
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	private Timestamp timestamp;
 
@@ -20,9 +19,9 @@ public class IndexImpl implements Index, Comparable<Index> {
 		this.timestamp = timestamp;
 	}
 
-	public int compareTo(Index index) {
-		if (index instanceof IndexImpl) {
-			IndexImpl indexImpl = (IndexImpl) index;
+	public int compareTo(DiffIndex diffIndex) {
+		if (diffIndex instanceof IndexImpl) {
+			IndexImpl indexImpl = (IndexImpl) diffIndex;
 			if (timestamp != null && indexImpl.getTimestamp() != null) {
 				return timestamp.compareTo(indexImpl.getTimestamp());
 			} else if (timestamp == null && indexImpl.getTimestamp() == null) {

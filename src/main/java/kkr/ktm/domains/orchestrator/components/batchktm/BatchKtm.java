@@ -90,7 +90,7 @@ public class BatchKtm extends BatchKtmFwk {
 							break;
 
 						default :
-							throw new IllegalStateException("Unsupported Status: " + status);
+							throw new IllegalStateException("Unsupported DiffStatus: " + status);
 					}
 
 					LOG.info(dateDetla);
