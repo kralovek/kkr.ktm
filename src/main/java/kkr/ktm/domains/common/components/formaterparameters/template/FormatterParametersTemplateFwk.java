@@ -1,15 +1,15 @@
-package kkr.ktm.components.templateparser.impl;
+package kkr.ktm.domains.common.components.formaterparameters.template;
 
 import kkr.ktm.exception.BaseException;
 
 
 
 /**
- * TemplateParserImplFwk
+ * FormatterParametersTemplateFwk
  * 
  * @author KRALOVEC-99999
  */
-public abstract class TemplateParserImplFwk {
+public abstract class FormatterParametersTemplateFwk {
     private boolean configured;
 
 	public void config() throws BaseException {

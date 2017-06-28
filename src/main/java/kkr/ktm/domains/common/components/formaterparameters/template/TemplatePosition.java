@@ -1,4 +1,4 @@
-package kkr.ktm.components.templateparser.impl;
+package kkr.ktm.domains.common.components.formaterparameters.template;
 
 import java.io.File;
 
