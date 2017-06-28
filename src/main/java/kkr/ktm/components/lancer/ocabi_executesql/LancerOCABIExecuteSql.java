@@ -178,7 +178,7 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 
 			generateTraceFileDiff(resultXML, date);
 
-			final Map<String, Object> resultParserMapData = parserParameters.parse(resultXML);
+			final Map<String, Object> resultParserMapData = parametersParser.parse(resultXML);
 			resultMap.putAll(resultParserMapData);
 			LOG.trace("OK");
 		} finally {
@@ -250,7 +250,7 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 		try {
 			String templateData = templateArchiv.loadTemplate(testInput.getType());
 
-			String templateDataParsed = formatterParameters.format(templateData, inputParameters);
+			String templateDataParsed = parametersFormatter.format(templateData, inputParameters);
 			resultMap.put(sysParamPrefix + PARAM_DATA_INPUT, templateDataParsed);
 
 			File destinationFile;

@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
-import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
+import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -25,9 +25,9 @@ public abstract class RunnerRequeaWsFwk {
 
 	protected TemplateArchiv templateArchiv;
 
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 
-	protected ParserParameters parserParameters;
+	protected ParametersParser parametersParser;
 
 	protected Map<String, String> parameters;
 
@@ -55,12 +55,12 @@ public abstract class RunnerRequeaWsFwk {
 		if (templateBodyName == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter templateBodyName is not configured");
 		}
-		if (formatterParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
+		if (parametersFormatter == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersFormatter is not configured");
 		}
 
-		if (parserParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
+		if (parametersParser == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersParser is not configured");
 		}
 
 		if (traceRequestFile != null) {
@@ -111,12 +111,12 @@ public abstract class RunnerRequeaWsFwk {
 		this.encoding = encoding;
 	}
 
-	public FormatterParameters getTemplateParser() {
-		return formatterParameters;
+	public ParametersFormatter getTemplateParser() {
+		return parametersFormatter;
 	}
 
-	public void setTemplateParser(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setTemplateParser(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
 	public Map<String, String> getParameters() {
@@ -151,12 +151,12 @@ public abstract class RunnerRequeaWsFwk {
 		this.templateBodyName = templateBodyName;
 	}
 
-	public ParserParameters getResultParser() {
-		return parserParameters;
+	public ParametersParser getResultParser() {
+		return parametersParser;
 	}
 
-	public void setResultParser(ParserParameters parserParameters) {
-		this.parserParameters = parserParameters;
+	public void setResultParser(ParametersParser parametersParser) {
+		this.parametersParser = parametersParser;
 	}
 
 	public String getTraceRequestFile() {

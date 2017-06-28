@@ -1,7 +1,7 @@
 package kkr.ktm.components.lancer.infotel_executesql;
 
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.domains.database.components.datasource.DataSource;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -9,7 +9,7 @@ public abstract class LancerInfotelExecuteSqlFwk {
 	private boolean configured;
 
 	protected TemplateArchiv templateArchiv;
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 	protected DataSource dataSource;
 	protected String sysParamPrefix;
 
@@ -18,8 +18,8 @@ public abstract class LancerInfotelExecuteSqlFwk {
 		if (templateArchiv == null) {
 			throw new ConfigurationException("Parameter 'templateArchiv' is not configured");
 		}
-		if (formatterParameters == null) {
-			throw new ConfigurationException("Parameter 'formatterParameters' is not configured");
+		if (parametersFormatter == null) {
+			throw new ConfigurationException("Parameter 'parametersFormatter' is not configured");
 		}
 		if (dataSource == null) {
 			throw new ConfigurationException("Parameter 'dataSource' is not configured");
@@ -47,12 +47,12 @@ public abstract class LancerInfotelExecuteSqlFwk {
 		this.templateArchiv = templateArchiv;
 	}
 
-	public FormatterParameters getFormatterParameters() {
-		return formatterParameters;
+	public ParametersFormatter getFormatterParameters() {
+		return parametersFormatter;
 	}
 
-	public void setFormatterParameters(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setFormatterParameters(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
 	public DataSource getDataSource() {

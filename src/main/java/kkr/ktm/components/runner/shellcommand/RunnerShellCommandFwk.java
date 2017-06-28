@@ -1,6 +1,6 @@
 package kkr.ktm.components.runner.shellcommand;
 
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -8,13 +8,13 @@ public abstract class RunnerShellCommandFwk {
 	private boolean configured;
 	protected String command;
 
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 
 	protected String sysParamPrefix;
 
 	public void config() throws BaseException {
 		configured = false;
-		if (formatterParameters == null) {
+		if (parametersFormatter == null) {
 			// OK
 		}
 		if (command == null) {
@@ -42,12 +42,12 @@ public abstract class RunnerShellCommandFwk {
 		this.command = command;
 	}
 
-	public FormatterParameters getTemplateParser() {
-		return formatterParameters;
+	public ParametersFormatter getTemplateParser() {
+		return parametersFormatter;
 	}
 
-	public void setTemplateParser(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setTemplateParser(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
 	public String getSysParamPrefix() {

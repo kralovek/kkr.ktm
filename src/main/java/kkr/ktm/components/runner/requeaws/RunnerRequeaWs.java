@@ -100,12 +100,12 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 			}
 
 			String templateBody = templateArchiv.loadTemplate(templateBodyName);
-			String parsedBody = formatterParameters.format(templateBody, allInputParameters);
+			String parsedBody = parametersFormatter.format(templateBody, allInputParameters);
 
 			allInputParameters.put(PARAM_SOAP_LENGTH, parsedBody.length());
 
 			String templateHeader = loadTemplate(templateHeadName);
-			String parsedHeader = formatterParameters.format(templateHeader, allInputParameters);
+			String parsedHeader = parametersFormatter.format(templateHeader, allInputParameters);
 
 			generateTraceFileRequest(parsedHeader, parsedBody, date);
 
@@ -117,7 +117,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 
 			allOputParameters.put(sysParamPrefix + PARAM_RUNNER_RESPONSE, response);
 
-			Map<String, Object> resultParameters = parserParameters.parse(response);
+			Map<String, Object> resultParameters = parametersParser.parse(response);
 
 			allOputParameters.putAll(resultParameters);
 

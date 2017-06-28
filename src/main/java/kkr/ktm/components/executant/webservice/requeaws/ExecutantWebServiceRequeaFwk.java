@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -23,7 +23,7 @@ public abstract class ExecutantWebServiceRequeaFwk {
 	protected String encoding;
 
 	protected File fileTemplate;
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 	protected Map<String, String> parameters;
 
 	public void config() throws BaseException {
@@ -50,8 +50,8 @@ public abstract class ExecutantWebServiceRequeaFwk {
 		if (fileTemplate == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter fileTemplate is not configured");
 		}
-		if (formatterParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
+		if (parametersFormatter == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersFormatter is not configured");
 		}
 		if (encoding == null) {
 			encoding = ENCODE_UTF_8;
@@ -95,12 +95,12 @@ public abstract class ExecutantWebServiceRequeaFwk {
 		this.fileTemplate = fileTemplate;
 	}
 
-	public FormatterParameters getFormatterParameters() {
-		return formatterParameters;
+	public ParametersFormatter getFormatterParameters() {
+		return parametersFormatter;
 	}
 
-	public void setFormatterParameters(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setFormatterParameters(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
 	public Map<String, String> getParameters() {

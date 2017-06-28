@@ -75,7 +75,7 @@ public class LancerTemplateBased extends LancerTemplateBasedFwk implements Lance
 			inputParameters.putAll(systemInputParameters(testInput));
 			inputParameters.putAll(testInput.getDataInput());
 
-			final String templateParsed = formatterParameters.format(template, inputParameters);
+			final String templateParsed = parametersFormatter.format(template, inputParameters);
 			resultMap.put(PARAM_REQUEST, templateParsed);
 
 			if (traceSource) {
@@ -121,7 +121,7 @@ public class LancerTemplateBased extends LancerTemplateBasedFwk implements Lance
 				baseException = ex;
 			}
 
-			final Map<String, Object> resultParserMap = parserParameters.parse(result);
+			final Map<String, Object> resultParserMap = parametersParser.parse(result);
 
 			if (baseException != null) {
 				resultMap.put(PARAM_EXCEPTION_CLASS, baseException.getClass().getSimpleName());

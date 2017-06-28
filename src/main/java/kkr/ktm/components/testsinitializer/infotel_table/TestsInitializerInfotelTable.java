@@ -97,7 +97,7 @@ public class TestsInitializerInfotelTable extends TestsInitializerInfotelTableFw
 		LOG.trace("BEGIN");
 		try {
 			String queryTemplate = templateArchiv.loadTemplate(type);
-			String query = formatterParameters.format(queryTemplate, inputParameters);
+			String query = parametersFormatter.format(queryTemplate, inputParameters);
 
 			Collection<Map<String, Object>> tableData = tableReader.readData(query);
 

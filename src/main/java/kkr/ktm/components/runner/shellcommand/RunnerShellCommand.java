@@ -29,8 +29,8 @@ public class RunnerShellCommand extends RunnerShellCommandFwk implements Runner 
 			Map<String, Object> retval = new HashMap<String, Object>();
 
 			String commandParsed;
-			if (formatterParameters != null) {
-				commandParsed = formatterParameters.format(command, parameters);
+			if (parametersFormatter != null) {
+				commandParsed = parametersFormatter.format(command, parameters);
 			} else {
 				commandParsed = command;
 			}

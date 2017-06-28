@@ -6,8 +6,8 @@ import java.util.Map;
 
 import kkr.ktm.components.executant.Executant;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
-import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
+import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -21,13 +21,13 @@ public abstract class LancerTemplateBasedFwk {
 
 	protected TemplateArchiv templateArchiv;
 
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 
 	protected Executant executant;
 
 	protected Map<String, Executant> executantByType;
 
-	protected ParserParameters parserParameters;
+	protected ParametersParser parametersParser;
 
 	protected File dirTrace;
 
@@ -59,8 +59,8 @@ public abstract class LancerTemplateBasedFwk {
 		if (executantByType == null) {
 			executantByType = new HashMap<String, Executant>();
 		}
-		if (parserParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
+		if (parametersParser == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersParser is not configured");
 		}
 		configured = true;
 	}
@@ -76,8 +76,8 @@ public abstract class LancerTemplateBasedFwk {
 		buffer.append("[").append(this.getClass().getName()).append("]\n");
 		buffer.append("    ").append("templateArchiv").append("=").append(templateArchiv == null ? "" : templateArchiv.getClass().getName())
 				.append("\n");
-		buffer.append("    ").append("formatterParameters").append("=")
-				.append(formatterParameters == null ? "" : formatterParameters.getClass().getName()).append("\n");
+		buffer.append("    ").append("parametersFormatter").append("=")
+				.append(parametersFormatter == null ? "" : parametersFormatter.getClass().getName()).append("\n");
 		buffer.append("    ").append("executant").append("=").append(executant == null ? "" : executant.getClass().getName()).append("\n");
 		buffer.append("    ").append("executants").append(":").append("\n");
 		if (executantByType != null) {
@@ -85,7 +85,7 @@ public abstract class LancerTemplateBasedFwk {
 				buffer.append("    ").append("    ").append(entry.getKey()).append(" -> ").append(entry.getValue().getClass().getName()).append("\n");
 			}
 		}
-		buffer.append("    ").append("parserParameters").append("=").append(parserParameters == null ? "" : parserParameters.getClass().getName())
+		buffer.append("    ").append("parametersParser").append("=").append(parametersParser == null ? "" : parametersParser.getClass().getName())
 				.append("\n");
 		buffer.append("    ").append("dirTrace").append("=").append(dirTrace == null ? "" : dirTrace).append("\n");
 		buffer.append("    ").append("traceSource").append("=").append(traceSource == null ? "" : traceSource).append("\n");
@@ -102,12 +102,12 @@ public abstract class LancerTemplateBasedFwk {
 		this.templateArchiv = pTemplateArchiv;
 	}
 
-	public FormatterParameters getFormatterParameters() {
-		return formatterParameters;
+	public ParametersFormatter getFormatterParameters() {
+		return parametersFormatter;
 	}
 
-	public void setFormatterParameters(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setFormatterParameters(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
 	public Executant getExecutant() {
@@ -126,12 +126,12 @@ public abstract class LancerTemplateBasedFwk {
 		this.executantByType = executantByType;
 	}
 
-	public ParserParameters getParserParameters() {
-		return parserParameters;
+	public ParametersParser getParserParameters() {
+		return parametersParser;
 	}
 
-	public void setParserParameters(ParserParameters parserParameters) {
-		this.parserParameters = parserParameters;
+	public void setParserParameters(ParametersParser parametersParser) {
+		this.parametersParser = parametersParser;
 	}
 
 	public File getDirTrace() {

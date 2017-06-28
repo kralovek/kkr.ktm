@@ -14,8 +14,8 @@ import kkr.ktm.components.filemanager.FileManager;
 import kkr.ktm.components.locker.Locker;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
-import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
+import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
+import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.utils.UtilsParameters;
@@ -25,7 +25,7 @@ public abstract class LancerM2OImportFileFwk {
 
 	protected TemplateArchiv templateArchiv;
 
-	protected FormatterParameters formatterParameters;
+	protected ParametersFormatter parametersFormatter;
 
 	protected FileManager fileManager;
 	private Map<String, FileManager> fileManagerByType;
@@ -39,7 +39,7 @@ public abstract class LancerM2OImportFileFwk {
 	private Map<String, List<DiffManager>> diffManagersByType;
 	protected Map<Pattern, List<DiffManager>> diffManagersByTypePattern;
 
-	protected ParserParameters parserParameters;
+	protected ParametersParser parametersParser;
 
 	protected String dirDestination;
 	private Map<String, String> dirDestinationByType;
@@ -60,8 +60,8 @@ public abstract class LancerM2OImportFileFwk {
 		if (templateArchiv == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter templateArchiv is not configured");
 		}
-		if (formatterParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
+		if (parametersFormatter == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersFormatter is not configured");
 		}
 
 		if (runnerByType == null) {
@@ -86,8 +86,8 @@ public abstract class LancerM2OImportFileFwk {
 		}
 		diffManagersByTypePattern = UtilsParameters.toByTypePattern(getClass(), diffManagersByType);
 
-		if (parserParameters == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
+		if (parametersParser == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parametersParser is not configured");
 		}
 		if (dirDestinationByType == null) {
 			dirDestinationByType = new LinkedHashMap<String, String>();
@@ -137,20 +137,20 @@ public abstract class LancerM2OImportFileFwk {
 		this.templateArchiv = pTemplateArchiv;
 	}
 
-	public FormatterParameters getFormatterParameters() {
-		return formatterParameters;
+	public ParametersFormatter getFormatterParameters() {
+		return parametersFormatter;
 	}
 
-	public void setFormatterParameters(FormatterParameters formatterParameters) {
-		this.formatterParameters = formatterParameters;
+	public void setFormatterParameters(ParametersFormatter parametersFormatter) {
+		this.parametersFormatter = parametersFormatter;
 	}
 
-	public ParserParameters getParserParameters() {
-		return parserParameters;
+	public ParametersParser getParserParameters() {
+		return parametersParser;
 	}
 
-	public void setParserParameters(ParserParameters parserParameters) {
-		this.parserParameters = parserParameters;
+	public void setParserParameters(ParametersParser parametersParser) {
+		this.parametersParser = parametersParser;
 	}
 
 	public FileManager getFileManager() {

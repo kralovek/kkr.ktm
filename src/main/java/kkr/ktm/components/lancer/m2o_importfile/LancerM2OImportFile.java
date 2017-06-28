@@ -172,7 +172,7 @@ public class LancerM2OImportFile extends LancerM2OImportFileFwk implements Lance
 
 			generateTraceFileDiff(resultXML, new Date());
 
-			final Map<String, Object> resultParserMapData = parserParameters.parse(resultXML);
+			final Map<String, Object> resultParserMapData = parametersParser.parse(resultXML);
 			resultMap.putAll(resultParserMapData);
 			LOG.trace("OK");
 		} finally {
@@ -244,7 +244,7 @@ public class LancerM2OImportFile extends LancerM2OImportFileFwk implements Lance
 			if (!noFile) {
 				String templateData = templateArchiv.loadTemplate(testInput.getType() + ".data");
 
-				String templateDataParsed = formatterParameters.format(templateData, inputParameters);
+				String templateDataParsed = parametersFormatter.format(templateData, inputParameters);
 				resultMap.put(sysParamPrefix + PARAM_DATA_INPUT, templateDataParsed);
 
 				String filename = UtilsParameters.getStringParam(inputParameters, sysParamPrefix + PARAM_INPUT_DATA_FILE_NAME);
