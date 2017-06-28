@@ -1,5 +1,4 @@
-package kkr.ktm.components.resultparser.soap;
-
+package kkr.ktm.domains.common.components.parserparameters.soap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,23 +7,23 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
 import kkr.ktm.exception.BaseException;
 
-public class ResultParserSoap extends ResultParserSoapFwk {
-	private static final Logger LOG = Logger
-			.getLogger(ResultParserSoap.class);
+public class ParserParametersSoap extends ParserParametersSoapFwk implements ParserParameters {
+	private static final Logger LOG = Logger.getLogger(ParserParametersSoap.class);
 
 	private static final String PARAM_PROTOCOL = "SOAP/PROTOCOL";
 	private static final String PARAM_CODE = "SOAP/CODE";
 	private static final String PARAM_STATUS = "SOAP/STATUS";
 
-	public Map<String, Object> parse(final String pSource) throws BaseException {
+	public Map<String, Object> parse(String source) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 
-			final String cleanedContent = cleanContent(pSource);
+			final String cleanedContent = cleanContent(source);
 			final String xmlContent = extractXmlContent(cleanedContent);
 			final String header = extractHeader(cleanedContent);
 
@@ -114,7 +113,7 @@ public class ResultParserSoap extends ResultParserSoapFwk {
 		}
 		// final byte[] bytes = new byte[] {0x0D, 0x0A, 0x30, 0x37, 0x64, 0x61,
 		// 0x0D, 0x0A};
-		final byte[] bytes = new byte[] { 0x0D, 0x0A, 0, 0, 0, 0, 0x0D, 0x0A };
+		final byte[] bytes = new byte[]{0x0D, 0x0A, 0, 0, 0, 0, 0x0D, 0x0A};
 		final byte[] sourceBytes = source.getBytes();
 
 		final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -137,7 +136,7 @@ public class ResultParserSoap extends ResultParserSoapFwk {
 				}
 			}
 			try {
-				buffer.write(new byte[] { sourceBytes[i] });
+				buffer.write(new byte[]{sourceBytes[i]});
 			} catch (final IOException ex) {
 				i++;
 				continue;

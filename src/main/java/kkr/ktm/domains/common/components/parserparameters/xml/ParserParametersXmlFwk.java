@@ -1,4 +1,4 @@
-package kkr.ktm.components.resultparser.xml;
+package kkr.ktm.domains.common.components.parserparameters.xml;
 
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
@@ -6,11 +6,11 @@ import kkr.ktm.exception.ConfigurationException;
 
 
 /**
- * ResultParserXmlFwk
+ * ParserParametersXmlFwk
  * 
  * @author KRALOVEC-99999
  */
-public abstract class ResultParserXmlFwk {
+public abstract class ParserParametersXmlFwk {
     private boolean configured;
 
 	/**

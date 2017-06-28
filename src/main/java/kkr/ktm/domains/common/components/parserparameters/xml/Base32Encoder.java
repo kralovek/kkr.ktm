@@ -1,4 +1,4 @@
-package kkr.ktm.components.resultparser.xml;
+package kkr.ktm.domains.common.components.parserparameters.xml;
 
 public class Base32Encoder {
     // private static final String base32Chars =

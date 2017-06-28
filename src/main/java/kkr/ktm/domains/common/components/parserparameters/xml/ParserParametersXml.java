@@ -1,5 +1,4 @@
-package kkr.ktm.components.resultparser.xml;
-
+package kkr.ktm.domains.common.components.parserparameters.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,20 +14,19 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.components.resultparser.ResultParser;
+import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.utils.collections.OrderFiFoMap;
 import kkr.ktm.utils.xml.Attribute;
 import kkr.ktm.utils.xml.Tag;
 
 /**
- * ResultParserXml
+ * ParserParametersXml
  * 
  * @author KRALOVEC-99999
  */
-public class ResultParserXml extends ResultParserXmlFwk implements ResultParser {
-	private static final Logger LOG = Logger
-			.getLogger(ResultParserXml.class);
+public class ParserParametersXml extends ParserParametersXmlFwk implements ParserParameters {
+	private static final Logger LOG = Logger.getLogger(ParserParametersXml.class);
 
 	private static final String PARAM_EXCEPTION_CLASS = "EXCEPTION/CLASS";
 
@@ -37,8 +35,8 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 	private static final String PARAM_EXCEPTION_DETAIL = "EXCEPTION/DETAIL";
 
 	private static final String PATH_SEPARATOR = "/";
-	
-	private static final String OS_WINDOWS_NAME="Windows";
+
+	private static final String OS_WINDOWS_NAME = "Windows";
 
 	private class Value {
 		private int[] index;
@@ -110,7 +108,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		LOG.trace("BEGIN");
 		try {
 			Map<String, Object> parameters = new OrderFiFoMap<String, Object>();
-			
+
 			if (pSource == null) {
 				LOG.warn("No XML body");
 				LOG.trace("OK");
@@ -120,8 +118,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 			try {
 				final Tag tag = createXmlTag(pSource, encoding);
 
-				final Map<String, List<Value>> mapValues = createMapValues(
-						null, tag, null);
+				final Map<String, List<Value>> mapValues = createMapValues(null, tag, null);
 				Map<String, Object> mapObjectsValues = listValuesToTreeValues(mapValues);
 				parameters.putAll(mapObjectsValues);
 			} catch (final XMLStreamException ex) {
@@ -129,7 +126,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 				parameters.put(sysParamPrefix + PARAM_EXCEPTION_MESSAGE, ex.getMessage());
 				parameters.put(sysParamPrefix + PARAM_EXCEPTION_DETAIL, toStringException(ex));
 			}
-			
+
 			LOG.trace("OK");
 			return parameters;
 		} finally {
@@ -145,23 +142,19 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		return byteArrayOutputStream.toString();
 	}
 
-	private Tag createXmlTag(final String pSource, final String pEncoding)
-			throws XMLStreamException {
+	private Tag createXmlTag(final String pSource, final String pEncoding) throws XMLStreamException {
 		XMLStreamReader xmlStreamReader = null;
-        String osName = System.getProperty("os.name");
-		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
-				pSource.getBytes());
+		String osName = System.getProperty("os.name");
+		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pSource.getBytes());
 		// On ne force l'encodage que si la machine est une machine windows 
 		//(cf probl�me d'encodage sur le proxi : machine linux : pas besoin d'encodage)
 		try {
 			if (pEncoding != null && osName.contains(OS_WINDOWS_NAME)) {
-				xmlStreamReader = XMLInputFactory.newInstance()
-						.createXMLStreamReader(byteArrayInputStream, pEncoding);
+				xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(byteArrayInputStream, pEncoding);
 			} else {
-				xmlStreamReader = XMLInputFactory.newInstance()
-						.createXMLStreamReader(byteArrayInputStream);
+				xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(byteArrayInputStream);
 			}
-			
+
 			final Tag tag = readMainTag(xmlStreamReader);
 
 			xmlStreamReader.close();
@@ -178,50 +171,44 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		}
 	}
 
-	private Tag readMainTag(final XMLStreamReader pXmlStreamReader)
-			throws XMLStreamException {
+	private Tag readMainTag(final XMLStreamReader pXmlStreamReader) throws XMLStreamException {
 		final List<Tag> tags = new ArrayList<Tag>();
 
 		Tag mainTag = null;
 		int code;
 		while ((code = pXmlStreamReader.next()) != XMLStreamConstants.END_DOCUMENT) {
 			switch (code) {
-			case XMLStreamConstants.START_ELEMENT:
-				final Tag tag = readTag(pXmlStreamReader);
-				if (mainTag != null) {
-					tags.get(tags.size() - 1).getTags().add(tag);
-				} else {
-					mainTag = tag;
-				}
-				tags.add(tag);
-				break;
-			case XMLStreamConstants.CHARACTERS:
-				final String currentValue = tags.get(tags.size() - 1)
-						.getValue();
-				tags.get(tags.size() - 1).setValue(
-						(currentValue == null ? "" : currentValue)
-								+ pXmlStreamReader.getText());
-				break;
-			case XMLStreamConstants.END_ELEMENT:
-				tags.remove(tags.size() - 1);
-				break;
+				case XMLStreamConstants.START_ELEMENT :
+					final Tag tag = readTag(pXmlStreamReader);
+					if (mainTag != null) {
+						tags.get(tags.size() - 1).getTags().add(tag);
+					} else {
+						mainTag = tag;
+					}
+					tags.add(tag);
+					break;
+				case XMLStreamConstants.CHARACTERS :
+					final String currentValue = tags.get(tags.size() - 1).getValue();
+					tags.get(tags.size() - 1).setValue((currentValue == null ? "" : currentValue) + pXmlStreamReader.getText());
+					break;
+				case XMLStreamConstants.END_ELEMENT :
+					tags.remove(tags.size() - 1);
+					break;
 			}
 		}
 
 		return mainTag;
 	}
 
-	private Map<String, List<Value>> createMapValues(
-			Map<String, List<Value>> pMapValues, final Tag pTag, Value pValue) {
+	private Map<String, List<Value>> createMapValues(Map<String, List<Value>> pMapValues, final Tag pTag, Value pValue) {
 		if (pMapValues == null) {
 			pMapValues = new OrderFiFoMap<String, List<Value>>();
 		}
 
 		if (pValue == null) {
 			pValue = new Value();
-			pValue.setIndex(new int[] { 0 });
-			pValue.setPath(useTagPrefix ? pTag.getComplexName() : pTag
-					.getName());
+			pValue.setIndex(new int[]{0});
+			pValue.setPath(useTagPrefix ? pTag.getComplexName() : pTag.getName());
 			pValue.setValue(pTag.getValue());
 		}
 
@@ -231,10 +218,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 			for (final Attribute attribute : pTag.getAttributes()) {
 				final Value value = new Value();
 				value.setIndex(extendIndex(pValue.getIndex(), i++));
-				value.setPath(pValue.getPath()
-						+ PATH_SEPARATOR
-						+ (useAttributePrefix ? attribute.getComplexName()
-								: attribute.getName()));
+				value.setPath(pValue.getPath() + PATH_SEPARATOR + (useAttributePrefix ? attribute.getComplexName() : attribute.getName()));
 				value.setValue(attribute.getValue());
 				addValue(pMapValues, value);
 			}
@@ -243,8 +227,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 			for (final Tag tag : pTag.getTags()) {
 				final Value value = new Value();
 				value.setIndex(extendIndex(pValue.getIndex(), i++));
-				value.setPath(pValue.getPath() + PATH_SEPARATOR
-						+ (useTagPrefix ? tag.getComplexName() : tag.getName()));
+				value.setPath(pValue.getPath() + PATH_SEPARATOR + (useTagPrefix ? tag.getComplexName() : tag.getName()));
 				value.setValue(tag.getValue());
 				//addValue(pMapValues, value);
 				createMapValues(pMapValues, tag, value);
@@ -256,8 +239,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		return pMapValues;
 	}
 
-	private void addValue(Map<String, List<Value>> pMapValues,
-			final Value pValue) {
+	private void addValue(Map<String, List<Value>> pMapValues, final Value pValue) {
 		if (pValue == null) {
 			return;
 		}
@@ -295,8 +277,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		return tag;
 	}
 
-	private Attribute createAttribute(final XMLStreamReader xmlStreamReader,
-			final int pIndex) {
+	private Attribute createAttribute(final XMLStreamReader xmlStreamReader, final int pIndex) {
 		final Attribute attribute = new Attribute();
 		attribute.setPrefix(xmlStreamReader.getAttributePrefix(pIndex));
 		attribute.setName(xmlStreamReader.getAttributeLocalName(pIndex));
@@ -304,17 +285,14 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		return attribute;
 	}
 
-	private Map<String, Object> listValuesToTreeValues(
-			final Map<String, List<Value>> pMapValues) {
+	private Map<String, Object> listValuesToTreeValues(final Map<String, List<Value>> pMapValues) {
 		final Map<String, Object> mapObjects = new OrderFiFoMap<String, Object>();
 		for (final Map.Entry<String, List<Value>> entry : pMapValues.entrySet()) {
-			if (entry
-					.getKey()
-					.equals("fr.cnamts.mk.metier.spfeltransport.to.sf.SPSoumisFacTranspSFTO/zFACTURE/zCOUVERTURE/fr.cnamts.mk.metier.spfeltransport.to.sf.CouvertureSFTO/zCONTRATS/fr.cnamts.mk.metier.spfeltransport.to.sf.ContratsAppliquesSFTO/zId")) {
+			if (entry.getKey().equals(
+					"fr.cnamts.mk.metier.spfeltransport.to.sf.SPSoumisFacTranspSFTO/zFACTURE/zCOUVERTURE/fr.cnamts.mk.metier.spfeltransport.to.sf.CouvertureSFTO/zCONTRATS/fr.cnamts.mk.metier.spfeltransport.to.sf.ContratsAppliquesSFTO/zId")) {
 			}
 			if (entry.getValue().size() == 1) {
-				mapObjects.put(entry.getKey(), entry.getValue().get(0)
-						.getValue());
+				mapObjects.put(entry.getKey(), entry.getValue().get(0).getValue());
 				continue;
 			}
 			final Object object = listValuesToTreeValues(entry.getValue());
@@ -378,7 +356,7 @@ public class ResultParserXml extends ResultParserXmlFwk implements ResultParser 
 		}
 		for (int i = 0; i < pTreeValues.length; i++) {
 			if (!pTreeValues[i].getClass().isArray()) {
-				pTreeValues[i] = new Object[] { pTreeValues[i] };
+				pTreeValues[i] = new Object[]{pTreeValues[i]};
 			}
 			adaptTreeValues((Object[]) pTreeValues[i], pLevel - 1);
 		}

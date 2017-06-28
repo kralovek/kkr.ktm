@@ -1,10 +1,10 @@
-package kkr.ktm.components.resultparser.soap;
+package kkr.ktm.domains.common.components.parserparameters.soap;
 
-import kkr.ktm.components.resultparser.xml.ResultParserXml;
+import kkr.ktm.domains.common.components.parserparameters.xml.ParserParametersXml;
 import kkr.ktm.exception.BaseException;
 
 
-public abstract class ResultParserSoapFwk extends ResultParserXml {
+public abstract class ParserParametersSoapFwk extends ParserParametersXml {
     private boolean configured;
     
 	public void config() throws BaseException {
