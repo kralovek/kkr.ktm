@@ -14,14 +14,14 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.components.diffmanager.DiffManager;
-import kkr.ktm.components.diffmanager.data.DiffGroup;
-import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.filemanager.FileManager;
 import kkr.ktm.components.lancer.Lancer;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.data.TestInput;
 import kkr.ktm.data.TestOutput;
+import kkr.ktm.domains.common.components.diffmanager.DiffManager;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.exception.TechnicalException;
