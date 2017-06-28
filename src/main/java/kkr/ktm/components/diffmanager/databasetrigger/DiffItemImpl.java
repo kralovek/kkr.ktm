@@ -1,4 +1,4 @@
-package kkr.ktm.components.diffmanager.database;
+package kkr.ktm.components.diffmanager.databasetrigger;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -6,9 +6,9 @@ import java.util.TreeMap;
 import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.diffmanager.data.DiffStatus;
 
-public class ItemImpl implements DiffItem, Comparable<DiffItem> {
+public class DiffItemImpl implements DiffItem, Comparable<DiffItem> {
 	private String name;
-	private IndexImpl index;
+	private DiffIndexImpl index;
 	private DiffStatus diffStatus;
 	private Map<String, String> parameters = new TreeMap<String, String>();
 
@@ -20,7 +20,7 @@ public class ItemImpl implements DiffItem, Comparable<DiffItem> {
 		return name;
 	}
 
-	public IndexImpl getIndex() {
+	public DiffIndexImpl getIndex() {
 		return index;
 	}
 
@@ -28,7 +28,7 @@ public class ItemImpl implements DiffItem, Comparable<DiffItem> {
 		return diffStatus;
 	}
 
-	public void setIndex(IndexImpl index) {
+	public void setIndex(DiffIndexImpl index) {
 		this.index = index;
 	}
 

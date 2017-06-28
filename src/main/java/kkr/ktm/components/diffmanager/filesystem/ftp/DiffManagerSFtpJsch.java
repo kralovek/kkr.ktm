@@ -88,23 +88,23 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("dir: " + dirInfo.getPath());
-			long date = groupState != null ? ((IndexImpl) groupState.getLastIndex()).getMs() : 0;
+			long date = groupState != null ? ((DiffIndexImpl) groupState.getLastIndex()).getMs() : 0;
 			List<DiffItem> diffItems = null;
 			if (dirInfo.isContent() && groupState != null && groupState.getItems() != null) {
-				List<ItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
 
 				diffItems = new ArrayList<DiffItem>();
 
 				for (DiffItem itemState : groupState.getItems()) {
-					ItemImpl existingItem = findItem(existingItems, itemState.getName());
+					DiffItemImpl existingItem = findItem(existingItems, itemState.getName());
 					if (existingItem != null) {
-						if (((IndexImpl) existingItem.getIndex()).getMs() <= ((IndexImpl) itemState.getIndex()).getMs()) {
+						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex()).getMs()) {
 							existingItems.remove(existingItem);
 						} else {
 							existingItem.setStatus(DiffStatus.UPD);
 						}
 					} else {
-						ItemImpl newItem = new ItemImpl(itemState);
+						DiffItemImpl newItem = new DiffItemImpl(itemState);
 						newItem.setStatus(DiffStatus.DEL);
 						diffItems.add(newItem);
 					}
@@ -112,16 +112,16 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 				diffItems.addAll(existingItems);
 				Collections.sort(diffItems, comparatorItem);
 			} else {
-				List<ItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date, dirInfo.getPattern());
+				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date, dirInfo.getPattern());
 				diffItems = new ArrayList<DiffItem>();
 				diffItems.addAll(existingItems);
 			}
 
 			long lastModified = getLastModified(diffItems);
-			GroupImpl group = new GroupImpl(dirInfo.getName());
-			IndexImpl indexImpl = new IndexImpl();
-			indexImpl.setMs(lastModified);
-			group.setLastIndex(indexImpl);
+			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+			diffIndexImpl.setMs(lastModified);
+			group.setLastIndex(diffIndexImpl);
 			group.getItems().addAll(diffItems);
 			LOG.trace("OK");
 			return group;
@@ -130,8 +130,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 	}
 
-	private ItemImpl findItem(List<ItemImpl> items, String name) {
-		for (ItemImpl item : items) {
+	private DiffItemImpl findItem(List<DiffItemImpl> items, String name) {
+		for (DiffItemImpl item : items) {
 			if (item.getName().equals(name)) {
 				return item;
 			}
@@ -143,15 +143,15 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		long lastModified = 0;
 		for (DiffItem diffItem : diffItems) {
 			// To je divny ... ta podminka ma byt naopak !!!
-			if (lastModified > ((IndexImpl) diffItem.getIndex()).getMs()) {
-				lastModified = ((IndexImpl) diffItem.getIndex()).getMs();
+			if (lastModified > ((DiffIndexImpl) diffItem.getIndex()).getMs()) {
+				lastModified = ((DiffIndexImpl) diffItem.getIndex()).getMs();
 			}
 		}
 		return lastModified;
 	}
 
-	private static List<ItemImpl> getItems(Client client, String dirRoot, String dir, long index, Pattern pattern) throws BaseException {
-		List<ItemImpl> items = new ArrayList<ItemImpl>();
+	private static List<DiffItemImpl> getItems(Client client, String dirRoot, String dir, long index, Pattern pattern) throws BaseException {
+		List<DiffItemImpl> items = new ArrayList<DiffItemImpl>();
 
 		Vector<LsEntry> files = null;
 		try {
@@ -178,10 +178,10 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 					continue;
 				}
 
-				ItemImpl item = new ItemImpl(path);
-				IndexImpl indexImpl = new IndexImpl();
-				indexImpl.setMs(ms);
-				item.setIndex(indexImpl);
+				DiffItemImpl item = new DiffItemImpl(path);
+				DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+				diffIndexImpl.setMs(ms);
+				item.setIndex(diffIndexImpl);
 				item.setStatus(DiffStatus.NEW);
 				items.add(item);
 			} else if (file.getAttrs().isDir()) {
@@ -189,7 +189,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 					continue;
 				}
 				String path = dir + file.getFilename() + PATH_SEPARATOR;
-				List<ItemImpl> itemsLocal = getItems(client, dirRoot, path, index, pattern);
+				List<DiffItemImpl> itemsLocal = getItems(client, dirRoot, path, index, pattern);
 				items.addAll(itemsLocal);
 			}
 		}
@@ -236,10 +236,10 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		LOG.trace("BEGIN");
 		try {
 			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
-			GroupImpl group = new GroupImpl(dirInfo.getName());
-			IndexImpl indexImpl = new IndexImpl();
-			indexImpl.setMs(lastModified);
-			group.setLastIndex(indexImpl);
+			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+			diffIndexImpl.setMs(lastModified);
+			group.setLastIndex(diffIndexImpl);
 			LOG.trace("OK");
 			return group;
 		} finally {

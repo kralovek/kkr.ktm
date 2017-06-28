@@ -1,18 +1,26 @@
-package kkr.ktm.components.diffmanager.databasetrigger;
+package kkr.ktm.components.diffmanager.filesystem.local;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+import kkr.ktm.components.diffmanager.data.DiffIndex;
 import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.diffmanager.data.DiffStatus;
 
-public class ItemImpl implements DiffItem, Comparable<DiffItem> {
+public class DiffItemImpl implements DiffItem {
 	private String name;
-	private IndexImpl index;
+	private DiffIndex diffIndex;
 	private DiffStatus diffStatus;
 	private Map<String, String> parameters = new TreeMap<String, String>();
 
-	public void setName(String name) {
+	public DiffItemImpl(DiffItem diffItem) {
+		name = diffItem.getName();
+		diffIndex = diffItem.getIndex();
+		diffStatus = diffItem.getStatus();
+		parameters.putAll(diffItem.getParameters());
+	}
+
+	public DiffItemImpl(String name) {
 		this.name = name;
 	}
 
@@ -20,16 +28,16 @@ public class ItemImpl implements DiffItem, Comparable<DiffItem> {
 		return name;
 	}
 
-	public IndexImpl getIndex() {
-		return index;
+	public DiffIndex getIndex() {
+		return diffIndex;
 	}
 
 	public DiffStatus getStatus() {
 		return diffStatus;
 	}
 
-	public void setIndex(IndexImpl index) {
-		this.index = index;
+	public void setIndex(DiffIndex diffIndex) {
+		this.diffIndex = diffIndex;
 	}
 
 	public void setStatus(DiffStatus diffStatus) {
@@ -38,9 +46,5 @@ public class ItemImpl implements DiffItem, Comparable<DiffItem> {
 
 	public Map<String, String> getParameters() {
 		return parameters;
-	}
-
-	public int compareTo(DiffItem diffItem) {
-		return name.compareTo(diffItem.getName());
 	}
 }

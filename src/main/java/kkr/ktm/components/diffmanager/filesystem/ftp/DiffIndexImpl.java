@@ -1,4 +1,4 @@
-package kkr.ktm.components.diffmanager.filesystem.local;
+package kkr.ktm.components.diffmanager.filesystem.ftp;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -6,8 +6,7 @@ import java.util.Date;
 
 import kkr.ktm.components.diffmanager.data.DiffIndex;
 
-public class IndexImpl implements DiffIndex, Comparable<DiffIndex> {
-
+public class DiffIndexImpl implements DiffIndex, Comparable<DiffIndex> {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	private long ms;
@@ -21,9 +20,9 @@ public class IndexImpl implements DiffIndex, Comparable<DiffIndex> {
 	}
 
 	public int compareTo(DiffIndex diffIndex) {
-		if (diffIndex instanceof IndexImpl) {
-			IndexImpl indexImpl = (IndexImpl) diffIndex;
-			return ms < indexImpl.ms ? -1 : ms > indexImpl.ms ? +1 : 0;
+		if (diffIndex instanceof DiffIndexImpl) {
+			DiffIndexImpl diffIndexImpl = (DiffIndexImpl) diffIndex;
+			return ms < diffIndexImpl.ms ? -1 : ms > diffIndexImpl.ms ? +1 : 0;
 		} else {
 			return -1;
 		}

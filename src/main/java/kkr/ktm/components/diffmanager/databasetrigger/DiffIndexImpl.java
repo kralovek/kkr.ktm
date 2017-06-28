@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 
 import kkr.ktm.components.diffmanager.data.DiffIndex;
 
-public class IndexImpl implements DiffIndex, Comparable<DiffIndex> {
+public class DiffIndexImpl implements DiffIndex, Comparable<DiffIndex> {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	private Timestamp timestamp;
@@ -20,11 +20,11 @@ public class IndexImpl implements DiffIndex, Comparable<DiffIndex> {
 	}
 
 	public int compareTo(DiffIndex diffIndex) {
-		if (diffIndex instanceof IndexImpl) {
-			IndexImpl indexImpl = (IndexImpl) diffIndex;
-			if (timestamp != null && indexImpl.getTimestamp() != null) {
-				return timestamp.compareTo(indexImpl.getTimestamp());
-			} else if (timestamp == null && indexImpl.getTimestamp() == null) {
+		if (diffIndex instanceof DiffIndexImpl) {
+			DiffIndexImpl diffIndexImpl = (DiffIndexImpl) diffIndex;
+			if (timestamp != null && diffIndexImpl.getTimestamp() != null) {
+				return timestamp.compareTo(diffIndexImpl.getTimestamp());
+			} else if (timestamp == null && diffIndexImpl.getTimestamp() == null) {
 				return 0;
 			} else {
 				return timestamp == null ? -1 : +1;

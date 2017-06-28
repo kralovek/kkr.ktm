@@ -46,7 +46,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 				for (TableInfo tableInfo : tableInfos) {
 					DiffGroup groupState = findGroup(groupStates, tableInfo.getName());
 
-					IndexImpl lastIndexImpl = (IndexImpl) groupState.getLastIndex();
+					DiffIndexImpl lastIndexImpl = (DiffIndexImpl) groupState.getLastIndex();
 
 					long date = groupState != null ? lastIndexImpl.getMs() : 0L;
 					DiffGroup diffGroup = readDiffTable(connection, tableInfo, date);
@@ -117,7 +117,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			try {
 				int typeSort = determineSortType(connection, tableInfo.getName(), tableInfo.getColumnSort());
 
-				GroupImpl group = new GroupImpl(tableInfo.getName());
+				DiffGroupImpl group = new DiffGroupImpl(tableInfo.getName());
 				boolean columnsListed = tableInfo.getColumns() != null && !tableInfo.getColumns().isEmpty();
 
 				String query = null;
@@ -193,7 +193,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 						}
 					}
 
-					IndexImpl indexSortImpl = new IndexImpl();
+					DiffIndexImpl indexSortImpl = new DiffIndexImpl();
 					indexSortImpl.setMs(indexSort);
 					itemCruid.setIndex(indexSortImpl);
 
@@ -272,7 +272,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			try {
 				int typeSort = determineSortType(connection, tableInfo.getName(), tableInfo.getColumnSort());
 
-				GroupImpl group = new GroupImpl(tableInfo.getName());
+				DiffGroupImpl group = new DiffGroupImpl(tableInfo.getName());
 
 				LOG.debug("QUERY: " + query);
 
@@ -316,10 +316,10 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 						}
 					}
 
-					IndexImpl indexImpl = new IndexImpl();
-					indexImpl.setMs(index);
+					DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+					diffIndexImpl.setMs(index);
 
-					group.setLastIndex(indexImpl);
+					group.setLastIndex(diffIndexImpl);
 				} else {
 					throw new TechnicalException("No line in the result set: " + query);
 				}

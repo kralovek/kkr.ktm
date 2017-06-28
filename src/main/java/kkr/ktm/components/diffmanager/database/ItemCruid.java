@@ -10,7 +10,7 @@ import kkr.ktm.components.diffmanager.data.DiffStatus;
 
 public class ItemCruid {
 	private String name;
-	private IndexImpl index;
+	private DiffIndexImpl index;
 	private DiffStatus diffStatus;
 	private Map<String, Object> parameters = new TreeMap<String, Object>();
 
@@ -29,7 +29,7 @@ public class ItemCruid {
 		return name;
 	}
 
-	public IndexImpl getIndex() {
+	public DiffIndexImpl getIndex() {
 		return index;
 	}
 
@@ -37,7 +37,7 @@ public class ItemCruid {
 		return diffStatus;
 	}
 
-	public void setIndex(IndexImpl index) {
+	public void setIndex(DiffIndexImpl index) {
 		this.index = index;
 	}
 
@@ -50,11 +50,11 @@ public class ItemCruid {
 	}
 
 	public DiffItem toItem() {
-		ItemImpl itemImpl = new ItemImpl();
+		DiffItemImpl diffItemImpl = new DiffItemImpl();
 
-		itemImpl.setIndex(index);
-		itemImpl.setName(name);
-		itemImpl.setStatus(diffStatus);
+		diffItemImpl.setIndex(index);
+		diffItemImpl.setName(name);
+		diffItemImpl.setStatus(diffStatus);
 
 		for (Map.Entry<String, Object> entry : parameters.entrySet()) {
 			String value;
@@ -67,10 +67,10 @@ public class ItemCruid {
 			} else {
 				value = String.valueOf(entry.getValue());
 			}
-			itemImpl.getParameters().put(entry.getKey(), value);
+			diffItemImpl.getParameters().put(entry.getKey(), value);
 		}
 
-		return itemImpl;
+		return diffItemImpl;
 	}
 
 	private static String toString(double value) {

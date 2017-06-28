@@ -1,26 +1,25 @@
-package kkr.ktm.components.diffmanager.filesystem.local;
+package kkr.ktm.components.diffmanager.filesystem.ftp;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-import kkr.ktm.components.diffmanager.data.DiffIndex;
 import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.diffmanager.data.DiffStatus;
 
-public class ItemImpl implements DiffItem {
+public class DiffItemImpl implements DiffItem, Cloneable {
 	private String name;
-	private DiffIndex diffIndex;
+	private DiffIndexImpl index;
 	private DiffStatus diffStatus;
 	private Map<String, String> parameters = new TreeMap<String, String>();
 
-	public ItemImpl(DiffItem diffItem) {
+	public DiffItemImpl(DiffItem diffItem) {
 		name = diffItem.getName();
-		diffIndex = diffItem.getIndex();
+		index = (DiffIndexImpl) diffItem.getIndex();
 		diffStatus = diffItem.getStatus();
 		parameters.putAll(diffItem.getParameters());
 	}
 
-	public ItemImpl(String name) {
+	public DiffItemImpl(String name) {
 		this.name = name;
 	}
 
@@ -28,16 +27,16 @@ public class ItemImpl implements DiffItem {
 		return name;
 	}
 
-	public DiffIndex getIndex() {
-		return diffIndex;
+	public DiffIndexImpl getIndex() {
+		return index;
 	}
 
 	public DiffStatus getStatus() {
 		return diffStatus;
 	}
 
-	public void setIndex(DiffIndex diffIndex) {
-		this.diffIndex = diffIndex;
+	public void setIndex(DiffIndexImpl index) {
+		this.index = index;
 	}
 
 	public void setStatus(DiffStatus diffStatus) {
@@ -46,5 +45,13 @@ public class ItemImpl implements DiffItem {
 
 	public Map<String, String> getParameters() {
 		return parameters;
+	}
+
+	public DiffItemImpl clone() {
+		DiffItemImpl item = new DiffItemImpl(name);
+		item.index = index;
+		item.diffStatus = diffStatus;
+		item.getParameters().putAll(parameters);
+		return item;
 	}
 }

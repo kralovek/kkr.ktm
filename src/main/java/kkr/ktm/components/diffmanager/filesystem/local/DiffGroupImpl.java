@@ -1,17 +1,18 @@
-package kkr.ktm.components.diffmanager.filesystem.ftp;
+package kkr.ktm.components.diffmanager.filesystem.local;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import kkr.ktm.components.diffmanager.data.DiffGroup;
+import kkr.ktm.components.diffmanager.data.DiffIndex;
 import kkr.ktm.components.diffmanager.data.DiffItem;
 
-public class GroupImpl implements DiffGroup, Comparable<DiffGroup> {
+public class DiffGroupImpl implements DiffGroup, Comparable<DiffGroup> {
 	private String name;
-	private IndexImpl lastIndex;
+	private DiffIndex lastIndex;
 	private List<DiffItem> diffItems = new ArrayList<DiffItem>();
 
-	public GroupImpl(String name) {
+	public DiffGroupImpl(String name) {
 		this.name = name;
 	}
 
@@ -23,11 +24,11 @@ public class GroupImpl implements DiffGroup, Comparable<DiffGroup> {
 		return name;
 	}
 
-	public IndexImpl getLastIndex() {
+	public DiffIndex getLastIndex() {
 		return lastIndex;
 	}
 
-	public void setLastIndex(IndexImpl lastIndex) {
+	public void setLastIndex(DiffIndex lastIndex) {
 		this.lastIndex = lastIndex;
 	}
 

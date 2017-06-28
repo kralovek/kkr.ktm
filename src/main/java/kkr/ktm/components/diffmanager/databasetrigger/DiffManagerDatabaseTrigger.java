@@ -96,7 +96,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 
 				for (TableInfo tableInfo : tableInfos) {
 					DiffGroup groupState = findGroup(groupStates, tableInfo.getName());
-					IndexImpl index = groupState != null ? (IndexImpl) groupState.getLastIndex() : null;
+					DiffIndexImpl index = groupState != null ? (DiffIndexImpl) groupState.getLastIndex() : null;
 					DiffGroup diffGroup = readDiffTable(connection, tableInfo, index);
 					diffGroups.add(diffGroup);
 
@@ -164,7 +164,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 			ResultSet resultSet = null;
 			triggeredTableSchemaName = getTriggeredTableSchemaName(tableInfo);
 			String query = "SELECT max(KTM_TS) FROM " + triggeredTableSchemaName;
-			GroupImpl group = new GroupImpl(tableInfo.getName());
+			DiffGroupImpl group = new DiffGroupImpl(tableInfo.getName());
 
 			try {
 				LOG.debug("QUERY: " + query);
@@ -182,10 +182,10 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 					}
 				}
 
-				IndexImpl indexImpl = new IndexImpl();
-				indexImpl.setTimestamp(index);
+				DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+				diffIndexImpl.setTimestamp(index);
 
-				group.setLastIndex(indexImpl);
+				group.setLastIndex(diffIndexImpl);
 
 				resultSet.close();
 				statement.close();
@@ -220,7 +220,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		return (tableInfo.getKtmSchema() != null ? tableInfo.getKtmSchema() + "." : "") + tableInfo.getKtmNamePrefix() + tableInfo.getName();
 	}
 
-	private void cleanTriggeredTable(IndexImpl index, TableInfo tableInfo, Connection connection) throws BaseException {
+	private void cleanTriggeredTable(DiffIndexImpl index, TableInfo tableInfo, Connection connection) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			PreparedStatement statement = null;
@@ -249,7 +249,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	private DiffGroup readDiffTable(Connection connection, TableInfo tableInfo, IndexImpl index) throws BaseException {
+	private DiffGroup readDiffTable(Connection connection, TableInfo tableInfo, DiffIndexImpl index) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("Table: " + tableInfo.getName());
@@ -266,7 +266,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 					index.setTimestamp(new Timestamp(0L));
 				}
 
-				GroupImpl group = new GroupImpl(tableInfo.getName());
+				DiffGroupImpl group = new DiffGroupImpl(tableInfo.getName());
 
 				String triggeredTableSchemaName = getTriggeredTableSchemaName(tableInfo);
 				String tableSchemaName = getTableSchemaName(tableInfo);
@@ -303,9 +303,9 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 					itemCruid.setStatus(diffStatus);
 
 					Timestamp timestamp = resultSet.getTimestamp(2);
-					IndexImpl indexImpl = new IndexImpl();
-					indexImpl.setTimestamp(timestamp);
-					itemCruid.setIndex(indexImpl);
+					DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
+					diffIndexImpl.setTimestamp(timestamp);
+					itemCruid.setIndex(diffIndexImpl);
 
 					List<String> valuesPK = new ArrayList<String>();
 
@@ -387,7 +387,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	private void groupByStatus(GroupImpl group, List<PK> listPks) {
+	private void groupByStatus(DiffGroupImpl group, List<PK> listPks) {
 		for (PK pk : listPks) {
 			if (pk.getItemCruids().size() == 1) {
 				ItemCruid lastItem = pk.getItemCruids().get(0);
@@ -404,7 +404,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	private void groupByResult(GroupImpl group, List<PK> listPks) {
+	private void groupByResult(DiffGroupImpl group, List<PK> listPks) {
 		for (PK pk : listPks) {
 			for (ItemCruid itemCruid : pk.getItemCruids()) {
 				group.getItems().add(itemCruid.toItem());

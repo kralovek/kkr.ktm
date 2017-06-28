@@ -1,4 +1,4 @@
-package kkr.ktm.components.diffmanager.filesystem.ftp;
+package kkr.ktm.components.diffmanager.database;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -6,20 +6,13 @@ import java.util.TreeMap;
 import kkr.ktm.components.diffmanager.data.DiffItem;
 import kkr.ktm.components.diffmanager.data.DiffStatus;
 
-public class ItemImpl implements DiffItem, Cloneable {
+public class DiffItemImpl implements DiffItem, Comparable<DiffItem> {
 	private String name;
-	private IndexImpl index;
+	private DiffIndexImpl index;
 	private DiffStatus diffStatus;
 	private Map<String, String> parameters = new TreeMap<String, String>();
 
-	public ItemImpl(DiffItem diffItem) {
-		name = diffItem.getName();
-		index = (IndexImpl) diffItem.getIndex();
-		diffStatus = diffItem.getStatus();
-		parameters.putAll(diffItem.getParameters());
-	}
-
-	public ItemImpl(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -27,7 +20,7 @@ public class ItemImpl implements DiffItem, Cloneable {
 		return name;
 	}
 
-	public IndexImpl getIndex() {
+	public DiffIndexImpl getIndex() {
 		return index;
 	}
 
@@ -35,7 +28,7 @@ public class ItemImpl implements DiffItem, Cloneable {
 		return diffStatus;
 	}
 
-	public void setIndex(IndexImpl index) {
+	public void setIndex(DiffIndexImpl index) {
 		this.index = index;
 	}
 
@@ -47,11 +40,7 @@ public class ItemImpl implements DiffItem, Cloneable {
 		return parameters;
 	}
 
-	public ItemImpl clone() {
-		ItemImpl item = new ItemImpl(name);
-		item.index = index;
-		item.diffStatus = diffStatus;
-		item.getParameters().putAll(parameters);
-		return item;
+	public int compareTo(DiffItem diffItem) {
+		return name.compareTo(diffItem.getName());
 	}
 }
