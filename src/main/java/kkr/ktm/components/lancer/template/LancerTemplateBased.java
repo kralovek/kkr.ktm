@@ -121,7 +121,7 @@ public class LancerTemplateBased extends LancerTemplateBasedFwk implements Lance
 				baseException = ex;
 			}
 
-			final Map<String, Object> resultParserMap = resultParser.parse(result);
+			final Map<String, Object> resultParserMap = parserParameters.parse(result);
 
 			if (baseException != null) {
 				resultMap.put(PARAM_EXCEPTION_CLASS, baseException.getClass().getSimpleName());

@@ -6,9 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
 import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -27,7 +27,7 @@ public abstract class RunnerRequeaWsFwk {
 
 	protected FormatterParameters formatterParameters;
 
-	protected ResultParser resultParser;
+	protected ParserParameters parserParameters;
 
 	protected Map<String, String> parameters;
 
@@ -59,8 +59,8 @@ public abstract class RunnerRequeaWsFwk {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter formatterParameters is not configured");
 		}
 
-		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
+		if (parserParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
 		}
 
 		if (traceRequestFile != null) {
@@ -151,12 +151,12 @@ public abstract class RunnerRequeaWsFwk {
 		this.templateBodyName = templateBodyName;
 	}
 
-	public ResultParser getResultParser() {
-		return resultParser;
+	public ParserParameters getResultParser() {
+		return parserParameters;
 	}
 
-	public void setResultParser(ResultParser resultParser) {
-		this.resultParser = resultParser;
+	public void setResultParser(ParserParameters parserParameters) {
+		this.parserParameters = parserParameters;
 	}
 
 	public String getTraceRequestFile() {

@@ -12,10 +12,10 @@ import java.util.regex.Pattern;
 import kkr.ktm.components.diffmanager.DiffManager;
 import kkr.ktm.components.filemanager.FileManager;
 import kkr.ktm.components.locker.Locker;
-import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
 import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.utils.UtilsParameters;
@@ -39,7 +39,7 @@ public abstract class LancerM2OImportFileFwk {
 	private Map<String, List<DiffManager>> diffManagersByType;
 	protected Map<Pattern, List<DiffManager>> diffManagersByTypePattern;
 
-	protected ResultParser resultParser;
+	protected ParserParameters parserParameters;
 
 	protected String dirDestination;
 	private Map<String, String> dirDestinationByType;
@@ -86,8 +86,8 @@ public abstract class LancerM2OImportFileFwk {
 		}
 		diffManagersByTypePattern = UtilsParameters.toByTypePattern(getClass(), diffManagersByType);
 
-		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
+		if (parserParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
 		}
 		if (dirDestinationByType == null) {
 			dirDestinationByType = new LinkedHashMap<String, String>();
@@ -145,12 +145,12 @@ public abstract class LancerM2OImportFileFwk {
 		this.formatterParameters = formatterParameters;
 	}
 
-	public ResultParser getResultParser() {
-		return resultParser;
+	public ParserParameters getParserParameters() {
+		return parserParameters;
 	}
 
-	public void setResultParser(ResultParser pResultParser) {
-		this.resultParser = pResultParser;
+	public void setParserParameters(ParserParameters parserParameters) {
+		this.parserParameters = parserParameters;
 	}
 
 	public FileManager getFileManager() {

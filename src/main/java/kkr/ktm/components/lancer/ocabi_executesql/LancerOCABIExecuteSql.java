@@ -176,7 +176,7 @@ public class LancerOCABIExecuteSql extends LancerOCABIExecuteSqlFwk implements L
 
 			generateTraceFileDiff(resultXML, date);
 
-			final Map<String, Object> resultParserMapData = resultParser.parse(resultXML);
+			final Map<String, Object> resultParserMapData = parserParameters.parse(resultXML);
 			resultMap.putAll(resultParserMapData);
 			LOG.trace("OK");
 		} finally {

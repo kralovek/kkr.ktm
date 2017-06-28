@@ -117,7 +117,7 @@ public class RunnerRequeaWs extends RunnerRequeaWsFwk implements Runner {
 
 			allOputParameters.put(sysParamPrefix + PARAM_RUNNER_RESPONSE, response);
 
-			Map<String, Object> resultParameters = resultParser.parse(response);
+			Map<String, Object> resultParameters = parserParameters.parse(response);
 
 			allOputParameters.putAll(resultParameters);
 

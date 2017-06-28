@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kkr.ktm.components.executant.Executant;
-import kkr.ktm.components.resultparser.ResultParser;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
 import kkr.ktm.domains.common.components.formaterparameters.FormatterParameters;
+import kkr.ktm.domains.common.components.parserparameters.ParserParameters;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 
@@ -27,7 +27,7 @@ public abstract class LancerTemplateBasedFwk {
 
 	protected Map<String, Executant> executantByType;
 
-	protected ResultParser resultParser;
+	protected ParserParameters parserParameters;
 
 	protected File dirTrace;
 
@@ -59,8 +59,8 @@ public abstract class LancerTemplateBasedFwk {
 		if (executantByType == null) {
 			executantByType = new HashMap<String, Executant>();
 		}
-		if (resultParser == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter resultParser is not configured");
+		if (parserParameters == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter parserParameters is not configured");
 		}
 		configured = true;
 	}
@@ -85,7 +85,8 @@ public abstract class LancerTemplateBasedFwk {
 				buffer.append("    ").append("    ").append(entry.getKey()).append(" -> ").append(entry.getValue().getClass().getName()).append("\n");
 			}
 		}
-		buffer.append("    ").append("resultParser").append("=").append(resultParser == null ? "" : resultParser.getClass().getName()).append("\n");
+		buffer.append("    ").append("parserParameters").append("=").append(parserParameters == null ? "" : parserParameters.getClass().getName())
+				.append("\n");
 		buffer.append("    ").append("dirTrace").append("=").append(dirTrace == null ? "" : dirTrace).append("\n");
 		buffer.append("    ").append("traceSource").append("=").append(traceSource == null ? "" : traceSource).append("\n");
 		buffer.append("    ").append("traceResult").append("=").append(traceResult == null ? "" : traceResult).append("\n");
@@ -125,12 +126,12 @@ public abstract class LancerTemplateBasedFwk {
 		this.executantByType = executantByType;
 	}
 
-	public ResultParser getResultParser() {
-		return resultParser;
+	public ParserParameters getParserParameters() {
+		return parserParameters;
 	}
 
-	public void setResultParser(ResultParser pResultParser) {
-		this.resultParser = pResultParser;
+	public void setParserParameters(ParserParameters parserParameters) {
+		this.parserParameters = parserParameters;
 	}
 
 	public File getDirTrace() {

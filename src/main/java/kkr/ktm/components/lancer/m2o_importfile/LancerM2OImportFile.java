@@ -170,7 +170,7 @@ public class LancerM2OImportFile extends LancerM2OImportFileFwk implements Lance
 
 			generateTraceFileDiff(resultXML, new Date());
 
-			final Map<String, Object> resultParserMapData = resultParser.parse(resultXML);
+			final Map<String, Object> resultParserMapData = parserParameters.parse(resultXML);
 			resultMap.putAll(resultParserMapData);
 			LOG.trace("OK");
 		} finally {
