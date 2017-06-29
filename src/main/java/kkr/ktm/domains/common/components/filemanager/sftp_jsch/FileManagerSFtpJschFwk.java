@@ -1,6 +1,6 @@
-package kkr.ktm.components.filemanager.sftp_jsch;
+package kkr.ktm.domains.common.components.filemanager.sftp_jsch;
 
-import kkr.ktm.components.filemanager.ftp_base.FileManagerFtpBase;
+import kkr.ktm.domains.common.components.filemanager.ftp_base.FileManagerFtpBase;
 import kkr.ktm.exception.ConfigurationException;
 
 public abstract class FileManagerSFtpJschFwk extends FileManagerFtpBase {

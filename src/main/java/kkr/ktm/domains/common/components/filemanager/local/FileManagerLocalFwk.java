@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager.local;
+package kkr.ktm.domains.common.components.filemanager.local;
 
 import kkr.ktm.exception.ConfigurationException;
 

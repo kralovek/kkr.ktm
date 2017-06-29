@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager.ftp_base;
+package kkr.ktm.domains.common.components.filemanager.ftp_base;
 
 import kkr.ktm.exception.ConfigurationException;
 

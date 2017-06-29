@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager;
+package kkr.ktm.domains.common.components.filemanager;
 
 import kkr.ktm.exception.BaseException;
 

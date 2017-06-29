@@ -1,6 +1,6 @@
-package kkr.ktm.components.filemanager.ftp_apache;
+package kkr.ktm.domains.common.components.filemanager.ftp_apache;
 
-import kkr.ktm.components.filemanager.ftp_base.FileManagerFtpBase;
+import kkr.ktm.domains.common.components.filemanager.ftp_base.FileManagerFtpBase;
 import kkr.ktm.exception.ConfigurationException;
 
 public abstract class FileManagerFtpApacheFwk extends FileManagerFtpBase {

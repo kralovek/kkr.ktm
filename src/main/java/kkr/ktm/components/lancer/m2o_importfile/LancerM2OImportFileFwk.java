@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import kkr.ktm.components.filemanager.FileManager;
 import kkr.ktm.components.locker.Locker;
 import kkr.ktm.components.runner.Runner;
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
 import kkr.ktm.exception.BaseException;

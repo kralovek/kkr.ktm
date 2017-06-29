@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager.sftp_jsch;
+package kkr.ktm.domains.common.components.filemanager.sftp_jsch;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,7 +26,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
-import kkr.ktm.components.filemanager.FileManager;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.exception.TechnicalException;

@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager.ftp_apache;
+package kkr.ktm.domains.common.components.filemanager.ftp_apache;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,7 +21,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 
-import kkr.ktm.components.filemanager.FileManager;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.exception.TechnicalException;

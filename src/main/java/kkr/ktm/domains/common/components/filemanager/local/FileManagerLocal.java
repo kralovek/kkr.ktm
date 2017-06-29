@@ -1,4 +1,4 @@
-package kkr.ktm.components.filemanager.local;
+package kkr.ktm.domains.common.components.filemanager.local;
 
 import java.io.Closeable;
 import java.io.File;
@@ -13,7 +13,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.components.filemanager.FileManager;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.ktm.exception.BaseException;
 import kkr.ktm.exception.ConfigurationException;
 import kkr.ktm.exception.TechnicalException;
