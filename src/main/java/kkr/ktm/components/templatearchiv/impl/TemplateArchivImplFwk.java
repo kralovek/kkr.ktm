@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
 
 
 /**

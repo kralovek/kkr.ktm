@@ -1,6 +1,6 @@
 package kkr.ktm.components.templatearchiv;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 /**
  * TemplateArchiv

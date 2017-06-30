@@ -10,9 +10,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.components.templatearchiv.TemplateArchiv;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
 
 public class TemplateArchivImpl extends TemplateArchivImplFwk implements TemplateArchiv {
 	private static final Logger LOG = Logger
