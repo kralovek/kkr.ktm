@@ -3,7 +3,7 @@ package kkr.ktm.domains.excel.utils;
 import java.util.Collection;
 
 import kkr.ktm.domains.excel.data.ExcelIdCell;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public class UtilsExcel implements ConstantsExcel {
 
