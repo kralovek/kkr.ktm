@@ -9,12 +9,12 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.utils.UtilsBean;
 import kkr.ktm.domains.orchestrator.components.batchktm.BatchKtm;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TestError;
-import kkr.ktm.utils.UtilsBean;
-import kkr.ktm.utils.errors.TreatErrors;
+import kkr.ktm.errors.TestError;
+import kkr.ktm.errors.TreatErrors;
 
 public class MainKtm {
 	private static final Logger LOG = Logger.getLogger(MainKtm.class);
