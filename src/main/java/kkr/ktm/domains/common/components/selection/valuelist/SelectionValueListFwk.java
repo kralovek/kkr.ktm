@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.selection.valuelist;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class SelectionValueListFwk {
 	private boolean configured;

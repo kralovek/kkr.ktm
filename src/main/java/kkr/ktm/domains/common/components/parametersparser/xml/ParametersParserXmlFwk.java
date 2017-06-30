@@ -1,7 +1,7 @@
 package kkr.ktm.domains.common.components.parametersparser.xml;
 
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
 
 
 

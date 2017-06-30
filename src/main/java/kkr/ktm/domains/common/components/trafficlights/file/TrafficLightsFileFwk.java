@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.trafficlights.file;
 
 import java.io.File;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class TrafficLightsFileFwk {
 	private boolean configured;

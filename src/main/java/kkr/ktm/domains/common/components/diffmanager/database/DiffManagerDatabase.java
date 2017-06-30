@@ -17,15 +17,15 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsResource;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
 import kkr.ktm.utils.database.ConstantsDatabase;
-import kkr.ktm.utils.database.UtilsDatabase;
 
 public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffManager, ConstantsDatabase {
 
@@ -58,7 +58,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(connection);
+				UtilsResource.closeResource(connection);
 			}
 			LOG.trace("OK");
 			return diffGroups;
@@ -99,7 +99,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(connection);
+				UtilsResource.closeResource(connection);
 			}
 			LOG.trace("OK");
 			return diffGroups;
@@ -255,8 +255,8 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(resultSet);
-				UtilsDatabase.getInstance().closeResource(statement);
+				UtilsResource.closeResource(resultSet);
+				UtilsResource.closeResource(statement);
 			}
 		} finally {
 			LOG.trace("END");
@@ -337,8 +337,8 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 					throw new TechnicalException("Cannot execute the statement: " + query, ex);
 				}
 			} finally {
-				UtilsDatabase.getInstance().closeResource(resultSet);
-				UtilsDatabase.getInstance().closeResource(statement);
+				UtilsResource.closeResource(resultSet);
+				UtilsResource.closeResource(statement);
 			}
 		} finally {
 			LOG.trace("END");
@@ -380,8 +380,8 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 			} catch (Exception ex) {
 				throw new TechnicalException("Cannot determinate the type of the column: " + table + "." + column, ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(statement);
-				UtilsDatabase.getInstance().closeResource(rs);
+				UtilsResource.closeResource(statement);
+				UtilsResource.closeResource(rs);
 			}
 		} finally {
 			LOG.trace("END");

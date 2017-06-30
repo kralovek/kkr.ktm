@@ -27,9 +27,9 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import kkr.ktm.domains.common.components.filemanager.FileManager;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
 
 public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileManager {
 	private static final Logger LOG = Logger.getLogger(FileManagerSFtpJsch.class);

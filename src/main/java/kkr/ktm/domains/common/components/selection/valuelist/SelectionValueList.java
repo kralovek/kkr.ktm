@@ -1,7 +1,7 @@
 package kkr.ktm.domains.common.components.selection.valuelist;
 
 import kkr.ktm.domains.common.components.selection.Selection;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class SelectionValueList extends SelectionValueListFwk implements Selection {
 

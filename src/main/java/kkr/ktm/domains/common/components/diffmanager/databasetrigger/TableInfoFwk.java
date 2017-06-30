@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.diffmanager.databasetrigger;
 
 import java.util.List;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public class TableInfoFwk {
 

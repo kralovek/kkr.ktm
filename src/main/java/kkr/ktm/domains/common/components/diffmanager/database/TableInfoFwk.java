@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import kkr.ktm.domains.common.components.diffmanager.database.checkerstatus.CheckerStatus;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class TableInfoFwk {
 

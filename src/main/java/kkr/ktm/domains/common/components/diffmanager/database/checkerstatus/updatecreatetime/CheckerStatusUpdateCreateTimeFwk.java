@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.diffmanager.database.checkerstatus.updatecreatetime;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 
 public abstract class CheckerStatusUpdateCreateTimeFwk {

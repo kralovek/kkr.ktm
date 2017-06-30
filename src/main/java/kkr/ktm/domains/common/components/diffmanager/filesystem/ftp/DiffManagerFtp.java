@@ -15,8 +15,8 @@ import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
 public class DiffManagerFtp extends DiffManagerFtpFwk {

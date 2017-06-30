@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.parametersformater.template;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 
 

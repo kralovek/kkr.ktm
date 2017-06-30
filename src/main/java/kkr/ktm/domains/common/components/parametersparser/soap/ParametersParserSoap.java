@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class ParametersParserSoap extends ParametersParserSoapFwk implements ParametersParser {
 	private static final Logger LOG = Logger.getLogger(ParametersParserSoap.class);

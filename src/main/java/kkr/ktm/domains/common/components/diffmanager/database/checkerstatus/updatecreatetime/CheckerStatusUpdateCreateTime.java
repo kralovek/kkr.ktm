@@ -6,7 +6,7 @@ import java.util.Map;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.database.ItemCruid;
 import kkr.ktm.domains.common.components.diffmanager.database.checkerstatus.CheckerStatus;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class CheckerStatusUpdateCreateTime extends CheckerStatusUpdateCreateTimeFwk implements CheckerStatus {
 	public DiffStatus checkStatus(long index, ItemCruid itemCruid) throws BaseException {

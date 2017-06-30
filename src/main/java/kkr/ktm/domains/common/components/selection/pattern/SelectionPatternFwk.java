@@ -3,8 +3,8 @@ package kkr.ktm.domains.common.components.selection.pattern;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.utils.UtilsConfig;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.utils.UtilsConfig;
 
 public abstract class SelectionPatternFwk {
 	private boolean configured;
@@ -19,8 +19,8 @@ public abstract class SelectionPatternFwk {
 	public void config() throws ConfigurationException {
 		configured = false;
 
-		patterns = UtilsConfig.checkListPatterns(_patterns, "_patterns");
-		exceptPatterns = UtilsConfig.checkListPatterns(_exceptPatterns, "_exceptPatterns");
+		patterns = UtilsConfig.checkListPatterns(_patterns, "patterns");
+		exceptPatterns = UtilsConfig.checkListPatterns(_exceptPatterns, "exceptPatterns");
 		if (_mode == null) {
 			mode = AcceptMode.INCLUDE;
 		} else {

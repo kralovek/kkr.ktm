@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.parametersformater;
 
 import java.util.Map;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface ParametersFormatter {
 

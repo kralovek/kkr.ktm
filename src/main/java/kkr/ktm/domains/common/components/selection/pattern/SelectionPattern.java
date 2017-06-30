@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.selection.pattern;
 import java.util.regex.Pattern;
 
 import kkr.ktm.domains.common.components.selection.Selection;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class SelectionPattern extends SelectionPatternFwk implements Selection {
 

@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.filemanager;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface FileManager {
 

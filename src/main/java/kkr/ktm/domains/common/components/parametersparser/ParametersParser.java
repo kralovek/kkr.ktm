@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.parametersparser;
 
 import java.util.Map;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface ParametersParser {
 

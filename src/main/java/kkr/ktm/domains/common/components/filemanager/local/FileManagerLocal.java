@@ -14,9 +14,9 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.common.components.filemanager.FileManager;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
 
 public class FileManagerLocal extends FileManagerLocalFwk implements FileManager {
 	private static final Logger LOG = Logger

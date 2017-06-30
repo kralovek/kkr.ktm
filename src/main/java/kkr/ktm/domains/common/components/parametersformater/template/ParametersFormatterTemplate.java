@@ -24,7 +24,7 @@ import kkr.ktm.domains.common.components.parametersformater.template.parts.TagPa
 import kkr.ktm.domains.common.components.parametersformater.template.parts.Text;
 import kkr.ktm.domains.common.components.parametersformater.template.tags.Attribute;
 import kkr.ktm.domains.common.components.parametersformater.template.tags.Tag;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk implements ParametersFormatter {
 	private static final Logger LOG = Logger.getLogger(ParametersFormatterTemplate.class);

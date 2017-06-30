@@ -17,13 +17,13 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsResource;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
 import kkr.ktm.utils.database.ConstantsDatabase;
-import kkr.ktm.utils.database.UtilsDatabase;
 
 public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk implements DiffManager, ConstantsDatabase {
 	private static final Logger LOG = Logger.getLogger(DiffManagerDatabaseTrigger.class);
@@ -108,7 +108,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(connection);
+				UtilsResource.closeResource(connection);
 			}
 			LOG.trace("OK");
 			return diffGroups;
@@ -138,7 +138,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(connection);
+				UtilsResource.closeResource(connection);
 			}
 			LOG.trace("OK");
 			return diffGroups;
@@ -200,16 +200,12 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 					throw new TechnicalException("Cannot execute the statement: " + query, ex);
 				}
 			} finally {
-				UtilsDatabase.getInstance().closeResource(resultSet);
-				UtilsDatabase.getInstance().closeResource(statement);
+				UtilsResource.closeResource(resultSet);
+				UtilsResource.closeResource(statement);
 			}
 		} finally {
 			LOG.trace("END");
 		}
-	}
-
-	private static Date roundDateToMs(Date date) {
-		return new Date(date.getTime() + 1);
 	}
 
 	private String getTableSchemaName(TableInfo tableInfo) {
@@ -240,7 +236,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(statement);
+				UtilsResource.closeResource(statement);
 			}
 
 			LOG.trace("OK");
@@ -253,10 +249,6 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("Table: " + tableInfo.getName());
-
-			if ("M2OVOIE".equalsIgnoreCase(tableInfo.getName())) {
-				int k = 0;
-			}
 
 			List<PK> listPks = new ArrayList<PK>();
 			PreparedStatement statement = null;
@@ -379,8 +371,8 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 			} catch (SQLException ex) {
 				throw new TechnicalException(ex);
 			} finally {
-				UtilsDatabase.getInstance().closeResource(resultSet);
-				UtilsDatabase.getInstance().closeResource(statement);
+				UtilsResource.closeResource(resultSet);
+				UtilsResource.closeResource(statement);
 			}
 		} finally {
 			LOG.trace("END");

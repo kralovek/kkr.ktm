@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.filemanager.local;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 
 

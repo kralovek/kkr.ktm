@@ -14,7 +14,7 @@ import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements DiffManager {
 	private static final Logger LOG = Logger.getLogger(DiffManagerFilesystem.class);

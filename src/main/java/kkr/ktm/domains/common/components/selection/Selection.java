@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.selection;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface Selection {
 

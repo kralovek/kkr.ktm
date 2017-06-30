@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.diffmanager;
 import java.util.List;
 
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface DiffManager {
 

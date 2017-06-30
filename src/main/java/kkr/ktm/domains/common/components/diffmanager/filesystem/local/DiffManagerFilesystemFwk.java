@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 
 

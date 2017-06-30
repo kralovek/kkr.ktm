@@ -22,10 +22,10 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.common.components.filemanager.FileManager;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
-import kkr.ktm.utils.UtilsFile;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsFile;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
 public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements FileManager {
@@ -209,7 +209,7 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 									+ file.getParentFile().getAbsolutePath());
 				}
 
-				UtilsFile.getInstance().contentToFile(content, file);
+				UtilsFile.contentToFile(content, file);
 			}
 
 			LOG.trace("OK");

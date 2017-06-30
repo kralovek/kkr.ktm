@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.filemanager.ftp_base;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class FileManagerFtpBaseFwk {
 	private boolean configured;

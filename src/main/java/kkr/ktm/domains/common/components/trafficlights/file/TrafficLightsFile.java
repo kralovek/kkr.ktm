@@ -3,8 +3,8 @@ package kkr.ktm.domains.common.components.trafficlights.file;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.common.components.trafficlights.TrafficLights;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 import kkr.ktm.utils.errors.StopException;
 
 public class TrafficLightsFile extends TrafficLightsFileFwk implements TrafficLights {

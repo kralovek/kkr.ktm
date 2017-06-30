@@ -5,8 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import kkr.ktm.domains.database.components.datasource.DataSource;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.components.datasource.DataSource;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class DiffManagerDatabaseFwk {
 	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";

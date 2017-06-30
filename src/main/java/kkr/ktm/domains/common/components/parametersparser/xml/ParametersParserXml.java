@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,9 +15,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.collections.OrderFiFoMap;
 import kkr.ktm.utils.xml.Attribute;
 import kkr.ktm.utils.xml.Tag;
 
@@ -107,7 +107,7 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 	public Map<String, Object> parse(final String pSource) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Map<String, Object> parameters = new OrderFiFoMap<String, Object>();
+			Map<String, Object> parameters = new LinkedHashMap<String, Object>();
 
 			if (pSource == null) {
 				LOG.warn("No XML body");
@@ -202,7 +202,7 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 
 	private Map<String, List<Value>> createMapValues(Map<String, List<Value>> pMapValues, final Tag pTag, Value pValue) {
 		if (pMapValues == null) {
-			pMapValues = new OrderFiFoMap<String, List<Value>>();
+			pMapValues = new LinkedHashMap<String, List<Value>>();
 		}
 
 		if (pValue == null) {
@@ -286,7 +286,7 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 	}
 
 	private Map<String, Object> listValuesToTreeValues(final Map<String, List<Value>> pMapValues) {
-		final Map<String, Object> mapObjects = new OrderFiFoMap<String, Object>();
+		final Map<String, Object> mapObjects = new LinkedHashMap<String, Object>();
 		for (final Map.Entry<String, List<Value>> entry : pMapValues.entrySet()) {
 			if (entry.getKey().equals(
 					"fr.cnamts.mk.metier.spfeltransport.to.sf.SPSoumisFacTranspSFTO/zFACTURE/zCOUVERTURE/fr.cnamts.mk.metier.spfeltransport.to.sf.CouvertureSFTO/zCONTRATS/fr.cnamts.mk.metier.spfeltransport.to.sf.ContratsAppliquesSFTO/zId")) {

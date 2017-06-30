@@ -1,7 +1,7 @@
 package kkr.ktm.domains.common.components.filemanager.sftp_jsch;
 
 import kkr.ktm.domains.common.components.filemanager.ftp_base.FileManagerFtpBase;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class FileManagerSFtpJschFwk extends FileManagerFtpBase {
 	private boolean configured;
