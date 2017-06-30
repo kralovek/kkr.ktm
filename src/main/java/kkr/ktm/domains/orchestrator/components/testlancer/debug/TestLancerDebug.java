@@ -5,7 +5,7 @@ import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
 import kkr.ktm.domains.orchestrator.data.TestOutputImpl;
 import kkr.ktm.domains.tests.data.TestInput;
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class TestLancerDebug extends TestLancerDebugFwk implements TestLancer {
 	private static final Logger LOG = Logger.getLogger(TestLancerDebug.class);

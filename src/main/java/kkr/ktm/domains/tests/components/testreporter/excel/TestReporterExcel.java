@@ -7,6 +7,12 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsFile;
+import kkr.common.utils.UtilsString;
+import kkr.common.utils.excel.ExcelPosition;
 import kkr.ktm.domains.excel.components.catalogstyles.CatalogStyles;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
 import kkr.ktm.domains.excel.components.exceladapter.TSheet;
@@ -25,12 +31,6 @@ import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.domains.tests.data.TestOutput;
 import kkr.ktm.domains.tests.data.TestResult;
 import kkr.ktm.domains.tests.data.ValuePattern;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
-import kkr.ktm.utils.UtilsFile;
-import kkr.ktm.utils.UtilsString;
-import kkr.ktm.utils.excel.ExcelConfigurationException;
-import kkr.ktm.utils.excel.ExcelPosition;
 
 public class TestReporterExcel extends TestReporterExcelFwk implements TestReporter {
 	private static final Logger LOG = Logger.getLogger(TestReporterExcel.class);
@@ -168,7 +168,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 	}
 
 	private void renameFile(File fileSource, File fileTarget) throws BaseException {
-		UtilsFile.getInstance().createFileDirectory(fileTarget);
+		UtilsFile.createFileDirectory(fileTarget);
 		if (fileTarget.exists() && !fileTarget.delete()) {
 			throw new TechnicalException("Cannot delete the file '" + fileSource.getAbsolutePath() + "' to '" + fileTarget.getAbsolutePath() + "'");
 		}
@@ -186,7 +186,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 
 			TSheet tSheet = excelAdapter.getSheet(tWorkbook, test.getType());
 			if (tSheet == null) {
-				throw new ExcelConfigurationException(excelPositionWorkbook, "The excel file does not contain a sheet: " + test.getType());
+				throw new ExcelException(excelPositionWorkbook, "The excel file does not contain a sheet: " + test.getType());
 			}
 
 			Status status = workSheet(excelPositionWorkbook, tWorkbook, tSheet, test, catalogStyles, skip);
@@ -213,7 +213,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 
 			StructureTest structureTest = structureSheet.findTest(test.getCode());
 			if (structureTest == null) {
-				throw new ExcelConfigurationException(excelPositionSheet, "Cannot find the test: " + test.getCode());
+				throw new ExcelException(excelPositionSheet, "Cannot find the test: " + test.getCode());
 			}
 
 			if (!skip) {
@@ -358,7 +358,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			} catch (Exception ex) {
 				excelPositionCell.setRow(tCell.getRow());
 				excelPositionCell.setColumn(tCell.getColumn());
-				throw new ExcelConfigurationException(excelPositionCell, "Value is not integer: " + valueInteger);
+				throw new ExcelException(excelPositionCell, "Value is not integer: " + valueInteger);
 			}
 		}
 		return value;

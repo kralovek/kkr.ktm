@@ -2,7 +2,7 @@ package kkr.ktm.domains.orchestrator.components.testlancer;
 
 import kkr.ktm.domains.tests.data.TestInput;
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface TestLancer {
 

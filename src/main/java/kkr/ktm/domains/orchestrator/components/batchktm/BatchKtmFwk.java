@@ -4,7 +4,7 @@ import kkr.ktm.domains.common.components.trafficlights.TrafficLights;
 import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
 import kkr.ktm.domains.tests.components.testreporter.TestReporter;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class BatchKtmFwk {
 	private boolean configured;

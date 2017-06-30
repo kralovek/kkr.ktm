@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class TestLancerByTypeFwk {
 	private boolean configured;

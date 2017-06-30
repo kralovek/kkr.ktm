@@ -9,8 +9,8 @@ import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
 import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.utils.UtilsString;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.utils.UtilsString;
 
 public abstract class TestReporterExcelFwk {
 	private boolean configured;

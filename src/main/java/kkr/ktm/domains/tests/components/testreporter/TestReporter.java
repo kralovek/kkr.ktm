@@ -6,7 +6,7 @@ import kkr.ktm.domains.excel.data.Status;
 import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.domains.tests.data.TestOutput;
 import kkr.ktm.domains.tests.data.TestResult;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface TestReporter {
 

@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import kkr.ktm.domains.excel.data.Status;
 import kkr.ktm.domains.tests.data.TestInput;
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.UtilsString;
+import kkr.common.errors.BaseException;
+import kkr.common.utils.UtilsString;
 import kkr.ktm.utils.errors.StopException;
 
 public class BatchKtm extends BatchKtmFwk {

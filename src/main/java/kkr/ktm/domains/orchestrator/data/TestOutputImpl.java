@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.ktm.utils.UtilsString;
+import kkr.common.utils.UtilsString;
 
 public class TestOutputImpl implements TestOutput {
 	private String name;

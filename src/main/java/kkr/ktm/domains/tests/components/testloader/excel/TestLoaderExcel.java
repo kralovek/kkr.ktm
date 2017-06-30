@@ -21,10 +21,10 @@ import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
 import kkr.ktm.domains.tests.data.TestInput;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
-import kkr.ktm.utils.excel.ExcelConfigurationException;
-import kkr.ktm.utils.excel.ExcelPosition;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.excel.ExcelPosition;
 
 public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 	private static final Logger LOG = Logger.getLogger(TestLoaderExcel.class);
@@ -102,7 +102,7 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 				}
 				buffer.append(entry.getKey());
 			}
-			throw new ExcelConfigurationException(excelPosition, "Some test-codes are not unique in the workbook: " + buffer.toString());
+			throw new ExcelException(excelPosition, "Some test-codes are not unique in the workbook: " + buffer.toString());
 		}
 	}
 

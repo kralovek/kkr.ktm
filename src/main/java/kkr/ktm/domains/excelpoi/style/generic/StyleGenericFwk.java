@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 
 import kkr.ktm.domains.excelpoi.style.Alignment;
 import kkr.ktm.domains.excelpoi.style.Boldweight;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class StyleGenericFwk {
 	private boolean configured;

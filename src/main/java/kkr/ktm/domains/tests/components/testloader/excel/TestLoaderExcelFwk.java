@@ -3,7 +3,7 @@ package kkr.ktm.domains.tests.components.testloader.excel;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
 import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class TestLoaderExcelFwk {
 	private boolean configured;

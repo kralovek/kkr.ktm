@@ -1,6 +1,6 @@
 package kkr.ktm.domains.orchestrator.components.testlancer.debug;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public class TestLancerDebugFwk {
 	private boolean configured;

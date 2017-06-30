@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
 import kkr.ktm.domains.tests.data.TestInput;
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class TestLancerByType extends TestLancerByTypeFwk implements TestLancer {
 
