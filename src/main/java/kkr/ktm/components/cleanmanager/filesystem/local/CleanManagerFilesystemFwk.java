@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import kkr.ktm.components.cleanmanager.filesystem.DirInfo;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 
 public abstract class CleanManagerFilesystemFwk {

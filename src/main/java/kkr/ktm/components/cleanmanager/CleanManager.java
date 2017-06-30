@@ -2,7 +2,7 @@ package kkr.ktm.components.cleanmanager;
 
 import java.util.List;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface CleanManager {
 

@@ -15,9 +15,9 @@ import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 import kkr.ktm.components.cleanmanager.CleanManager;
 import kkr.ktm.components.cleanmanager.filesystem.DirInfo;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.TechnicalException;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
