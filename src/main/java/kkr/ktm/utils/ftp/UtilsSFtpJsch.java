@@ -6,8 +6,8 @@ import java.io.PrintWriter;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 
 public class UtilsSFtpJsch {
 

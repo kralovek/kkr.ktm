@@ -7,8 +7,8 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.io.CopyStreamEvent;
 import org.apache.commons.net.io.CopyStreamListener;
 
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 
 public class UtilsFtp {
 
