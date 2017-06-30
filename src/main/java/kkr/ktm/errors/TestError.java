@@ -1,4 +1,4 @@
-package kkr.ktm.exception;
+package kkr.ktm.errors;
 
 public class TestError extends RuntimeException {
 

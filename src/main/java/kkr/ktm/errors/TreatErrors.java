@@ -1,11 +1,11 @@
-package kkr.ktm.utils.errors;
+package kkr.ktm.errors;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.exception.FunctionalException;
-import kkr.ktm.exception.TechnicalException;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ConfigurationException;
+import kkr.common.errors.FunctionalException;
+import kkr.common.errors.TechnicalException;
 
 public final class TreatErrors {
 	private static final Logger logger = Logger.getLogger(TreatErrors.class);
