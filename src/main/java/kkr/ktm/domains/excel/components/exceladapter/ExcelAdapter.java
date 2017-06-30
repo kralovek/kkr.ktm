@@ -2,7 +2,7 @@ package kkr.ktm.domains.excel.components.exceladapter;
 
 import java.io.File;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public interface ExcelAdapter {
 

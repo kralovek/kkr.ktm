@@ -1,6 +1,6 @@
 package kkr.ktm.domains.excel.components.catalogstyles.poi;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class CatalogStylesFactoryPoiFwk extends CatalogStylesPoiFwk {
 	private boolean configured;

@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import kkr.ktm.domains.excelpoi.style.Style;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class CatalogStylesPoiFwk {
 	private boolean configured;

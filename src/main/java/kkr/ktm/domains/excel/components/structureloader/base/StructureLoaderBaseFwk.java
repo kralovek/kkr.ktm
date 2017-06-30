@@ -3,12 +3,11 @@ package kkr.ktm.domains.excel.components.structureloader.base;
 import java.util.Collection;
 import java.util.HashSet;
 
+import kkr.common.errors.ConfigurationException;
 import kkr.ktm.domains.common.components.selection.Selection;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.data.ExcelIdCell;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
-import kkr.ktm.exception.ConfigurationException;
-import kkr.ktm.utils.excel.ExcelUtils;
 
 public abstract class StructureLoaderBaseFwk {
 	private boolean configured;
@@ -53,7 +52,7 @@ public abstract class StructureLoaderBaseFwk {
 		if (_rowsIgnored != null) {
 			int ir = 0;
 			for (Integer _row : _rowsIgnored) {
-				int row = ExcelUtils.getInstance().adaptAndCheckRowId(_row, "Parameter 'rowsIgnored[" + ir + "]'");
+				int row = UtilsExcel.adaptAndCheckRowId(getClass(), _row, "rowsIgnored[" + ir + "]");
 				rowsIgnored.add(row);
 				ir++;
 			}
@@ -63,8 +62,8 @@ public abstract class StructureLoaderBaseFwk {
 		if (_columnsIgnored != null) {
 			int ir = 0;
 			for (String _column : _columnsIgnored) {
-				int row = ExcelUtils.getInstance().adaptAndCheckColumnId(_column, "Parameter 'columnsIgnored[" + ir + "]'");
-				columnsIgnored.add(row);
+				int column = UtilsExcel.adaptAndCheckColumnId(getClass(), _column, "columnsIgnored[" + ir + "]");
+				columnsIgnored.add(column);
 				ir++;
 			}
 		}

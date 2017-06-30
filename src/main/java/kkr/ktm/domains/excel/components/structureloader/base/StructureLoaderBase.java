@@ -17,10 +17,10 @@ import kkr.ktm.domains.excel.data.StructureParameter;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.UtilsString;
-import kkr.ktm.utils.excel.ExcelConfigurationException;
-import kkr.ktm.utils.excel.ExcelPosition;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.utils.UtilsString;
+import kkr.common.utils.excel.ExcelPosition;
 
 public abstract class StructureLoaderBase extends StructureLoaderBaseFwk implements StructureLoader {
 	private static final Logger LOG = Logger.getLogger(StructureLoaderBase.class);
@@ -105,7 +105,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					try {
 						ioLoc = Io.valueOf(valueIo);
 					} catch (Exception ex) {
-						throw new ExcelConfigurationException(excelPosition, "Bad value on the Io: '" + valueIo + "'");
+						throw new ExcelException(excelPosition, "Bad value on the Io: '" + valueIo + "'");
 					}
 					if (ioLoc != io) {
 						continue;
@@ -122,7 +122,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					TCell tCellParameter = loadCellParameter(excelPosition, tSheet, i);
 					String valueParameter = excelAdapter.getStringValue(tCellParameter);
 					if (UtilsString.isEmpty(valueParameter)) {
-						throw new ExcelConfigurationException(excelPosition, "The parameter name is empty");
+						throw new ExcelException(excelPosition, "The parameter name is empty");
 					}
 
 					structureParameter.setName(valueParameter);
@@ -131,13 +131,13 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						case E :
 							StructureParameter structureParameterO = structureSheet.findParameterO(structureParameter.getName());
 							if (structureParameterO == null) {
-								throw new ExcelConfigurationException(excelPosition,
+								throw new ExcelException(excelPosition,
 										"The parameter E does not exist as parameter O: " + valueParameter);
 							}
 							// NO BREAK
 						case I :
 							if (parameters.contains(valueParameter)) {
-								throw new ExcelConfigurationException(excelPosition, "The parameter " + io + " is not unique: " + valueParameter);
+								throw new ExcelException(excelPosition, "The parameter " + io + " is not unique: " + valueParameter);
 							}
 							break;
 						default :
@@ -183,7 +183,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					try {
 						active = Active.valueOf(valueActive);
 					} catch (Exception ex) {
-						throw new ExcelConfigurationException(excelPosition, "Bad value on the Active: '" + valueActive + "'");
+						throw new ExcelException(excelPosition, "Bad value on the Active: '" + valueActive + "'");
 					}
 					if (active != Active.Y) {
 						continue;
@@ -199,11 +199,11 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					TCell tCellCode = loadCellCode(excelPosition, tSheet, i);
 					String valueCode = excelAdapter.getStringValue(tCellCode);
 					if (UtilsString.isEmpty(valueCode)) {
-						throw new ExcelConfigurationException(excelPosition, "The Test Code is not specified");
+						throw new ExcelException(excelPosition, "The Test Code is not specified");
 					}
 
 					if (codes.contains(valueCode)) {
-						throw new ExcelConfigurationException(excelPosition, "The test Code is not unique on the sheet: '" + valueCode + "'");
+						throw new ExcelException(excelPosition, "The test Code is not unique on the sheet: '" + valueCode + "'");
 					}
 					codes.add(valueCode);
 					structureTest.setCode(valueCode);
@@ -223,7 +223,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 							status = Status.valueOf(valueStatus);
 							structureTest.setStatus(status);
 						} catch (Exception ex) {
-							throw new ExcelConfigurationException(excelPosition, "Bad value on the DiffStatus: '" + valueStatus + "'");
+							throw new ExcelException(excelPosition, "Bad value on the DiffStatus: '" + valueStatus + "'");
 						}
 					}
 				}
@@ -238,11 +238,11 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						try {
 							int group = Integer.parseInt(valueGroup);
 							if (group <= 0) {
-								throw new ExcelConfigurationException(excelPosition, "The DiffGroup must be positive integer: '" + valueGroup + "'");
+								throw new ExcelException(excelPosition, "The DiffGroup must be positive integer: '" + valueGroup + "'");
 							}
 							structureTest.setGroup(group);
 						} catch (NumberFormatException ex) {
-							throw new ExcelConfigurationException(excelPosition, "The test DiffGroup is not a number: '" + valueGroup + "'");
+							throw new ExcelException(excelPosition, "The test DiffGroup is not a number: '" + valueGroup + "'");
 						}
 					}
 				}
@@ -275,16 +275,16 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						try {
 							int order = Integer.parseInt(valueOrder);
 							if (order <= 0) {
-								throw new ExcelConfigurationException(excelPosition, "The Order must be positive integer: '" + valueOrder + "'");
+								throw new ExcelException(excelPosition, "The Order must be positive integer: '" + valueOrder + "'");
 							}
 							if (orders.contains(order)) {
-								throw new ExcelConfigurationException(excelPosition,
+								throw new ExcelException(excelPosition,
 										"The test Order is not unique on the sheet: '" + valueOrder + "'");
 							}
 							orders.add(order);
 							structureTest.setOrder(order);
 						} catch (NumberFormatException ex) {
-							throw new ExcelConfigurationException(excelPosition, "The test Order is not a number: '" + valueOrder + "'");
+							throw new ExcelException(excelPosition, "The test Order is not a number: '" + valueOrder + "'");
 						}
 					}
 				}

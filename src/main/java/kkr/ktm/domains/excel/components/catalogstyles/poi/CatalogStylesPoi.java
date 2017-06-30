@@ -14,7 +14,7 @@ import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
 import kkr.ktm.domains.excel.components.exceladapter.poi.TStylePoi;
 import kkr.ktm.domains.excel.components.exceladapter.poi.TWorkbookPoi;
 import kkr.ktm.domains.excelpoi.style.Style;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class CatalogStylesPoi extends CatalogStylesPoiFwk implements CatalogStyles {
 	private static final Logger LOG = Logger.getLogger(CatalogStylesPoi.class);

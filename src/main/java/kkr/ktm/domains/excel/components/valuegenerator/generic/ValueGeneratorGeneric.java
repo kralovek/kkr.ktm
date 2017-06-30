@@ -9,9 +9,9 @@ import java.util.regex.PatternSyntaxException;
 import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
 import kkr.ktm.domains.tests.data.ValueFlag;
 import kkr.ktm.domains.tests.data.ValuePattern;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.excel.ExcelConfigurationException;
-import kkr.ktm.utils.excel.ExcelPosition;
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.utils.excel.ExcelPosition;
 
 public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements ValueGenerator {
 
@@ -30,7 +30,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 				ValuePattern valueIntern = ValueParser.parseValue(strValue);
 				return valueIntern;
 			} catch (Exception ex) {
-				throw new ExcelConfigurationException(excelPosition, "Bad format of the value: " + ex.getMessage());
+				throw new ExcelException(excelPosition, "Bad format of the value: " + ex.getMessage());
 			}
 		} else {
 			ValuePatternImpl valueIntern = new ValuePatternImpl();
@@ -51,7 +51,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 				ValuePattern valueIntern = ValueParser.parseValue(strValue);
 				return valueIntern.getValue();
 			} catch (Exception ex) {
-				throw new ExcelConfigurationException(excelPosition, "Bad format of the value: " + ex.getMessage());
+				throw new ExcelException(excelPosition, "Bad format of the value: " + ex.getMessage());
 			}
 		} else {
 			return value;
@@ -106,7 +106,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 	// ##############################################################################
 	//
 
-	public boolean compareValues(ExcelPosition excelPositionE, ValuePattern valuePatternE, Object valueO) throws ExcelConfigurationException {
+	public boolean compareValues(ExcelPosition excelPositionE, ValuePattern valuePatternE, Object valueO) throws ExcelException {
 		Object valueE = valuePatternE != null && valuePatternE.getValue() != null ? valuePatternE.getValue() : null;
 		boolean flagIORD = valuePatternE != null ? valuePatternE.getFlags().contains(ValueFlag.IORD) : false;
 		boolean result = compareValues(excelPositionE, valueE, valueO, flagIORD);
@@ -114,7 +114,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 	}
 
 	private boolean compareValues(ExcelPosition excelPositionE, Object valueOrPatternExpected, Object valueOutput, boolean ignorOrder)
-			throws ExcelConfigurationException {
+			throws ExcelException {
 		boolean emptyE = isEmpty(valueOrPatternExpected);
 		boolean emptyO = isEmpty(valueOutput);
 		if (emptyE && emptyO) {
@@ -165,7 +165,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 		return true;
 	}
 
-	private boolean compareSingleValues(ExcelPosition excelPosition, Object valueE, Object valueO) throws ExcelConfigurationException {
+	private boolean compareSingleValues(ExcelPosition excelPosition, Object valueE, Object valueO) throws ExcelException {
 		if (valueE instanceof String && valueO instanceof String) {
 			return compareValuesString(excelPosition, (String) valueE, (String) valueO);
 		}
@@ -211,7 +211,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 	}
 
 	private boolean compareValuesArraysRespectOrder(ExcelPosition excelPositionE, Object[] arrayE, Object[] arrayO)
-			throws ExcelConfigurationException {
+			throws ExcelException {
 		for (int i = 0; i < arrayE.length; i++) {
 			boolean compared = compareValues(excelPositionE, arrayE[i], arrayO[i], false);
 			if (!compared) {
@@ -221,7 +221,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 		return true;
 	}
 
-	private boolean compareValuesArraysIgnorOrder(ExcelPosition excelPositionE, Object[] arrayE, Object[] arrayO) throws ExcelConfigurationException {
+	private boolean compareValuesArraysIgnorOrder(ExcelPosition excelPositionE, Object[] arrayE, Object[] arrayO) throws ExcelException {
 		Set<Integer> usedIndexesO = new HashSet<Integer>();
 		for (int iE = 0; iE < arrayE.length; iE++) {
 			boolean result = false;
@@ -241,7 +241,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 		return true;
 	}
 
-	private boolean compareValuesString(ExcelPosition excelPosition, String valueOrPattern, final String pValue2) throws ExcelConfigurationException {
+	private boolean compareValuesString(ExcelPosition excelPosition, String valueOrPattern, final String pValue2) throws ExcelException {
 		Pattern pattern1 = valueToPattern(excelPosition, valueOrPattern);
 		String value2 = adaptValue(pValue2);
 		if (pattern1 != null) {
@@ -260,13 +260,13 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 		return value.replace("\r\n", " ").replace("\n", " ");
 	}
 
-	private Pattern valueToPattern(ExcelPosition excelPosition, String value) throws ExcelConfigurationException {
+	private Pattern valueToPattern(ExcelPosition excelPosition, String value) throws ExcelException {
 		if (value.startsWith("{") && value.endsWith("}") && !value.endsWith("\\}")) {
 			String strPattern = value.substring(1, value.length() - 1);
 			try {
 				return Pattern.compile(strPattern);
 			} catch (PatternSyntaxException ex) {
-				throw new ExcelConfigurationException(excelPosition, "The pattern is incorect: " + strPattern, ex);
+				throw new ExcelException(excelPosition, "The pattern is incorect: " + strPattern, ex);
 			}
 		}
 		return null;

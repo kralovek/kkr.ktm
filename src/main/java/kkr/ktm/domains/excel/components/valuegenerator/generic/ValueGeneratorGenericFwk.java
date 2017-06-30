@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class ValueGeneratorGenericFwk {
 	private boolean configured;

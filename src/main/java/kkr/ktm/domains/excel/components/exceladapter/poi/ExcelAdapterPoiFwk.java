@@ -3,7 +3,7 @@ package kkr.ktm.domains.excel.components.exceladapter.poi;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public class ExcelAdapterPoiFwk {
 	private boolean configured;

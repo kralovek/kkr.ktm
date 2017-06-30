@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.excel.components.catalogstyles.CatalogStylesFactory;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class CatalogStylesFactoryPoi extends CatalogStylesFactoryPoiFwk implements CatalogStylesFactory {
 	private static final Logger LOG = Logger.getLogger(CatalogStylesFactoryPoi.class);

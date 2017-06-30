@@ -5,7 +5,7 @@ import java.util.Set;
 
 import kkr.ktm.domains.excel.components.structureloader.base.StructureLoaderBase;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
-import kkr.ktm.exception.ConfigurationException;
+import kkr.common.errors.ConfigurationException;
 
 public abstract class StructureLoaderVerticalFwk extends StructureLoaderBase {
 	private boolean configured;

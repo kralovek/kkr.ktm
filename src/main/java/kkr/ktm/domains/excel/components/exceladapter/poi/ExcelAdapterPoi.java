@@ -21,14 +21,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsResource;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
 import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.exceladapter.TStyle;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.exception.TechnicalException;
-import kkr.ktm.utils.UtilsFile;
 
 public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter {
 	private static final Logger LOG = Logger.getLogger(ExcelAdapterPoi.class);
@@ -116,7 +116,7 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 			} catch (IOException ex) {
 				throw new TechnicalException("Cannot write the file: " + tWorkbookPoi.getFile().getAbsolutePath(), ex);
 			} finally {
-				UtilsFile.getInstance().close(outputStream);
+				UtilsResource.closeResource(outputStream);
 			}
 
 			LOG.trace("OK");
@@ -149,7 +149,7 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 				throw new TechnicalException("Bad format of the excel file: " + file.getAbsolutePath(), ex);
 			} finally {
 				if (tWorkbookPoi == null) {
-					UtilsFile.getInstance().close(fileInputStream);
+					UtilsResource.closeResource(fileInputStream);
 				}
 			}
 
@@ -172,7 +172,7 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 			} catch (IOException ex) {
 				throw new TechnicalException("Cannot close the workbook: " + tWorkbookPoi.getFile().getAbsolutePath(), ex);
 			} finally {
-				UtilsFile.getInstance().close(inputStream);
+				UtilsResource.closeResource(inputStream);
 			}
 
 			LOG.trace("OK");

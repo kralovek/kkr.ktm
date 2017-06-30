@@ -4,8 +4,8 @@ import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.excel.ExcelPosition;
+import kkr.common.errors.BaseException;
+import kkr.common.utils.excel.ExcelPosition;
 
 public interface StructureLoader {
 

@@ -2,11 +2,11 @@ package kkr.ktm.domains.excel.components.structureloader.horizontal;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.utils.excel.ExcelPosition;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
 import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
 import kkr.ktm.domains.excel.data.Orientation;
-import kkr.ktm.utils.excel.ExcelPosition;
 
 public class StructureLoaderHorizontal extends StructureLoaderHorizontalFwk implements StructureLoader {
 	private static final Logger LOG = Logger.getLogger(StructureLoaderHorizontal.class);

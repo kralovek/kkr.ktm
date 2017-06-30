@@ -1,8 +1,8 @@
 package kkr.ktm.domains.excel.components.valuegenerator;
 
 import kkr.ktm.domains.tests.data.ValuePattern;
-import kkr.ktm.exception.BaseException;
-import kkr.ktm.utils.excel.ExcelPosition;
+import kkr.common.errors.BaseException;
+import kkr.common.utils.excel.ExcelPosition;
 
 public interface ValueGenerator {
 
