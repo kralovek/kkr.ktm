@@ -1,6 +1,6 @@
 package kkr.ktm.utils.errors;
 
-import kkr.ktm.exception.BaseException;
+import kkr.common.errors.BaseException;
 
 public class StopException extends BaseException {
 
