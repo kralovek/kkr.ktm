@@ -7,11 +7,11 @@ import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.excel.data.Status;
 import kkr.ktm.domains.tests.data.TestInput;
 import kkr.ktm.domains.tests.data.TestOutput;
-import kkr.common.errors.BaseException;
-import kkr.common.utils.UtilsString;
 import kkr.ktm.utils.errors.StopException;
 
 public class BatchKtm extends BatchKtmFwk {
@@ -26,8 +26,6 @@ public class BatchKtm extends BatchKtmFwk {
 	public void run(String batchId, String source) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			String prefix = UtilsString.isEmpty(sysPrefix) ? "" : sysPrefix + ".";
-
 			Collection<TestInput> testsInput = testLoader.loadTests(source);
 
 			int iTest = 0;
@@ -65,9 +63,9 @@ public class BatchKtm extends BatchKtmFwk {
 					Date dateEnd = new Date();
 					String dateDetla = UtilsString.toStringDateDelta(dateBegin, dateEnd);
 
-					testOutput.getDataOutput().put(prefix + PARAM_TIME_BEGIN, dateBegin);
-					testOutput.getDataOutput().put(prefix + PARAM_TIME_END, dateEnd);
-					testOutput.getDataOutput().put(prefix + PARAM_TIME_DELTA, dateDetla);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_BEGIN, dateBegin);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_END, dateEnd);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_DELTA, dateDetla);
 
 					Status status = testReporter.reportTest(testOutput, batchId);
 

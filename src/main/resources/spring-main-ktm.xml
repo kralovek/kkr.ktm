@@ -12,7 +12,7 @@
     default-init-method="config"
 >
 
-    <bean id="structureLoader" parent="structureLoaderH">
+    <bean id="structureLoader" parent="structureLoaderV">
         <property name="excelAdapter" ref="excelAdapter" />
     </bean>
     

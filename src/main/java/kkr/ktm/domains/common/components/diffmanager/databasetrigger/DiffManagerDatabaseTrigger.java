@@ -11,6 +11,7 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -84,11 +85,11 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			Collection<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			Connection connection = null;
 			try {
@@ -117,7 +118,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -147,7 +148,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk im
 		}
 	}
 
-	private DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+	private DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
 		for (DiffGroup diffGroup : diffGroups) {
 			if (name.equals(diffGroup.getName())) {
 				return diffGroup;

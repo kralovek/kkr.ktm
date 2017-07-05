@@ -2,6 +2,7 @@ package kkr.ktm.domains.common.components.diffmanager.filesystem.local;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -9,12 +10,12 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.common.errors.BaseException;
 
 public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements DiffManager {
 	private static final Logger LOG = Logger.getLogger(DiffManagerFilesystem.class);
@@ -27,7 +28,7 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 		}
 	};
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -104,7 +105,7 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 		return null;
 	}
 
-	private static DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
 		if (diffGroups != null) {
 			for (DiffGroup diffGroup : diffGroups) {
 				if (name.equals(diffGroup.getName())) {

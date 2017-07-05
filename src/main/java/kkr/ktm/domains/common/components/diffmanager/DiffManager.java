@@ -1,15 +1,15 @@
 package kkr.ktm.domains.common.components.diffmanager;
 
-import java.util.List;
+import java.util.Collection;
 
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.common.errors.BaseException;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 
 public interface DiffManager {
 
 	String getName();
 
-	List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException;
+	Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException;
 
-	List<DiffGroup> loadCurrents() throws BaseException;
+	Collection<DiffGroup> loadCurrents() throws BaseException;
 }

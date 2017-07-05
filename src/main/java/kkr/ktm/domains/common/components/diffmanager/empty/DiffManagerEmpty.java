@@ -1,13 +1,13 @@
 package kkr.ktm.domains.common.components.diffmanager.empty;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
-import kkr.common.errors.BaseException;
 
 public class DiffManagerEmpty implements DiffManager {
 	private static final Logger LOG = Logger.getLogger(DiffManagerEmpty.class);
@@ -16,10 +16,10 @@ public class DiffManagerEmpty implements DiffManager {
 		return "EMPTY";
 	}
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			List<DiffGroup> retval = new ArrayList<DiffGroup>();
+			Collection<DiffGroup> retval = new ArrayList<DiffGroup>();
 			LOG.trace("OK");
 			return retval;
 		} finally {
@@ -27,10 +27,10 @@ public class DiffManagerEmpty implements DiffManager {
 		}
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			List<DiffGroup> retval = new ArrayList<DiffGroup>();
+			Collection<DiffGroup> retval = new ArrayList<DiffGroup>();
 			LOG.trace("OK");
 			return retval;
 		} finally {

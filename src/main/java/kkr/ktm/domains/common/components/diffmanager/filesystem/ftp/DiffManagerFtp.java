@@ -2,6 +2,7 @@ package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,12 +12,12 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.common.errors.BaseException;
-import kkr.common.errors.TechnicalException;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
 public class DiffManagerFtp extends DiffManagerFtpFwk {
@@ -28,11 +29,11 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		}
 	};
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			Collection<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
@@ -66,7 +67,7 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 			long date = groupState != null ? ((DiffIndexImpl) groupState.getLastIndex()).getMs() : 0;
 			List<DiffItem> diffItems = null;
 			if (dirInfo.isContent() && groupState != null && groupState.getItems() != null) {
-				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+				Collection<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
 
 				diffItems = new ArrayList<DiffItem>();
 
@@ -105,7 +106,7 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		}
 	}
 
-	private DiffItemImpl findItem(List<DiffItemImpl> items, String name) {
+	private DiffItemImpl findItem(Collection<DiffItemImpl> items, String name) {
 		for (DiffItemImpl item : items) {
 			if (item.getName().equals(name)) {
 				return item;
@@ -212,7 +213,7 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		return items;
 	}
 
-	private static DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
 		if (diffGroups != null) {
 			for (DiffGroup diffGroup : diffGroups) {
 				if (name.equals(diffGroup.getName())) {
@@ -268,7 +269,7 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		return relativePath;
 	}
 
-	private static long getLastModified(List<DiffItem> diffItems) {
+	private static long getLastModified(Collection<DiffItem> diffItems) {
 		long lastModified = 0;
 		for (DiffItem diffItem : diffItems) {
 			// To je divny ... ta podminka ma byt naopak !!!

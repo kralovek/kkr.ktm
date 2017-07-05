@@ -3,8 +3,9 @@ package kkr.ktm.domains.orchestrator.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.domains.tests.data.TestOutput;
 import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.tests.data.Test;
+import kkr.ktm.domains.tests.data.TestOutput;
 
 public class TestOutputImpl implements TestOutput {
 	private String name;
@@ -17,8 +18,11 @@ public class TestOutputImpl implements TestOutput {
 
 	private Map<String, Object> dataOutput = new HashMap<String, Object>();
 
+	public TestOutputImpl(Test test) {
+		this(test.getName(), test.getDescription(), test.getSource(), test.getType(), test.getCode(), test.getGroup());
+	}
+
 	public TestOutputImpl(String name, String description, String source, String type, String code, Integer group) {
-		super();
 		if (UtilsString.isEmpty(source)) {
 			throw new IllegalArgumentException("Source is empty");
 		}

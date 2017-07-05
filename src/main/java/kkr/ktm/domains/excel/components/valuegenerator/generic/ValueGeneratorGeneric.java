@@ -266,7 +266,7 @@ public class ValueGeneratorGeneric extends ValueGeneratorGenericFwk implements V
 			try {
 				return Pattern.compile(strPattern);
 			} catch (PatternSyntaxException ex) {
-				throw new ExcelException(excelPosition, "The pattern is incorect: " + strPattern, ex);
+				throw new ExcelException(excelPosition, "The _pattern is incorect: " + strPattern, ex);
 			}
 		}
 		return null;

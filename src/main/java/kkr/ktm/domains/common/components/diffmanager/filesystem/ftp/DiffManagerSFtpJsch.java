@@ -1,6 +1,7 @@
 package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -17,12 +18,12 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.TechnicalException;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
-import kkr.common.errors.BaseException;
-import kkr.common.errors.TechnicalException;
 
 public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 	private static final String UNIX_PATH_SEPARATOR = "/";
@@ -56,7 +57,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 	}
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -199,7 +200,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return items;
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -290,7 +291,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return relativePath;
 	}
 
-	private static DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
 		if (diffGroups != null) {
 			for (DiffGroup diffGroup : diffGroups) {
 				if (name.equals(diffGroup.getName())) {

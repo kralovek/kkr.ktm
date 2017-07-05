@@ -1,10 +1,11 @@
 package kkr.ktm.domains.orchestrator.components.batchktm;
 
+import kkr.common.errors.ConfigurationException;
+import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.trafficlights.TrafficLights;
 import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
 import kkr.ktm.domains.tests.components.testreporter.TestReporter;
-import kkr.common.errors.ConfigurationException;
 
 public abstract class BatchKtmFwk {
 	private boolean configured;
@@ -12,6 +13,7 @@ public abstract class BatchKtmFwk {
 	protected TestLoader testLoader;
 	protected TestReporter testReporter;
 	protected TrafficLights trafficLights;
+	private String _sysPrefix;
 	protected String sysPrefix;
 
 	protected TestLancer testLancer;
@@ -27,8 +29,10 @@ public abstract class BatchKtmFwk {
 		if (trafficLights == null) {
 			throw new ConfigurationException("Parameter 'trafficLights' is not configured");
 		}
-		if (sysPrefix == null) {
-			throw new ConfigurationException("Parameter 'sysPrefix' is not configured");
+		if (_sysPrefix == null) {
+			sysPrefix = "";
+		} else {
+			sysPrefix = UtilsString.isEmpty(_sysPrefix) ? "" : _sysPrefix + ".";
 		}
 		if (testLancer == null) {
 			throw new ConfigurationException("Parameter 'testLancer' is not configured");
@@ -68,11 +72,11 @@ public abstract class BatchKtmFwk {
 	}
 
 	public String getSysPrefix() {
-		return sysPrefix;
+		return _sysPrefix;
 	}
 
 	public void setSysPrefix(String sysPrefix) {
-		this.sysPrefix = sysPrefix;
+		this._sysPrefix = sysPrefix;
 	}
 
 	public TestLancer getTestLancer() {

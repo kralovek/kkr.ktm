@@ -11,6 +11,7 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 
 	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat("yyyyMMdd HHmmss SSS");
 
-	public List<DiffGroup> loadDiffs(List<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -67,7 +68,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 		}
 	}
 
-	private DiffGroup findGroup(List<DiffGroup> diffGroups, String name) {
+	private DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
 		for (DiffGroup diffGroup : diffGroups) {
 			if (name.equals(diffGroup.getName())) {
 				return diffGroup;
@@ -76,7 +77,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 		return null;
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffGroup> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
