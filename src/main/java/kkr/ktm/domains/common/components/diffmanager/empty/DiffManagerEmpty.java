@@ -7,19 +7,20 @@ import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
+import kkr.ktm.domains.tests.data.Test;
 
 public class DiffManagerEmpty implements DiffManager {
 	private static final Logger LOG = Logger.getLogger(DiffManagerEmpty.class);
 
-	public String getName() {
+	public String getCode() {
 		return "EMPTY";
 	}
 
-	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Collection<DiffGroup> retval = new ArrayList<DiffGroup>();
+			Collection<DiffEntity> retval = new ArrayList<DiffEntity>();
 			LOG.trace("OK");
 			return retval;
 		} finally {
@@ -27,10 +28,10 @@ public class DiffManagerEmpty implements DiffManager {
 		}
 	}
 
-	public Collection<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Collection<DiffGroup> retval = new ArrayList<DiffGroup>();
+			Collection<DiffEntity> retval = new ArrayList<DiffEntity>();
 			LOG.trace("OK");
 			return retval;
 		} finally {
