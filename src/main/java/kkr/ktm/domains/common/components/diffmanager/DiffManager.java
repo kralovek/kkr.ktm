@@ -3,13 +3,12 @@ package kkr.ktm.domains.common.components.diffmanager;
 import java.util.Collection;
 
 import kkr.common.errors.BaseException;
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
+import kkr.ktm.domains.tests.data.Test;
 
 public interface DiffManager {
 
-	String getName();
+	Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException;
 
-	Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException;
-
-	Collection<DiffGroup> loadCurrents() throws BaseException;
+	Collection<DiffEntity> loadCurrents(Test test) throws BaseException;
 }
