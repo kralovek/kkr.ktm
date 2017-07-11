@@ -6,48 +6,31 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 
 import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
-import kkr.common.utils.UtilsBean;
+import kkr.common.main.AbstractMain;
 import kkr.ktm.domains.orchestrator.components.batchktm.BatchKtm;
-import kkr.ktm.errors.TestError;
-import kkr.ktm.errors.TreatErrors;
 
-public class MainKtm {
+public class MainKtm extends AbstractMain {
 	private static final Logger LOG = Logger.getLogger(MainKtm.class);
 
-	private static final String ID_BEAN = "batchKtm";
 	private static final DateFormat BATCH_ID_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
 
-	public static void main(final String[] pArgs) {
+	public static void main(String[] args) throws BaseException {
 		MainKtm main = new MainKtm();
-		main.work(pArgs);
+		main.run(args);
 	}
 
-	private void work(String[] pArgs) {
+	public void run(String[] args) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			ConfigKtm config = new ConfigKtm(pArgs);
+			ConfigKtm config = config(getClass(), ConfigKtm.class, args);
+			BatchKtm batch = createBean(config, BatchKtm.class, null, null);
 
-			try {
-				BeanFactory beanFactory = UtilsBean.createBeanFactory(config.getConfig(), null, null);
-
-				BatchKtm batchKtm = beanFactory.getBean(ID_BEAN, BatchKtm.class);
-
-				workRun(batchKtm, config);
-
-			} catch (BeansException ex) {
-				throw new ConfigurationException(ex.getMessage());
-			}
+			workRun(batch, config);
 
 			LOG.trace("OK");
-		} catch (TestError testError) {
-			throw testError;
-		} catch (Exception ex) {
-			TreatErrors.treatException(ex);
 		} finally {
 			LOG.trace("END");
 		}
@@ -65,7 +48,6 @@ public class MainKtm {
 			File dirWorkingDirectory = getWorkingDirectory();
 			LOG.info("WORKING DIRECTORY: " + dirWorkingDirectory.getAbsolutePath());
 
-			printMessages(config);
 			printConfig(config);
 
 			batchKtm.run(batchId, config.getSource());
@@ -78,15 +60,6 @@ public class MainKtm {
 
 	private void printConfig(ConfigKtm config) {
 		LOG.info("CONFIG: " + config.toString());
-	}
-
-	private void printMessages(ConfigKtm config) {
-		if (!config.getMessages().isEmpty()) {
-			LOG.info("MESSAGES: ");
-			for (String message : config.getMessages()) {
-				LOG.info("\t" + message);
-			}
-		}
 	}
 
 	private String generateBatchId() {
