@@ -19,8 +19,8 @@ public abstract class SelectionPatternFwk {
 	public void config() throws ConfigurationException {
 		configured = false;
 
-		patterns = UtilsConfig.checkListPatterns(_patterns, "patterns");
-		exceptPatterns = UtilsConfig.checkListPatterns(_exceptPatterns, "exceptPatterns");
+		patterns = UtilsConfig.checkCollectionPatterns(_patterns, "patterns");
+		exceptPatterns = UtilsConfig.checkCollectionPatterns(_exceptPatterns, "exceptPatterns");
 		if (_mode == null) {
 			mode = AcceptMode.INCLUDE;
 		} else {

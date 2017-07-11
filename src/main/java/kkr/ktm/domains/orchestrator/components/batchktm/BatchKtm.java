@@ -19,9 +19,9 @@ public class BatchKtm extends BatchKtmFwk {
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-	private static final String PARAM_TIME_BEGIN = "TIME.BEGIN";
-	private static final String PARAM_TIME_END = "TIME.END";
-	private static final String PARAM_TIME_DELTA = "TIME.DELTA";
+	private static final String PARAM_OUT_TIME_BEGIN = "TIME.BEGIN";
+	private static final String PARAM_OUT_TIME_END = "TIME.END";
+	private static final String PARAM_OUT_TIME_DELTA = "TIME.DELTA";
 
 	public void run(String batchId, String source) throws BaseException {
 		LOG.trace("BEGIN");
@@ -35,7 +35,7 @@ public class BatchKtm extends BatchKtmFwk {
 			int resultKo = 0;
 			int resultSkip = 0;
 
-			Collection<Integer> groupsKo = new HashSet<Integer>();
+			Collection<Integer> groupsSkip = new HashSet<Integer>();
 
 			for (TestInput testInput : testsInput) {
 				iTest++;
@@ -50,9 +50,9 @@ public class BatchKtm extends BatchKtmFwk {
 				LOG.info("..................................................................");
 
 				Date dateBegin = new Date();
-				LOG.info(DATE_FORMAT.format(dateBegin) + " Test: (" + iTest + "/" + testsCount + ")" + testInput.toString());
+				LOG.info(DATE_FORMAT.format(dateBegin) + " Test: (" + iTest + "/" + testsCount + ") " + testInput.toString());
 
-				if (groupsKo.contains(testInput.getGroup())) {
+				if (groupsSkip.contains(testInput.getGroup())) {
 					LOG.info(DATE_FORMAT.format(dateBegin) + " - SKIP -");
 					testReporter.skipTest(testInput, batchId);
 					continue;
@@ -60,12 +60,17 @@ public class BatchKtm extends BatchKtmFwk {
 
 				try {
 					TestOutput testOutput = testLancer.lanceTest(testInput);
+
+					if (testOutput == null) {
+						throw new IllegalStateException("Testlancer returned NULL TestOutput");
+					}
+
 					Date dateEnd = new Date();
 					String dateDetla = UtilsString.toStringDateDelta(dateBegin, dateEnd);
 
-					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_BEGIN, dateBegin);
-					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_END, dateEnd);
-					testOutput.getDataOutput().put(sysPrefix + PARAM_TIME_DELTA, dateDetla);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_BEGIN, dateBegin);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_END, dateEnd);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_DELTA, dateDetla);
 
 					Status status = testReporter.reportTest(testOutput, batchId);
 
@@ -78,13 +83,17 @@ public class BatchKtm extends BatchKtmFwk {
 						case KO :
 							resultKo++;
 							LOG.info(DATE_FORMAT.format(dateBegin) + "### KO ###");
-							groupsKo.add(testInput.getGroup());
+							if (testInput.getGroup() != null) {
+								groupsSkip.add(testInput.getGroup());
+							}
 							break;
 
 						case SKIP :
 							resultSkip++;
 							LOG.info(DATE_FORMAT.format(dateBegin) + " - SKIP - ");
-							groupsKo.add(testInput.getGroup());
+							if (testInput.getGroup() != null) {
+								groupsSkip.add(testInput.getGroup());
+							}
 							break;
 
 						default :

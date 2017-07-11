@@ -3,70 +3,22 @@ package kkr.ktm.domains.orchestrator.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.tests.data.Test;
+import kkr.ktm.domains.tests.data.TestBase;
 import kkr.ktm.domains.tests.data.TestOutput;
 
-public class TestOutputImpl implements TestOutput {
-	private String name;
-	private String description;
-
-	private String source;
-	private String type;
-	private String code;
-	private Integer group;
-
+public class TestOutputImpl extends TestBase implements TestOutput {
 	private Map<String, Object> dataOutput = new HashMap<String, Object>();
 
 	public TestOutputImpl(Test test) {
-		this(test.getName(), test.getDescription(), test.getSource(), test.getType(), test.getCode(), test.getGroup());
+		super(test);
 	}
 
 	public TestOutputImpl(String name, String description, String source, String type, String code, Integer group) {
-		if (UtilsString.isEmpty(source)) {
-			throw new IllegalArgumentException("Source is empty");
-		}
-		if (UtilsString.isEmpty(type)) {
-			throw new IllegalArgumentException("Type is empty");
-		}
-		if (UtilsString.isEmpty(code)) {
-			throw new IllegalArgumentException("Code is empty");
-		}
-
-		this.name = name;
-		this.description = description;
-		this.source = source;
-		this.type = type;
-		this.code = code;
-		this.group = group;
+		super(name, description, source, type, code, group);
 	}
 
 	public Map<String, Object> getDataOutput() {
 		return dataOutput;
 	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public Integer getGroup() {
-		return group;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
 }

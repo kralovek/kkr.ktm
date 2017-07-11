@@ -1,11 +1,11 @@
 package kkr.ktm.domains.orchestrator.components.batchktm;
 
 import kkr.common.errors.ConfigurationException;
-import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.trafficlights.TrafficLights;
 import kkr.ktm.domains.orchestrator.components.testlancer.TestLancer;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
 import kkr.ktm.domains.tests.components.testreporter.TestReporter;
+import kkr.ktm.utils.UtilsKtm;
 
 public abstract class BatchKtmFwk {
 	private boolean configured;
@@ -29,15 +29,7 @@ public abstract class BatchKtmFwk {
 		if (trafficLights == null) {
 			throw new ConfigurationException("Parameter 'trafficLights' is not configured");
 		}
-		if (_sysPrefix == null) {
-			sysPrefix = "";
-		} else {
-			sysPrefix = UtilsString.isEmpty(_sysPrefix) ? "" : _sysPrefix + ".";
-		}
-		if (testLancer == null) {
-			throw new ConfigurationException("Parameter 'testLancer' is not configured");
-		}
-
+		sysPrefix = UtilsKtm.checkPrefix(_sysPrefix, "sysPrefix");
 		configured = true;
 	}
 

@@ -71,11 +71,16 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			}
 			TWorkbook workbookTarget = excelAdapter.cloneWorkbook(workbookSource, fileTmp);
 
+			ExcelPosition excelPositionWorkbook = new ExcelPosition();
+			excelPositionWorkbook.setFile(workbookTarget.getFile());
+
 			excelAdapter.closeWorkbook(workbookSource);
 
 			CatalogStyles catalogStyles = catalogStylesFactory.createInstance(workbookTarget);
 
-			Status status = workWorkbook(workbookTarget, test, catalogStyles, skip);
+			Status status = workWorkbook(excelPositionWorkbook, workbookTarget, test, catalogStyles, skip);
+
+			workReview(excelPositionWorkbook, workbookTarget, test, status, catalogStyles);
 
 			excelAdapter.saveWorkbook(workbookTarget);
 
@@ -118,8 +123,6 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 						continue;
 					}
 
-					TestResultExcel testResult = new TestResultExcel();
-
 					Iterator<StructureTest> iteratorT = structureSheet.iteratorTests();
 					while (iteratorT.hasNext()) {
 						StructureTest structureTest = iteratorT.next();
@@ -127,15 +130,18 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 							// test non executed
 							continue;
 						}
-						testResult.setCode(structureTest.getCode());
-						testResult.setDescription(structureTest.getDescription());
-						testResult.setName(structureTest.getName());
-						testResult.setStatus(structureTest.getStatus());
-						testResult.setSource(source);
-						testResult.setType(tSheet.getName());
-					}
+						TestResultExcel testResult = new TestResultExcel(//
+								structureTest.getName(), //
+								structureTest.getDescription(), //
+								source, //
+								tSheet.getName(), //
+								structureTest.getCode(), //
+								structureTest.getGroup());
 
-					retval.add(testResult);
+						testResult.setStatus(structureTest.getStatus());
+
+						retval.add(testResult);
+					}
 				}
 
 				excelAdapter.closeWorkbook(tWorkbook);
@@ -178,20 +184,16 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private Status workWorkbook(TWorkbook tWorkbook, Test test, CatalogStyles catalogStyles, boolean skip) throws BaseException {
+	private Status workWorkbook(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, Test test, CatalogStyles catalogStyles, boolean skip)
+			throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			ExcelPosition excelPositionWorkbook = new ExcelPosition();
-			excelPositionWorkbook.setFile(tWorkbook.getFile());
-
 			TSheet tSheet = excelAdapter.getSheet(tWorkbook, test.getType());
 			if (tSheet == null) {
 				throw new ExcelException(excelPositionWorkbook, "The excel file does not contain a sheet: " + test.getType());
 			}
 
 			Status status = workSheet(excelPositionWorkbook, tWorkbook, tSheet, test, catalogStyles, skip);
-
-			workReview(excelPositionWorkbook, tWorkbook, test, status, catalogStyles);
 
 			LOG.trace("OK");
 			return status;
@@ -235,12 +237,13 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 						updateExcelPosition(excelPositionCellE, structureTest.getIndex(), parameterInfoE.getIndex(), structureSheet.getOrientation());
 						TCell tCellE = loadCell(tSheet, structureTest.getIndex(), parameterInfoE.getIndex(), structureSheet.getOrientation());
 
-						boolean resultValue = writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE, valueTargetO, catalogStyles);
+						boolean resultValue = writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE, valueSourceO, valueTargetO,
+								catalogStyles);
 						if (!resultValue) {
 							status = Status.KO;
 						}
 					} else {
-						writeValue(excelPositionCell, tCellO, valueTargetO);
+						writeValue(excelPositionCell, tCellO, valueTargetO, catalogStyles);
 					}
 				}
 			} else {
@@ -257,18 +260,19 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private void writeValue(ExcelPosition excelPositionCell, TCell tCellO, Object value) throws BaseException {
+	private void writeValue(ExcelPosition excelPositionCell, TCell tCellO, Object value, CatalogStyles catalogStyles) throws BaseException {
 		excelAdapter.setValue(tCellO, value);
+		applyStyle(tCellO, KtmStyle.OUTPUT, catalogStyles);
 	}
 
-	private boolean writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, TCell tCellO, TCell tCellE, Object value,
-			CatalogStyles catalogStyles) throws BaseException {
+	private boolean writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, TCell tCellO, TCell tCellE, Object valueSourceO,
+			Object valueTargetO, CatalogStyles catalogStyles) throws BaseException {
 		Object valueSourceE = excelAdapter.getValue(tCellE);
 		ValuePattern patternSourceE = valueGenerator.parsePattern(excelPositionCell, valueSourceE);
 
-		boolean result = valueGenerator.compareValues(excelPositionCell, patternSourceE, value);
+		boolean result = valueGenerator.compareValues(excelPositionCell, patternSourceE, valueSourceO);
 
-		excelAdapter.setValue(tCellO, value);
+		excelAdapter.setValue(tCellO, valueTargetO);
 
 		if (result) {
 			applyStyle(tCellE, KtmStyle.EXPECTED_OK, catalogStyles);
@@ -317,6 +321,21 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 				return KtmStyle.SKIP;
 			default :
 				throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
+		}
+	}
+
+	private void writeTotalCount(ExcelPosition excelPositionSheet, TSheet tSheet, ExcelIdCell idCell, CatalogStyles catalogStyles)
+			throws BaseException {
+		if (idCell != null) {
+			ExcelPosition excelPositionCell = excelPositionSheet.clone();
+			excelPositionCell.setRow(idCell.getRow());
+			excelPositionCell.setColumn(idCell.getColumn());
+
+			TCell tCell = excelAdapter.getOrCreateCell(tSheet, idCell.getRow(), idCell.getColumn());
+			int value = readCellInteger(excelPositionCell, tCell);
+			value++;
+			excelAdapter.setValue(tCell, value);
+			applyStyle(tCell, KtmStyle.NO, catalogStyles);
 		}
 	}
 
@@ -405,31 +424,35 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			TSheet tSheet = excelAdapter.getSheet(tWorkbook, reviewSheet);
 			if (tSheet == null) {
 				tSheet = excelAdapter.createSheet(tWorkbook, reviewSheet);
-				excelAdapter.setSheetOrder(tWorkbook, reviewSheet, 0);
-				excelAdapter.setSheetActive(tWorkbook, reviewSheet);
+			}
+			excelAdapter.setSheetOrder(tWorkbook, reviewSheet, 0);
+			excelAdapter.setSheetActive(tWorkbook, reviewSheet);
 
-				//
-				// HEADER
-				// 
-				if (reviewRowHeader != null) {
-					TStyle tStyleHeader = catalogStyles.createStyle(KtmStyle.HEADER.name());
+			//
+			// HEADER_COLUMN
+			// 
+			if (reviewRowHeader != null) {
+				TStyle tStyleHeader = catalogStyles.createStyle(KtmStyle.HEADER_COLUMN.name());
 
-					TCell tCellHeaderName = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnName);
-					excelAdapter.setValue(tCellHeaderName, "TYPE");
-					excelAdapter.setCellStyle(tCellHeaderName, tStyleHeader);
+				TCell tCellHeaderName = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnName);
+				excelAdapter.setValue(tCellHeaderName, "TYPE");
+				excelAdapter.setCellStyle(tCellHeaderName, tStyleHeader);
 
-					TCell tCellHeaderOk = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusOk);
-					excelAdapter.setValue(tCellHeaderOk, "OK");
-					excelAdapter.setCellStyle(tCellHeaderOk, tStyleHeader);
+				TCell tCellHeaderTotal = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusTotal);
+				excelAdapter.setValue(tCellHeaderTotal, "TOTAL");
+				excelAdapter.setCellStyle(tCellHeaderTotal, tStyleHeader);
 
-					TCell tCellHeaderKo = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusKo);
-					excelAdapter.setValue(tCellHeaderKo, "KO");
-					excelAdapter.setCellStyle(tCellHeaderKo, tStyleHeader);
+				TCell tCellHeaderOk = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusOk);
+				excelAdapter.setValue(tCellHeaderOk, "OK");
+				excelAdapter.setCellStyle(tCellHeaderOk, tStyleHeader);
 
-					TCell tCellHeaderSkip = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusSkip);
-					excelAdapter.setValue(tCellHeaderSkip, "SKIP");
-					excelAdapter.setCellStyle(tCellHeaderSkip, tStyleHeader);
-				}
+				TCell tCellHeaderKo = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusKo);
+				excelAdapter.setValue(tCellHeaderKo, "KO");
+				excelAdapter.setCellStyle(tCellHeaderKo, tStyleHeader);
+
+				TCell tCellHeaderSkip = excelAdapter.getOrCreateCell(tSheet, reviewRowHeader, reviewColumnStatusSkip);
+				excelAdapter.setValue(tCellHeaderSkip, "SKIP");
+				excelAdapter.setCellStyle(tCellHeaderSkip, tStyleHeader);
 			}
 
 			int rowMax = tSheet.getRowMax();
@@ -439,7 +462,9 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			//
 			Integer rowFound = null;
 			Integer rowEmpty = null;
-			for (int ir = reviewRowFirst; ir <= rowMax; ir++) {
+			boolean empty = true;
+			int ir;
+			for (ir = reviewRowFirst; ir <= rowMax; ir++) {
 				TCell tCellName = excelAdapter.getOrCreateCell(tSheet, ir, reviewColumnName);
 				String valueName = excelAdapter.getStringValue(tCellName);
 				if (UtilsString.isEmpty(valueName)) {
@@ -451,19 +476,23 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 				if (test.getType().equals(valueName)) {
 					rowFound = ir;
 				}
+				empty = false;
 			}
 
 			if (rowFound == null) {
-				rowFound = rowEmpty;
-			}
-			if (rowFound == null) {
-				rowFound = reviewRowFirst;
+				if (rowEmpty != null) {
+					rowFound = rowEmpty;
+				} else if (!empty) {
+					rowFound = ir;
+				} else {
+					rowFound = reviewRowFirst;
+				}
 			}
 
 			//
 			// NAME
 			// 
-			TStyle tStyleName = catalogStyles.createStyle(KtmStyle.ITEM.name());
+			TStyle tStyleName = catalogStyles.createStyle(KtmStyle.HEADER_LINE.name());
 			TCell tCellName = excelAdapter.getOrCreateCell(tSheet, rowFound, reviewColumnName);
 			excelAdapter.setValue(tCellName, test.getType());
 			excelAdapter.setCellStyle(tCellName, tStyleName);
@@ -471,6 +500,8 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			ExcelIdCell idCell = new ExcelIdCell();
 			idCell.setRow(rowFound);
 
+			idCell.setColumn(reviewColumnStatusTotal);
+			writeTotalCount(excelPositionSheet, tSheet, idCell, catalogStyles);
 			idCell.setColumn(reviewColumnStatusOk);
 			writeStatusCount(excelPositionSheet, tSheet, idCell, catalogStyles, Status.OK, status);
 			idCell.setColumn(reviewColumnStatusKo);

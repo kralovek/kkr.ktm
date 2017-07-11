@@ -10,6 +10,10 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.errors.TechnicalException;
+import kkr.common.utils.excel.ExcelPosition;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
 import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
@@ -21,10 +25,6 @@ import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
 import kkr.ktm.domains.tests.data.TestInput;
-import kkr.common.errors.BaseException;
-import kkr.common.errors.ExcelException;
-import kkr.common.errors.TechnicalException;
-import kkr.common.utils.excel.ExcelPosition;
 
 public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 	private static final Logger LOG = Logger.getLogger(TestLoaderExcel.class);
@@ -33,21 +33,74 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 		LOG.trace("BEGIN");
 		try {
 			File file = new File(source);
-			TWorkbook workbook = null;
+			TWorkbook tWorkbook = null;
 			try {
-				workbook = excelAdapter.readWorkbook(file);
+				tWorkbook = excelAdapter.readWorkbook(file);
 				ExcelPosition excelPosition = new ExcelPosition();
 				excelPosition.setFile(file);
 
-				Collection<TestInput> testsWorkbook = workWorkbook(excelPosition, workbook, source);
+				Collection<TestInput> testsWorkbook = workWorkbook(excelPosition, tWorkbook, source);
+
+				checkDuplicates(excelPosition, testsWorkbook);
+
+				excelAdapter.closeWorkbook(tWorkbook);
 
 				LOG.trace("OK");
 				return testsWorkbook;
 			} finally {
-
+				try {
+					excelAdapter.closeWorkbook(tWorkbook);
+				} catch (Exception ex) {
+					// Nothing to do
+				}
 			}
 		} finally {
 			LOG.trace("END");
+		}
+	}
+
+	private void checkDuplicates(ExcelPosition excelPosition, Collection<TestInput> testInputs) throws BaseException {
+		Map<Integer, Map<Integer, TestInputExcel>> duplicatesOrders = new HashMap<Integer, Map<Integer, TestInputExcel>>();
+		Map<String, TestInputExcel> duplicatesCodes = new HashMap<String, TestInputExcel>();
+
+		for (TestInput testInput : testInputs) {
+			TestInputExcel testInputExcel = (TestInputExcel) testInput;
+
+			//
+			// CODE
+			//
+			if (duplicatesCodes.containsKey(testInputExcel.getCode())) {
+				TestInputExcel testInputExcelDupl = duplicatesCodes.get(testInputExcel.getOrder());
+				ExcelPosition excelPositionSheet = excelPosition.clone();
+				excelPositionSheet.setSheet(testInputExcel.getType());
+				throw new ExcelException(excelPositionSheet, "Code already exists in the workbook: " // 
+						+ testInputExcel.toString() + " and " + testInputExcelDupl.toString());
+			}
+			duplicatesCodes.put(testInput.getCode(), testInputExcel);
+
+			//
+			// GROUP/ORDER
+			//
+			Map<Integer, TestInputExcel> orderTests = duplicatesOrders.get(testInput.getGroup());
+			if (orderTests == null) {
+				orderTests = new HashMap<Integer, TestInputExcel>();
+				duplicatesOrders.put(testInput.getGroup(), orderTests);
+			}
+			if (testInputExcel.getOrder() != null) {
+				if (orderTests.containsKey(testInputExcel.getOrder())) {
+					TestInputExcel testInputExcelDupl = orderTests.get(testInputExcel.getOrder());
+					ExcelPosition excelPositionSheet = excelPosition.clone();
+					excelPositionSheet.setSheet(testInputExcel.getType());
+					throw new ExcelException(excelPositionSheet,
+							"Group/Order already exists in the workbook: " // 
+									+ testInputExcel.toString() + ": " // 
+									+ testInputExcel.getGroup() + "/" + testInputExcel.getOrder() + " and " //
+									+ testInputExcelDupl.toString() + ": " // 
+									+ testInputExcelDupl.getGroup() + "/" + testInputExcelDupl.getOrder()) //
+					;
+				}
+				orderTests.put(testInputExcel.getOrder(), testInputExcel);
+			}
 		}
 	}
 
@@ -64,7 +117,7 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			StructureSheet structureSheet = structureWorkbook.getSheets().get(tSheet.getName());
 
 			if (structureSheet == null) {
-				LOG.info("Sheet ignored: " + tSheet.getName());
+				LOG.debug("Ignored sheet: " + tSheet.getName());
 				continue;
 			}
 
@@ -157,17 +210,17 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 		while (iteratorT.hasNext()) {
 			StructureTest structureTest = iteratorT.next();
 
-			TestInputExcel testInputExcel = new TestInputExcel();
-			testInputExcel.setSource(source);
-			testInputExcel.setType(tSheet.getName());
-			testInputExcel.setCode(structureTest.getCode());
-			testInputExcel.setName(structureTest.getName());
-			testInputExcel.setDescription(structureTest.getDescription());
+			TestInputExcel testInputExcel = new TestInputExcel( //
+					structureTest.getName(), // 
+					structureTest.getDescription(), //
+					source, //
+					tSheet.getName(), // 
+					structureTest.getCode(), //
+					structureTest.getGroup());
 
 			testInputExcel.setOrderOfSheet(orderOfSheet);
 			testInputExcel.setOrderInSheet(structureTest.getIndex());
 			testInputExcel.setOrder(structureTest.getOrder());
-			testInputExcel.setGroup(structureTest.getGroup());
 
 			Iterator<StructureParameter> iteratorI = structureSheet.iteratorParametersI();
 			while (iteratorI.hasNext()) {

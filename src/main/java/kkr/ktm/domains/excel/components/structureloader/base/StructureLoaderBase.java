@@ -1,10 +1,16 @@
 package kkr.ktm.domains.excel.components.structureloader.base;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
+import kkr.common.errors.ExcelException;
+import kkr.common.utils.UtilsString;
+import kkr.common.utils.excel.ExcelPosition;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
 import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
@@ -17,10 +23,6 @@ import kkr.ktm.domains.excel.data.StructureParameter;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
-import kkr.common.errors.BaseException;
-import kkr.common.errors.ExcelException;
-import kkr.common.utils.UtilsString;
-import kkr.common.utils.excel.ExcelPosition;
 
 public abstract class StructureLoaderBase extends StructureLoaderBaseFwk implements StructureLoader {
 	private static final Logger LOG = Logger.getLogger(StructureLoaderBase.class);
@@ -35,7 +37,6 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 				TSheet tSheet = excelAdapter.getSheet(tWorkbook, i);
 
 				if (!selectionSheets.isSelected(tSheet.getName())) {
-					LOG.warn("Ignored sheet: " + tSheet.getName());
 					continue;
 				}
 
@@ -131,8 +132,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						case E :
 							StructureParameter structureParameterO = structureSheet.findParameterO(structureParameter.getName());
 							if (structureParameterO == null) {
-								throw new ExcelException(excelPosition,
-										"The parameter E does not exist as parameter O: " + valueParameter);
+								throw new ExcelException(excelPosition, "The parameter E does not exist as parameter O: " + valueParameter);
 							}
 							// NO BREAK
 						case I :
@@ -163,7 +163,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 		try {
 			ExcelPosition excelPosition = excelPositionSheet.clone();
 			Set<String> codes = new HashSet<String>();
-			Set<Integer> orders = new HashSet<Integer>();
+			Map<Integer, Collection<Integer>> orders = new HashMap<Integer, Collection<Integer>>();
 
 			for (int i = 0; isLimitTest(excelPosition, tSheet, i); i++) {
 				if (isIgnoredTest(i)) {
@@ -183,7 +183,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					try {
 						active = Active.valueOf(valueActive);
 					} catch (Exception ex) {
-						throw new ExcelException(excelPosition, "Bad value on the Active: '" + valueActive + "'");
+						throw new ExcelException(excelPosition, "Bad value of the Active: '" + valueActive + "'");
 					}
 					if (active != Active.Y) {
 						continue;
@@ -238,11 +238,11 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 						try {
 							int group = Integer.parseInt(valueGroup);
 							if (group <= 0) {
-								throw new ExcelException(excelPosition, "The DiffGroup must be positive integer: '" + valueGroup + "'");
+								throw new ExcelException(excelPosition, "The Group must be positive integer: '" + valueGroup + "'");
 							}
 							structureTest.setGroup(group);
 						} catch (NumberFormatException ex) {
-							throw new ExcelException(excelPosition, "The test DiffGroup is not a number: '" + valueGroup + "'");
+							throw new ExcelException(excelPosition, "The test Group is not a number: '" + valueGroup + "'");
 						}
 					}
 				}
@@ -277,11 +277,21 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 							if (order <= 0) {
 								throw new ExcelException(excelPosition, "The Order must be positive integer: '" + valueOrder + "'");
 							}
-							if (orders.contains(order)) {
-								throw new ExcelException(excelPosition,
-										"The test Order is not unique on the sheet: '" + valueOrder + "'");
+
+							Collection<Integer> groupOrders = orders.get(structureTest.getGroup());
+							if (groupOrders == null) {
+								groupOrders = new HashSet<Integer>();
+								orders.put(structureTest.getGroup(), groupOrders);
 							}
-							orders.add(order);
+
+							if (groupOrders.contains(order)) {
+								throw new ExcelException(excelPosition,
+										"The test Order is not unique for the group "
+												+ (structureTest.getGroup() != null ? structureTest.getGroup() : "DEFAULT") + " on the sheet: '"
+												+ valueOrder + "'");
+							}
+							groupOrders.add(order);
+
 							structureTest.setOrder(order);
 						} catch (NumberFormatException ex) {
 							throw new ExcelException(excelPosition, "The test Order is not a number: '" + valueOrder + "'");

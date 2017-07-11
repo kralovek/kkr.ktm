@@ -105,7 +105,7 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 			Workbook workbook = tWorkbookPoi.getWorkbook();
 
 			createFileDirectory(tWorkbookPoi.getFile());
-			LOG.info("saving: " + tWorkbookPoi.getFile());
+			LOG.debug("Saving: " + tWorkbookPoi.getFile());
 
 			FileOutputStream outputStream = null;
 			try {
@@ -348,21 +348,22 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 		return tCellPoi;
 	}
 
-	public TCellPoi getOrCreateCell(TSheet tSheet, int irow, int icolumn) {
+	public TCellPoi getOrCreateCell(TSheet tSheet, int iRow, int iColumn) {
 		testConfigured();
 
 		TSheetPoi tSheetPoi = cast(tSheet);
 		Sheet sheet = tSheetPoi.getSheet();
 
 		Cell cell = null;
-		Row row = sheet.getRow(irow);
-		if (row != null) {
-			cell = row.getCell(icolumn, Row.CREATE_NULL_AS_BLANK);
+		Row row = sheet.getRow(iRow);
+		if (row == null) {
+			row = sheet.createRow(iRow);
 		}
+		cell = row.getCell(iColumn, Row.CREATE_NULL_AS_BLANK);
 
 		TCellPoi tCellPoi = new TCellPoi(tSheetPoi, cell);
-		tCellPoi.setColumn(icolumn);
-		tCellPoi.setRow(irow);
+		tCellPoi.setColumn(iColumn);
+		tCellPoi.setRow(iRow);
 
 		return tCellPoi;
 	}

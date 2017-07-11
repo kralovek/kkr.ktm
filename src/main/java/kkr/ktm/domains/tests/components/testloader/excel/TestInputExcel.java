@@ -3,10 +3,11 @@ package kkr.ktm.domains.tests.components.testloader.excel;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.domains.excel.data.TestExcel;
+import kkr.ktm.domains.tests.data.Test;
+import kkr.ktm.domains.tests.data.TestBase;
 import kkr.ktm.domains.tests.data.TestInput;
 
-public class TestInputExcel extends TestExcel implements TestInput, Comparable<TestInputExcel> {
+public class TestInputExcel extends TestBase implements TestInput, Comparable<TestInputExcel> {
 
 	private Integer order;
 
@@ -14,6 +15,14 @@ public class TestInputExcel extends TestExcel implements TestInput, Comparable<T
 
 	private int orderOfSheet;
 	private int orderInSheet;
+
+	public TestInputExcel(Test test) {
+		super(test);
+	}
+
+	public TestInputExcel(String name, String description, String source, String type, String code, Integer group) {
+		super(name, description, source, type, code, group);
+	}
 
 	public Map<String, Object> getDataInput() {
 		return dataInput;
@@ -92,7 +101,7 @@ public class TestInputExcel extends TestExcel implements TestInput, Comparable<T
 	}
 
 	public String toString() {
-		return "[CODE: " + code + "]" + " [TYPE: " + type + "]" + " [SOURCE: " + source + "]" + " [ORDER: " + orderOfSheet + "/" + orderInSheet + "]";
+		return "IN " + super.toString() + " [ORDER: " + orderOfSheet + "/" + orderInSheet + "]";
 	}
 
 	private int compare(Integer i1, Integer i2) {

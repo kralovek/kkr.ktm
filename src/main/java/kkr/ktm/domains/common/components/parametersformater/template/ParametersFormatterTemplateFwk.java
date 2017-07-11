@@ -2,15 +2,8 @@ package kkr.ktm.domains.common.components.parametersformater.template;
 
 import kkr.common.errors.BaseException;
 
-
-
-/**
- * ParametersFormatterTemplateFwk
- * 
- * @author KRALOVEC-99999
- */
 public abstract class ParametersFormatterTemplateFwk {
-    private boolean configured;
+	private boolean configured;
 
 	public void config() throws BaseException {
 		configured = false;
@@ -19,8 +12,7 @@ public abstract class ParametersFormatterTemplateFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 

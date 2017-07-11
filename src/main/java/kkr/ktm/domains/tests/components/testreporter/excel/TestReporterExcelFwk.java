@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
+import kkr.common.errors.ConfigurationException;
+import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.excel.components.catalogstyles.CatalogStylesFactory;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
 import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
-import kkr.common.errors.ConfigurationException;
-import kkr.common.utils.UtilsString;
 
 public abstract class TestReporterExcelFwk {
 	private boolean configured;
@@ -36,6 +36,9 @@ public abstract class TestReporterExcelFwk {
 
 	private String _reviewColumnName;
 	protected Integer reviewColumnName;
+
+	private String _reviewColumnStatusTotal;
+	protected Integer reviewColumnStatusTotal;
 
 	private String _reviewColumnStatusOk;
 	protected Integer reviewColumnStatusOk;
@@ -81,6 +84,7 @@ public abstract class TestReporterExcelFwk {
 		reviewRowHeader = UtilsExcel.adaptAndCheckRowId(getClass(), _reviewRowHeader, "reviewRowHeader");
 		reviewRowFirst = UtilsExcel.adaptAndCheckRowId(getClass(), _reviewRowFirst, "reviewRowFirst");
 		reviewColumnName = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnName, "reviewColumnName");
+		reviewColumnStatusTotal = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusTotal, "reviewColumnStatusTotal");
 		reviewColumnStatusOk = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusOk, "reviewColumnStatusOk");
 		reviewColumnStatusKo = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusKo, "reviewColumnStatusKo");
 		reviewColumnStatusSkip = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusSkip, "reviewColumnStatusSkip");
@@ -127,6 +131,7 @@ public abstract class TestReporterExcelFwk {
 
 		Collection<String> columns = new HashSet<String>();
 		UtilsExcel.checkDoubles(columns, _reviewColumnName, "reviewColumnName");
+		UtilsExcel.checkDoubles(columns, _reviewColumnStatusTotal, "reviewColumnStatusTotal");
 		UtilsExcel.checkDoubles(columns, _reviewColumnStatusOk, "reviewColumnStatusOk");
 		UtilsExcel.checkDoubles(columns, _reviewColumnStatusKo, "reviewColumnStatusKo");
 		UtilsExcel.checkDoubles(columns, _reviewColumnStatusSkip, "reviewColumnStatusSkip");
@@ -194,6 +199,14 @@ public abstract class TestReporterExcelFwk {
 
 	public void setReviewColumnName(String reviewColumnName) {
 		this._reviewColumnName = reviewColumnName;
+	}
+
+	public String getReviewColumnStatusTotal() {
+		return _reviewColumnStatusTotal;
+	}
+
+	public void setReviewColumnStatusTotal(String reviewColumnStatusTotal) {
+		this._reviewColumnStatusTotal = reviewColumnStatusTotal;
 	}
 
 	public String getReviewColumnStatusOk() {

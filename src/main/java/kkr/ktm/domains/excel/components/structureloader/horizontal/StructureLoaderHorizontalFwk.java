@@ -3,9 +3,9 @@ package kkr.ktm.domains.excel.components.structureloader.horizontal;
 import java.util.HashSet;
 import java.util.Set;
 
+import kkr.common.errors.ConfigurationException;
 import kkr.ktm.domains.excel.components.structureloader.base.StructureLoaderBase;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
-import kkr.common.errors.ConfigurationException;
 
 public abstract class StructureLoaderHorizontalFwk extends StructureLoaderBase {
 	private boolean configured;
@@ -27,47 +27,47 @@ public abstract class StructureLoaderHorizontalFwk extends StructureLoaderBase {
 		if (_rowParameter == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'rowParameter' is not configured");
 		} else {
-			indexParameter = UtilsExcel.adaptAndCheckRowId(getClass(), _rowParameter, "Parameter 'rowParameter'");
+			indexParameter = UtilsExcel.adaptAndCheckRowId(getClass(), _rowParameter, "rowParameter");
 		}
 		if (_rowIo == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'rowIo' is not configured");
 		} else {
-			indexIo = UtilsExcel.adaptAndCheckRowId(getClass(), _rowIo, "Parameter 'rowIo'");
+			indexIo = UtilsExcel.adaptAndCheckRowId(getClass(), _rowIo, "rowIo");
 		}
 		if (_columnCode == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnCode' is not configured");
 		} else {
-			indexCode = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnCode, "Parameter 'columnCode'");
+			indexCode = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnCode, "columnCode");
 		}
 		if (_columnActive == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnActive' is not configured");
 		} else {
-			indexActive = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnActive, "Parameter 'columnActive'");
+			indexActive = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnActive, "columnActive");
 		}
 		if (_columnStatusTest == null) {
 			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnStatusTest' is not configured");
 		} else {
-			indexStatusTest = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnStatusTest, "Parameter 'columnStatusTest'");
+			indexStatusTest = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnStatusTest, "columnStatusTest");
 		}
 		if (_columnName == null) {
 			indexName = null;
 		} else {
-			indexName = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnName, "Parameter 'columnName'");
+			indexName = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnName, "columnName");
 		}
 		if (_columnDescription == null) {
 			indexDescription = null;
 		} else {
-			indexDescription = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnName, "Parameter 'columnDescription'");
+			indexDescription = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnDescription, "columnDescription");
 		}
 		if (_columnGroup == null) {
 			indexGroup = null;
 		} else {
-			indexGroup = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnGroup, "Parameter 'columnGroup'");
+			indexGroup = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnGroup, "columnGroup");
 		}
 		if (_columnOrder == null) {
 			indexOrder = null;
 		} else {
-			indexOrder = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnOrder, "Parameter 'columnOrder'");
+			indexOrder = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnOrder, "columnOrder");
 		}
 
 		Set<Integer> rows = new HashSet<Integer>();
