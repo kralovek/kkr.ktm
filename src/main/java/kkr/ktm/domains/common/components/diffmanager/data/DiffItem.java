@@ -6,5 +6,5 @@ public interface DiffItem {
 	String getName();
 	DiffIndex getIndex();
 	DiffStatus getStatus();
-	Map<String, String> getParameters();
+	Map<String, Object> getParameters();
 }
