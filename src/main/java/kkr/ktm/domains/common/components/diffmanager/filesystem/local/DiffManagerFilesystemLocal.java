@@ -11,14 +11,19 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
+import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
-import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffEntityImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
+import kkr.ktm.domains.tests.data.Test;
 
-public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements DiffManager {
-	private static final Logger LOG = Logger.getLogger(DiffManagerFilesystem.class);
+public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk implements DiffManager {
+	private static final Logger LOG = Logger.getLogger(DiffManagerFilesystemLocal.class);
 
 	private static final String UNIX_PATH_SEPARATOR = "/";
 
@@ -28,26 +33,26 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 		}
 	};
 
-	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			List<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			for (DirInfo dirInfo : dirInfos) {
-				DiffGroup groupState = findGroup(groupStates, dirInfo.getName());
-				DiffGroup diffGroup = loadDiff(dirInfo, groupState);
-				diffGroups.add(diffGroup);
+				DiffEntity groupState = findGroup(groupStates, dirInfo.getName());
+				DiffEntity diffEntity = loadDiff(dirInfo, groupState);
+				diffEntities.add(diffEntity);
 			}
 
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private DiffGroup loadDiff(DirInfo dirInfo, DiffGroup groupState) throws BaseException {
+	private DiffEntity loadDiff(DirInfo dirInfo, DiffEntity groupState) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			File dir = new File(dirInfo.getPath());
@@ -84,7 +89,7 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 			}
 
 			long lastModified = getLastModified(diffItems);
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntryName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
 			group.setLastIndex(diffIndexImpl);
@@ -105,46 +110,47 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 		return null;
 	}
 
-	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
-		if (diffGroups != null) {
-			for (DiffGroup diffGroup : diffGroups) {
-				if (name.equals(diffGroup.getName())) {
-					return diffGroup;
+	private DiffEntity findGroup(Collection<DiffEntity> diffEntities, String name) {
+		name = adaptEntryName(name);
+		if (diffEntities != null) {
+			for (DiffEntity diffEntity : diffEntities) {
+				if (name.equals(diffEntity.getName())) {
+					return diffEntity;
 				}
 			}
 		}
 		return null;
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public List<DiffEntity> loadCurrents(Test test) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			List<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			for (DirInfo dirInfo : dirInfos) {
 				if (dirInfo.isContent()) {
-					DiffGroup diffGroup = loadDiff(dirInfo, null);
-					diffGroups.add(diffGroup);
+					DiffEntity diffEntity = loadDiff(dirInfo, null);
+					diffEntities.add(diffEntity);
 				} else {
-					DiffGroup diffGroup = loadCurrent(dirInfo);
-					diffGroups.add(diffGroup);
+					DiffEntity diffEntity = loadCurrent(dirInfo);
+					diffEntities.add(diffEntity);
 				}
 			}
 
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	public DiffGroup loadCurrent(DirInfo dirInfo) throws BaseException {
+	private DiffEntity loadCurrent(DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			File dir = new File(dirInfo.getPath());
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntryName(dirInfo.getName()));
 			long lastModified = getLastModifiedDirectory(dir, dir, 0, dirInfo.getPattern());
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
@@ -238,5 +244,13 @@ public class DiffManagerFilesystem extends DiffManagerFilesystemFwk implements D
 			}
 		}
 		return lastModified;
+	}
+
+	private String adaptEntryName(String name) {
+		if (UtilsString.isEmpty(code)) {
+			return name;
+		} else {
+			return code + "." + name;
+		}
 	}
 }

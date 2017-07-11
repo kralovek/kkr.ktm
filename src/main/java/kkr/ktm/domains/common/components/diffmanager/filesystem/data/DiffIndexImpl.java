@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.data;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -30,6 +30,6 @@ public class DiffIndexImpl implements DiffIndex, Comparable<DiffIndex> {
 
 	public String toString() {
 		Date date = new Date(ms);
-		return DATE_FORMAT.format(date);
+		return "[DATE: " + DATE_FORMAT.format(date) + "]";
 	}
 }

@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.apache;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,14 +14,20 @@ import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
 import kkr.common.errors.TechnicalException;
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
-import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffEntityImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.base.DiffManagerFtpBaseFwk;
+import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
-public class DiffManagerFtp extends DiffManagerFtpFwk {
-	private static final Logger LOG = Logger.getLogger(DiffManagerFtp.class);
+public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
+	private static final Logger LOG = Logger.getLogger(DiffManagerFtpApache.class);
 
 	private static Comparator<DiffItem> comparatorItem = new Comparator<DiffItem>() {
 		public int compare(DiffItem item1, DiffItem item2) {
@@ -29,39 +35,39 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		}
 	};
 
-	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			Collection<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			Collection<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return diffGroups;
+				return diffEntities;
 			}
 			FTPClient client = UtilsFtp.connect(ftpHost, ftpPort, ftpLogin, ftpPassword);
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
-					DiffGroup groupState = findGroup(groupStates, dirInfo.getName());
-					DiffGroup diffGroup = loadDiff(client, dirInfo, groupState);
-					diffGroups.add(diffGroup);
+					DiffEntity groupState = findGroup(groupStates, dirInfo.getName());
+					DiffEntity diffEntity = loadDiff(client, dirInfo, groupState);
+					diffEntities.add(diffEntity);
 				}
 			} finally {
 				try {
 					client.disconnect();
 				} catch (IOException ex) {
-					// rien � faire
+					// nothing to do
 				}
 			}
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private DiffGroup loadDiff(FTPClient client, DirInfo dirInfo, DiffGroup groupState) throws BaseException {
+	private DiffEntity loadDiff(FTPClient client, DirInfo dirInfo, DiffEntity groupState) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			long date = groupState != null ? ((DiffIndexImpl) groupState.getLastIndex()).getMs() : 0;
@@ -94,7 +100,7 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 			}
 
 			long lastModified = getLastModified(diffItems);
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
 			group.setLastIndex(diffIndexImpl);
@@ -115,26 +121,26 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		return null;
 	}
 
-	public List<DiffGroup> loadCurrents() throws BaseException {
+	public List<DiffEntity> loadCurrents(Test test) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			List<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return diffGroups;
+				return diffEntities;
 			}
 			FTPClient client = UtilsFtp.connect(ftpHost, ftpPort, ftpLogin, ftpPassword);
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
 					if (dirInfo.isContent()) {
-						DiffGroup diffGroup = loadDiff(client, dirInfo, null);
-						diffGroups.add(diffGroup);
+						DiffEntity diffEntity = loadDiff(client, dirInfo, null);
+						diffEntities.add(diffEntity);
 					} else {
-						DiffGroup diffGroup = loadCurrent(client, dirInfo);
-						diffGroups.add(diffGroup);
+						DiffEntity diffEntity = loadCurrent(client, dirInfo);
+						diffEntities.add(diffEntity);
 					}
 				}
 			} finally {
@@ -145,17 +151,17 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 				}
 			}
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private DiffGroup loadCurrent(FTPClient client, DirInfo dirInfo) throws BaseException {
+	private DiffEntity loadCurrent(FTPClient client, DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
 			group.setLastIndex(diffIndexImpl);
@@ -213,11 +219,12 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 		return items;
 	}
 
-	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
-		if (diffGroups != null) {
-			for (DiffGroup diffGroup : diffGroups) {
-				if (name.equals(diffGroup.getName())) {
-					return diffGroup;
+	private DiffEntity findGroup(Collection<DiffEntity> diffEntities, String name) {
+		name = adaptEntityName(name);
+		if (diffEntities != null) {
+			for (DiffEntity diffEntity : diffEntities) {
+				if (name.equals(diffEntity.getName())) {
+					return diffEntity;
 				}
 			}
 		}
@@ -278,5 +285,13 @@ public class DiffManagerFtp extends DiffManagerFtpFwk {
 			}
 		}
 		return lastModified;
+	}
+
+	private String adaptEntityName(String name) {
+		if (UtilsString.isEmpty(code)) {
+			return name;
+		} else {
+			return code + "." + name;
+		}
 	}
 }

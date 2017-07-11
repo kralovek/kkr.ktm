@@ -1,16 +1,17 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.data;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+import kkr.ktm.domains.common.components.diffmanager.data.DiffIndex;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 
 public class DiffItemImpl implements DiffItem, Cloneable {
 	private String name;
-	private DiffIndexImpl index;
+	private DiffIndex index;
 	private DiffStatus diffStatus;
-	private Map<String, String> parameters = new TreeMap<String, String>();
+	private Map<String, Object> parameters = new TreeMap<String, Object>();
 
 	public DiffItemImpl(DiffItem diffItem) {
 		name = diffItem.getName();
@@ -27,7 +28,7 @@ public class DiffItemImpl implements DiffItem, Cloneable {
 		return name;
 	}
 
-	public DiffIndexImpl getIndex() {
+	public DiffIndex getIndex() {
 		return index;
 	}
 
@@ -43,7 +44,7 @@ public class DiffItemImpl implements DiffItem, Cloneable {
 		this.diffStatus = diffStatus;
 	}
 
-	public Map<String, String> getParameters() {
+	public Map<String, Object> getParameters() {
 		return parameters;
 	}
 

@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.data;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.data;
 
 public class DirInfo extends DirInfoFwk {
 

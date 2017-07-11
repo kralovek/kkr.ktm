@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp;
+package kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.jsch;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,12 +20,18 @@ import com.jcraft.jsch.SftpException;
 
 import kkr.common.errors.BaseException;
 import kkr.common.errors.TechnicalException;
-import kkr.ktm.domains.common.components.diffmanager.data.DiffGroup;
+import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
-import kkr.ktm.domains.common.components.diffmanager.filesystem.DirInfo;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffEntityImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
+import kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.base.DiffManagerFtpBase;
+import kkr.ktm.domains.tests.data.Test;
 
-public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
+public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 	private static final String UNIX_PATH_SEPARATOR = "/";
 
 	private static final Logger LOG = Logger.getLogger(DiffManagerSFtpJsch.class);
@@ -57,35 +63,35 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 	}
 
-	public Collection<DiffGroup> loadDiffs(Collection<DiffGroup> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			List<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return diffGroups;
+				return diffEntities;
 			}
 			Client client = connect();
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
-					DiffGroup groupState = findGroup(groupStates, dirInfo.getName());
-					DiffGroup diffGroup = loadDiff(client, dirInfo, groupState);
-					diffGroups.add(diffGroup);
+					DiffEntity groupState = findGroup(groupStates, dirInfo.getName());
+					DiffEntity diffEntity = loadDiff(client, dirInfo, groupState);
+					diffEntities.add(diffEntity);
 				}
 			} finally {
 				disconnect(client);
 			}
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private DiffGroup loadDiff(Client client, DirInfo dirInfo, DiffGroup groupState) throws BaseException {
+	private DiffEntity loadDiff(Client client, DirInfo dirInfo, DiffEntity groupState) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			LOG.debug("dir: " + dirInfo.getPath());
@@ -119,7 +125,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 			}
 
 			long lastModified = getLastModified(diffItems);
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
 			group.setLastIndex(diffIndexImpl);
@@ -200,44 +206,44 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return items;
 	}
 
-	public Collection<DiffGroup> loadCurrents() throws BaseException {
+	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			LOG.debug("diff: " + name);
-			List<DiffGroup> diffGroups = new ArrayList<DiffGroup>();
+			LOG.debug("diff: " + code);
+			List<DiffEntity> diffEntities = new ArrayList<DiffEntity>();
 
 			if (dirInfos.isEmpty()) {
 				LOG.trace("OK");
-				return diffGroups;
+				return diffEntities;
 			}
 			Client client = connect();
 
 			try {
 				for (DirInfo dirInfo : dirInfos) {
 					if (dirInfo.isContent()) {
-						DiffGroup diffGroup = loadDiff(client, dirInfo, null);
-						diffGroups.add(diffGroup);
+						DiffEntity diffEntity = loadDiff(client, dirInfo, null);
+						diffEntities.add(diffEntity);
 					} else {
-						DiffGroup diffGroup = loadCurrent(client, dirInfo);
-						diffGroups.add(diffGroup);
+						DiffEntity diffEntity = loadCurrent(client, dirInfo);
+						diffEntities.add(diffEntity);
 					}
 				}
 			} finally {
 				disconnect(client);
 			}
 			LOG.trace("OK");
-			return diffGroups;
+			return diffEntities;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private DiffGroup loadCurrent(Client client, DirInfo dirInfo) throws BaseException {
+	private DiffEntity loadCurrent(Client client, DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
-			DiffGroupImpl group = new DiffGroupImpl(dirInfo.getName());
+			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
 			group.setLastIndex(diffIndexImpl);
@@ -291,11 +297,11 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		return relativePath;
 	}
 
-	private static DiffGroup findGroup(Collection<DiffGroup> diffGroups, String name) {
-		if (diffGroups != null) {
-			for (DiffGroup diffGroup : diffGroups) {
-				if (name.equals(diffGroup.getName())) {
-					return diffGroup;
+	private static DiffEntity findGroup(Collection<DiffEntity> diffEntities, String name) {
+		if (diffEntities != null) {
+			for (DiffEntity diffEntity : diffEntities) {
+				if (name.equals(diffEntity.getName())) {
+					return diffEntity;
 				}
 			}
 		}
@@ -334,6 +340,14 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpFwk {
 		}
 		if (client.getSession() != null) {
 			client.getSession().disconnect();
+		}
+	}
+
+	private String adaptEntityName(String name) {
+		if (UtilsString.isEmpty(code)) {
+			return name;
+		} else {
+			return code + "." + name;
 		}
 	}
 }
