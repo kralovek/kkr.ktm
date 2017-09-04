@@ -2,11 +2,11 @@ package kkr.ktm.domains.tests.components.testreporter;
 
 import java.util.Collection;
 
+import kkr.common.errors.BaseException;
 import kkr.ktm.domains.excel.data.Status;
 import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.domains.tests.data.TestOutput;
 import kkr.ktm.domains.tests.data.TestResult;
-import kkr.common.errors.BaseException;
 
 public interface TestReporter {
 
