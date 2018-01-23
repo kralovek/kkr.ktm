@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Block;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Content;
@@ -24,12 +25,12 @@ import kkr.ktm.domains.common.components.parametersformater.template.parts.TagPa
 import kkr.ktm.domains.common.components.parametersformater.template.parts.Text;
 import kkr.ktm.domains.common.components.parametersformater.template.tags.Attribute;
 import kkr.ktm.domains.common.components.parametersformater.template.tags.Tag;
-import kkr.common.errors.BaseException;
 
 public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk implements ParametersFormatter {
 	private static final Logger LOG = Logger.getLogger(ParametersFormatterTemplate.class);
 
-	private static final String[] TAGS = new String[]{TagLoop.TAG, TagEnd.TAG, TagIf.TAG, TagParameter.TAG, TagIndex.TAG};
+	private static final String[] TAGS = new String[] { TagLoop.TAG, TagEnd.TAG, TagIf.TAG, TagParameter.TAG,
+			TagIndex.TAG };
 
 	private class Position {
 		String source;
@@ -60,7 +61,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		}
 	}
 
-	private Content evaluateContent(Content pContentSource, Map<String, Object> pParameters, Map<String, Integer> indexes) throws BaseException {
+	private Content evaluateContent(Content pContentSource, Map<String, Object> pParameters,
+			Map<String, Integer> indexes) throws BaseException {
 		Content contentTarget = new Content();
 
 		for (int i = 0; i < pContentSource.getContents().size(); i++) {
@@ -76,8 +78,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					try {
 						String.format(tagParameter.getFormat(), value);
 					} catch (Exception ex) {
-						throw new TemplateConfigurationException(null,
-								"Bad format string for a STRING value [" + tagParameter.getTagName() + "]: " + tagParameter.getFormat());
+						throw new TemplateConfigurationException(null, "Bad format string for a STRING value ["
+								+ tagParameter.getTagName() + "]: " + tagParameter.getFormat());
 					}
 				}
 				Text text = new Text();
@@ -87,16 +89,16 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				TagIndex tagIndex = (TagIndex) object;
 				Integer value = indexes.get(tagIndex.getName());
 				if (value == null) {
-					throw new TemplateConfigurationException(null,
-							"Unknown index requested by the tag [" + tagIndex.getTagName() + "]: " + tagIndex.getName());
+					throw new TemplateConfigurationException(null, "Unknown index requested by the tag ["
+							+ tagIndex.getTagName() + "]: " + tagIndex.getName());
 				}
 				Text text = new Text();
 				if (tagIndex.getFormat() != null) {
 					try {
 						text.setValue(String.format(tagIndex.getFormat(), value));
 					} catch (Exception ex) {
-						throw new TemplateConfigurationException(null,
-								"Bad format string for a INTEGER value [" + tagIndex.getTagName() + "]: " + tagIndex.getName());
+						throw new TemplateConfigurationException(null, "Bad format string for a INTEGER value ["
+								+ tagIndex.getTagName() + "]: " + tagIndex.getName());
 					}
 				} else {
 					text.setValue(String.valueOf(value));
@@ -146,8 +148,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 					count = toInteger(valueParameter);
 					if (count == null || count < 0) {
-						throw new TemplateConfigurationException(null,
-								"The value of the parameter " + tagLoop.getName() + toStringIndexes(tagIndexes) + " must be a non negativ integer");
+						throw new TemplateConfigurationException(null, "The value of the parameter " + tagLoop.getName()
+								+ toStringIndexes(tagIndexes) + " must be a non negativ integer");
 					}
 				} else if (tagLoop.getType() == TagLoop.Type.LENGTH) {
 					Object objectParameter = pParameters.get(tagLoop.getName());
@@ -162,7 +164,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 				if (indexes != null) {
 					if (indexes.containsKey(tagLoop.getIndex())) {
-						throw new TemplateConfigurationException(null, "The loop index " + tagLoop.getIndex() + " is already used by a parent loop");
+						throw new TemplateConfigurationException(null,
+								"The loop index " + tagLoop.getIndex() + " is already used by a parent loop");
 					}
 					indexesLoc.putAll(indexes);
 				}
@@ -172,7 +175,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					contentTarget.getContents().addAll(content.getContents());
 				}
 			} else {
-				throw new TemplateConfigurationException(null, "Unknown content part: " + object.getClass().getSimpleName());
+				throw new TemplateConfigurationException(null,
+						"Unknown content part: " + object.getClass().getSimpleName());
 			}
 		}
 
@@ -186,9 +190,10 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 			for (int index : indexes) {
 				if (index > 1) {
 					Object[] array;
-					if (objectCurrent == null || !objectCurrent.getClass().isArray() || (array = (Object[]) objectCurrent).length < index) {
-						throw new TemplateConfigurationException(null,
-								"Not enough values of the parameter " + name + " for the index: " + toStringIndexes(indexes));
+					if (objectCurrent == null || !objectCurrent.getClass().isArray()
+							|| (array = (Object[]) objectCurrent).length < index) {
+						throw new TemplateConfigurationException(null, "Not enough values of the parameter " + name
+								+ " for the index: " + toStringIndexes(indexes));
 					}
 					retval = objectCurrent = array[index - 1];
 				} else {
@@ -219,10 +224,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 	}
 
 	private Integer evaluateListLength(Object pObject) {
-		return pObject == null
-				? //
-				0
-				: pObject.getClass().isArray() ? //
+		return pObject == null ? //
+				0 : pObject.getClass().isArray() ? //
 						((Object[]) pObject).length : "".equals(pObject) ? //
 								0 : 1;
 	}
@@ -247,7 +250,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return buffer.toString();
 	}
 
-	private String evaluateParameter(String name, int[] indexes, final Map<String, Object> parameters) throws BaseException {
+	private String evaluateParameter(String name, int[] indexes, final Map<String, Object> parameters)
+			throws BaseException {
 		if (!parameters.containsKey(name)) {
 			throw new TemplateConfigurationException(null, "Unknown parameter: " + name);
 		}
@@ -257,7 +261,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		Object objectLevel = retrieveObjectLevel(name, object, indexes);
 		String value = evaluateValue(objectLevel);
 		if (value == null) {
-			throw new TemplateConfigurationException(null, "The parameter " + name + toStringIndexes(indexes) + " must contain a scalar");
+			throw new TemplateConfigurationException(null,
+					"The parameter " + name + toStringIndexes(indexes) + " must contain a scalar");
 		}
 		return value;
 	}
@@ -350,21 +355,26 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				String attributeValue = entry.getValue();
 				if (TagParameter.ATTR_NAME.equals(attributeName)) {
 					if (!isNameParameter(attributeValue)) {
-						throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute [" + pTag.getName() + " "
-								+ TagParameter.ATTR_NAME + "]" + TagParameter.ATTR_NAME + " as a parameter name: " + attributeValue);
+						throw new TemplateConfigurationException(null,
+								"Cannot evaluate the value of the attribute [" + pTag.getName() + " "
+										+ TagParameter.ATTR_NAME + "] " + TagParameter.ATTR_NAME
+										+ " as a parameter name: " + attributeValue);
 					}
 					tagParameter.setName(attributeValue);
 				} else if (TagParameter.ATTR_INDEXES.equals(attributeName)) {
 					String[] indexes = toArray(attributeValue);
 					if (indexes == null) {
 						throw new TemplateConfigurationException(null,
-								"Cannot evaluate the value of the attribute [" + pTag.getName() + " " + TagParameter.ATTR_INDEXES + "]"
-										+ TagParameter.ATTR_NAME + "  as a comma separated list of index names: " + attributeValue);
+								"Cannot evaluate the value of the attribute [" + pTag.getName() + " "
+										+ TagParameter.ATTR_INDEXES + "]" + TagParameter.ATTR_NAME
+										+ "  as a comma separated list of index names: " + attributeValue);
 					}
 					for (String index : indexes) {
 						if (!isNameIndex(index)) {
-							throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute [" + pTag.getName() + " "
-									+ TagParameter.ATTR_INDEXES + "]" + " an index name has bad format: " + attributeValue);
+							throw new TemplateConfigurationException(null,
+									"Cannot evaluate the value of the attribute [" + pTag.getName() + " "
+											+ TagParameter.ATTR_INDEXES + "]" + " an index name has bad format: "
+											+ attributeValue);
 						}
 					}
 					tagParameter.setIndexes(indexes);
@@ -372,12 +382,14 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					try {
 						String.format(attributeValue, "");
 					} catch (Exception ex) {
-						throw new TemplateConfigurationException(null, "Bad format of the attribute [" + pTag.getName() + " " + TagIndex.ATTR_FORMAT
-								+ "]" + " value: " + attributeValue + " problem: " + ex.getMessage());
+						throw new TemplateConfigurationException(null,
+								"Bad format of the attribute [" + pTag.getName() + " " + TagIndex.ATTR_FORMAT + "]"
+										+ " value: " + attributeValue + " problem: " + ex.getMessage());
 					}
 					tagParameter.setFormat(attributeValue);
 				} else {
-					throw new TemplateConfigurationException(null, "Unknown attribute '" + attributeName + "' for the tag '" + pTag.getName() + "'");
+					throw new TemplateConfigurationException(null,
+							"Unknown attribute '" + attributeName + "' for the tag '" + pTag.getName() + "'");
 				}
 			}
 			if (tagParameter.getName() == null) {
@@ -393,20 +405,22 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				String attributeValue = entry.getValue();
 				if (TagIndex.ATTR_NAME.equals(attributeName)) {
 					if (!isNameIndex(attributeValue)) {
-						throw new TemplateConfigurationException(null,
-								"Cannot evaluate the value of the attribute '" + TagIndex.ATTR_NAME + "' as a index name: " + pTag.getName());
+						throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '"
+								+ TagIndex.ATTR_NAME + "' as a index name: " + pTag.getName());
 					}
 					tagIndex.setName(attributeValue);
 				} else if (TagIndex.ATTR_FORMAT.equals(attributeName)) {
 					try {
 						String.format(attributeValue, 0);
 					} catch (Exception ex) {
-						throw new TemplateConfigurationException(null, "Bad format of the attribute [" + pTag.getName() + " " + TagIndex.ATTR_FORMAT
-								+ "]" + " value: " + attributeValue + " problem: " + ex.getMessage());
+						throw new TemplateConfigurationException(null,
+								"Bad format of the attribute [" + pTag.getName() + " " + TagIndex.ATTR_FORMAT + "]"
+										+ " value: " + attributeValue + " problem: " + ex.getMessage());
 					}
 					tagIndex.setFormat(attributeValue);
 				} else {
-					throw new TemplateConfigurationException(null, "Unknown attribute '" + attributeName + "' for the tag '" + pTag.getName() + "'");
+					throw new TemplateConfigurationException(null,
+							"Unknown attribute '" + attributeName + "' for the tag '" + pTag.getName() + "'");
 				}
 			}
 			return tagIndex;
@@ -417,21 +431,22 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				String attributeValue = entry.getValue();
 				if (TagLoop.ATTR_INDEX.equals(attributeName)) {
 					if (!isNameParameter(attributeValue)) {
-						throw new TemplateConfigurationException(null,
-								"Cannot evaluate the value of the attribute '" + TagLoop.ATTR_INDEX + "' as a parameter name: " + pTag.getName());
+						throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '"
+								+ TagLoop.ATTR_INDEX + "' as a parameter name: " + pTag.getName());
 					}
 					tagLoop.setIndex(attributeValue);
 				} else if (TagLoop.ATTR_NAME.equals(attributeName)) {
 					if (!isNameParameter(attributeValue)) {
-						throw new TemplateConfigurationException(null,
-								"Cannot evaluate the attribute [" + pTag.getName() + " " + TagLoop.ATTR_NAME + "] as a parameter name");
+						throw new TemplateConfigurationException(null, "Cannot evaluate the attribute ["
+								+ pTag.getName() + " " + TagLoop.ATTR_NAME + "] as a parameter name");
 					}
 					tagLoop.setName(attributeValue);
 				} else if (TagLoop.ATTR_INDEXES.equals(attributeName)) {
 					String[] indexes = toArray(attributeValue);
 					if (indexes == null) {
-						throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '" + TagParameter.ATTR_INDEXES
-								+ "' as a comma separated list of index names: " + pTag.getName());
+						throw new TemplateConfigurationException(null,
+								"Cannot evaluate the value of the attribute '" + TagParameter.ATTR_INDEXES
+										+ "' as a comma separated list of index names: " + pTag.getName());
 					}
 					tagLoop.setIndexes(indexes);
 				} else if (TagLoop.ATTR_TYPE.equals(attributeName)) {
@@ -440,24 +455,30 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					} else if (TagLoop.TYPE_LENGTH.equals(attributeValue)) {
 						tagLoop.setType(TagLoop.Type.LENGTH);
 					} else {
-						throw new TemplateConfigurationException(null, "The value of the attribute [" + pTag.getName() + " " + TagLoop.ATTR_TYPE
-								+ "] must be " + TagLoop.Type.COUNT + " or " + TagLoop.Type.LENGTH);
+						throw new TemplateConfigurationException(null,
+								"The value of the attribute [" + pTag.getName() + " " + TagLoop.ATTR_TYPE + "] must be "
+										+ TagLoop.Type.COUNT + " or " + TagLoop.Type.LENGTH);
 					}
 				} else {
-					throw new TemplateConfigurationException(null, "Unknown attribute '" + attributeName + "' for the tag '" + TagLoop.TAG + "'");
+					throw new TemplateConfigurationException(null,
+							"Unknown attribute '" + attributeName + "' for the tag '" + TagLoop.TAG + "'");
 				}
 			}
 			if (tagLoop.getIndex() == null) {
-				throw new TemplateConfigurationException(null, "attribute '" + TagLoop.ATTR_INDEX + "' is required for the tag " + TagLoop.TAG);
+				throw new TemplateConfigurationException(null,
+						"attribute '" + TagLoop.ATTR_INDEX + "' is required for the tag " + TagLoop.TAG);
 			}
 			if (tagLoop.getIndexes() == null) {
-				tagLoop.setIndexes(new String[0]);;
+				tagLoop.setIndexes(new String[0]);
+				;
 			}
 			if (tagLoop.getName() == null) {
-				throw new TemplateConfigurationException(null, "Attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_NAME + "] must be defined.");
+				throw new TemplateConfigurationException(null,
+						"Attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_NAME + "] must be defined.");
 			}
 			if (tagLoop.getType() == null) {
-				throw new TemplateConfigurationException(null, "Attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_NAME + "] must be defined.");
+				throw new TemplateConfigurationException(null,
+						"Attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_NAME + "] must be defined.");
 			}
 			return tagLoop;
 		} else if (TagIf.TAG.equals(pTag.getName())) {
@@ -471,13 +492,13 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					} else if ("FALSE".equals(attributeValue)) {
 						tagIf.setValid(false);
 					} else {
-						throw new TemplateConfigurationException(null,
-								"The value of the attribute [" + pTag.getName() + " " + TagIf.ATTR_VALID + "] must be TRUE or FALSE");
+						throw new TemplateConfigurationException(null, "The value of the attribute [" + pTag.getName()
+								+ " " + TagIf.ATTR_VALID + "] must be TRUE or FALSE");
 					}
 				} else if (TagIf.ATTR_NAME.equals(attributeName)) {
 					if (!isNameParameter(attributeValue)) {
-						throw new TemplateConfigurationException(null,
-								"Cannot evaluate the attribute [" + pTag.getName() + " " + TagIf.ATTR_NAME + "] as a parameter name");
+						throw new TemplateConfigurationException(null, "Cannot evaluate the attribute ["
+								+ pTag.getName() + " " + TagIf.ATTR_NAME + "] as a parameter name");
 					}
 					tagIf.setName(attributeValue);
 				} else if (TagIf.ATTR_VALUE.equals(attributeName)) {
@@ -485,8 +506,9 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				} else if (TagIf.ATTR_INDEXES.equals(attributeName)) {
 					String[] indexes = toArray(attributeValue);
 					if (indexes == null) {
-						throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '" + TagParameter.ATTR_INDEXES
-								+ "' as a comma separated list of index names: " + pTag.getName());
+						throw new TemplateConfigurationException(null,
+								"Cannot evaluate the value of the attribute '" + TagParameter.ATTR_INDEXES
+										+ "' as a comma separated list of index names: " + pTag.getName());
 					}
 					tagIf.setIndexes(indexes);
 				} else if (TagIf.ATTR_TYPE.equals(attributeName)) {
@@ -499,11 +521,14 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					} else if (TagIf.TYPE_NE.equals(attributeValue)) {
 						tagIf.setType(TagIf.Type.NE);
 					} else {
-						throw new TemplateConfigurationException(null, "The value of the attribute [" + pTag.getName() + " " + TagIf.ATTR_TYPE
-								+ "] must be " + TagIf.Type.EMPTY + "," + TagIf.Type.NONEMPTY + "," + TagIf.Type.NE + "," + TagIf.Type.EQ);
+						throw new TemplateConfigurationException(null,
+								"The value of the attribute [" + pTag.getName() + " " + TagIf.ATTR_TYPE + "] must be "
+										+ TagIf.Type.EMPTY + "," + TagIf.Type.NONEMPTY + "," + TagIf.Type.NE + ","
+										+ TagIf.Type.EQ);
 					}
 				} else {
-					throw new TemplateConfigurationException(null, "Unknown attribute '" + attributeName + "' for the tag '" + TagIf.TAG + "'");
+					throw new TemplateConfigurationException(null,
+							"Unknown attribute '" + attributeName + "' for the tag '" + TagIf.TAG + "'");
 				}
 			}
 
@@ -511,16 +536,21 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 				tagIf.setValid(true);
 			}
 			if (tagIf.getIndexes() == null) {
-				tagIf.setIndexes(new String[0]);;
+				tagIf.setIndexes(new String[0]);
+				;
 			}
 			if (tagIf.getName() == null) {
-				throw new TemplateConfigurationException(null, "Attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "] must be defined.");
+				throw new TemplateConfigurationException(null,
+						"Attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "] must be defined.");
 			}
 			if (tagIf.getType() == null) {
-				throw new TemplateConfigurationException(null, "Attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "] must be defined.");
-			} else if ((tagIf.getType() == TagIf.Type.EQ || tagIf.getType() == TagIf.Type.NE) && tagIf.getValue() == null) {
-				throw new TemplateConfigurationException(null, "The attribut " + TagIf.ATTR_VALUE + " is expected when the value of the attribute ["
-						+ pTag.getName() + " " + TagIf.ATTR_TYPE + "=\"" + tagIf.getType() + "\"]");
+				throw new TemplateConfigurationException(null,
+						"Attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "] must be defined.");
+			} else if ((tagIf.getType() == TagIf.Type.EQ || tagIf.getType() == TagIf.Type.NE)
+					&& tagIf.getValue() == null) {
+				throw new TemplateConfigurationException(null,
+						"The attribut " + TagIf.ATTR_VALUE + " is expected when the value of the attribute ["
+								+ pTag.getName() + " " + TagIf.ATTR_TYPE + "=\"" + tagIf.getType() + "\"]");
 			}
 			return tagIf;
 		} else if (TagEnd.TAG.equals(pTag.getName())) {
@@ -661,7 +691,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		while (true) {
 			final Attribute attribute = createAttribute(pBuilder, pP);
 			if (tag.getAttributes().containsKey(attribute.getName())) {
-				throw new TemplateConfigurationException(null, "Attribute " + attribute.getName() + " exists already in the tag " + tag.getName());
+				throw new TemplateConfigurationException(null,
+						"Attribute " + attribute.getName() + " exists already in the tag " + tag.getName());
 			}
 			tag.getAttributes().put(attribute.getName(), attribute.getValue());
 
@@ -757,7 +788,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		int j = 0;
 		for (int i = pPos; i < pBuilder.length(); i++, j++) {
 			char c = pBuilder.charAt(i);
-			if (j == 0 && !Character.isJavaIdentifierStart(c) || !Character.isJavaIdentifierPart(c) && c != '-' && c != '.') {
+			if (j == 0 && !Character.isJavaIdentifierStart(c)
+					|| !Character.isJavaIdentifierPart(c) && c != '-' && c != '.') {
 				break;
 			}
 		}
