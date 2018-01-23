@@ -13,7 +13,6 @@
 >
 
     <bean id="structureLoader" parent="structureLoaderV">
-        <property name="excelAdapter" ref="excelAdapter" />
     </bean>
     
 
@@ -44,6 +43,8 @@
     </bean>
 
     <bean abstract="true" id="structureLoaderV" class="kkr.ktm.domains.excel.components.structureloader.vertical.StructureLoaderVertical">
+        <property name="excelAdapter" ref="excelAdapter" />
+
         <property name="columnParameter" value="A" />
         <property name="columnIo" value="B" />
         <property name="rowName" value="1" />
@@ -76,7 +77,6 @@
                     <set>
                         <value>REVIEW</value>
                         <value>\(N\).*</value>
-                        <value>H_.*</value>
                     </set>
                 </property>
             </bean>
@@ -85,6 +85,8 @@
 
 
     <bean abstract="true" id="structureLoaderH" class="kkr.ktm.domains.excel.components.structureloader.horizontal.StructureLoaderHorizontal">
+        <property name="excelAdapter" ref="excelAdapter" />
+
         <property name="rowParameter" value="1" />
         <property name="rowIo" value="2" />
         <property name="columnName" value="A" />
@@ -116,9 +118,7 @@
                 <property name="patterns">
                     <set>
                         <value>REVIEW</value>
-                        <value>(N).*</value>
-                        <value>V_.*</value>
-                        <value>H_.*</value>
+                        <value>\(N\).*</value>
                     </set>
                 </property>
             </bean>
