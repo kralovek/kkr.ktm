@@ -1,4 +1,5 @@
 package kkr.ktm.main;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -18,6 +19,7 @@ public class MainKtm extends AbstractMain {
 	private static final DateFormat BATCH_ID_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
 
 	public static void main(String[] args) throws BaseException {
+		System.out.println("KTM");
 		MainKtm main = new MainKtm();
 		main.run(args);
 	}

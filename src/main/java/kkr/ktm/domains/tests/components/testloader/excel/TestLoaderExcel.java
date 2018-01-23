@@ -70,10 +70,10 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			// CODE
 			//
 			if (duplicatesCodes.containsKey(testInputExcel.getCode())) {
-				TestInputExcel testInputExcelDupl = duplicatesCodes.get(testInputExcel.getOrder());
+				TestInputExcel testInputExcelDupl = duplicatesCodes.get(testInputExcel.getCode());
 				ExcelPosition excelPositionSheet = excelPosition.clone();
 				excelPositionSheet.setSheet(testInputExcel.getType());
-				throw new ExcelException(excelPositionSheet, "Code already exists in the workbook: " // 
+				throw new ExcelException(excelPositionSheet, "Code already exists in the workbook: " //
 						+ testInputExcel.toString() + " and " + testInputExcelDupl.toString());
 			}
 			duplicatesCodes.put(testInput.getCode(), testInputExcel);
@@ -91,12 +91,11 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 					TestInputExcel testInputExcelDupl = orderTests.get(testInputExcel.getOrder());
 					ExcelPosition excelPositionSheet = excelPosition.clone();
 					excelPositionSheet.setSheet(testInputExcel.getType());
-					throw new ExcelException(excelPositionSheet,
-							"Group/Order already exists in the workbook: " // 
-									+ testInputExcel.toString() + ": " // 
-									+ testInputExcel.getGroup() + "/" + testInputExcel.getOrder() + " and " //
-									+ testInputExcelDupl.toString() + ": " // 
-									+ testInputExcelDupl.getGroup() + "/" + testInputExcelDupl.getOrder()) //
+					throw new ExcelException(excelPositionSheet, "Group/Order already exists in the workbook: " //
+							+ testInputExcel.toString() + ": " //
+							+ testInputExcel.getGroup() + "/" + testInputExcel.getOrder() + " and " //
+							+ testInputExcelDupl.toString() + ": " //
+							+ testInputExcelDupl.getGroup() + "/" + testInputExcelDupl.getOrder()) //
 					;
 				}
 				orderTests.put(testInputExcel.getOrder(), testInputExcel);
@@ -104,7 +103,8 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 		}
 	}
 
-	private Collection<TestInput> workWorkbook(ExcelPosition excelPosition, TWorkbook tWorkbook, String source) throws BaseException {
+	private Collection<TestInput> workWorkbook(ExcelPosition excelPosition, TWorkbook tWorkbook, String source)
+			throws BaseException {
 		int sheetCount = excelAdapter.getSheetCount(tWorkbook);
 
 		Collection<TestInput> testsWorkbook = new TreeSet<TestInput>();
@@ -155,48 +155,49 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 				}
 				buffer.append(entry.getKey());
 			}
-			throw new ExcelException(excelPosition, "Some test-codes are not unique in the workbook: " + buffer.toString());
+			throw new ExcelException(excelPosition,
+					"Some test-codes are not unique in the workbook: " + buffer.toString());
 		}
 	}
 
-	private Object readValue(ExcelPosition excelPosition, TSheet tSheet, int indexTest, int indexParameter, Orientation orientation, Io io)
-			throws BaseException {
+	private Object readValue(ExcelPosition excelPosition, TSheet tSheet, int indexTest, int indexParameter,
+			Orientation orientation, Io io) throws BaseException {
 		TCell tCell;
 		switch (orientation) {
-			case V :
-				excelPosition.setRow(indexParameter);
-				excelPosition.setColumn(indexTest);
-				tCell = excelAdapter.getCell(tSheet, indexParameter, indexTest);
-				break;
-			case H :
-				excelPosition.setColumn(indexParameter);
-				excelPosition.setRow(indexTest);
-				tCell = excelAdapter.getCell(tSheet, indexTest, indexParameter);
-				break;
+		case V:
+			excelPosition.setRow(indexParameter);
+			excelPosition.setColumn(indexTest);
+			tCell = excelAdapter.getCell(tSheet, indexParameter, indexTest);
+			break;
+		case H:
+			excelPosition.setColumn(indexParameter);
+			excelPosition.setRow(indexTest);
+			tCell = excelAdapter.getCell(tSheet, indexTest, indexParameter);
+			break;
 
-			default :
-				throw new TechnicalException("Unsupported rientation: " + orientation);
+		default:
+			throw new TechnicalException("Unsupported rientation: " + orientation);
 		}
 
 		Object value = excelAdapter.getValue(tCell);
 
 		Object retval;
 		switch (io) {
-			case I :
-				retval = valueGenerator.parseValue(excelPosition, value);
-				break;
+		case I:
+			retval = valueGenerator.parseValue(excelPosition, value);
+			break;
 
-			case E :
-				retval = valueGenerator.parsePattern(excelPosition, value);
-				break;
-			default :
-				throw new IllegalArgumentException("Unexpected IO: " + io);
+		case E:
+			retval = valueGenerator.parsePattern(excelPosition, value);
+			break;
+		default:
+			throw new IllegalArgumentException("Unexpected IO: " + io);
 		}
 		return retval;
 	}
 
-	private Collection<TestInput> workSheet(ExcelPosition excelPositionWorkbook, TSheet tSheet, StructureSheet structureSheet, int orderOfSheet,
-			String source) throws BaseException {
+	private Collection<TestInput> workSheet(ExcelPosition excelPositionWorkbook, TSheet tSheet,
+			StructureSheet structureSheet, int orderOfSheet, String source) throws BaseException {
 		Collection<TestInput> testsSheet = new ArrayList<TestInput>();
 
 		LOG.debug("SHEET: " + tSheet.getName());
@@ -211,10 +212,10 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			StructureTest structureTest = iteratorT.next();
 
 			TestInputExcel testInputExcel = new TestInputExcel( //
-					structureTest.getName(), // 
+					structureTest.getName(), //
 					structureTest.getDescription(), //
 					source, //
-					tSheet.getName(), // 
+					tSheet.getName(), //
 					structureTest.getCode(), //
 					structureTest.getGroup());
 
@@ -225,8 +226,8 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			Iterator<StructureParameter> iteratorI = structureSheet.iteratorParametersI();
 			while (iteratorI.hasNext()) {
 				StructureParameter structureParameterI = iteratorI.next();
-				Object value = readValue(excelPosition, tSheet, structureTest.getIndex(), structureParameterI.getIndex(),
-						structureSheet.getOrientation(), Io.I);
+				Object value = readValue(excelPosition, tSheet, structureTest.getIndex(),
+						structureParameterI.getIndex(), structureSheet.getOrientation(), Io.I);
 				testInputExcel.getDataInput().put(structureParameterI.getName(), value);
 			}
 
@@ -234,7 +235,8 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			while (iteratorE.hasNext()) {
 				StructureParameter structureParameterE = iteratorE.next();
 				// Read and forget - just for checking
-				readValue(excelPosition, tSheet, structureTest.getIndex(), structureParameterE.getIndex(), structureSheet.getOrientation(), Io.E);
+				readValue(excelPosition, tSheet, structureTest.getIndex(), structureParameterE.getIndex(),
+						structureSheet.getOrientation(), Io.E);
 			}
 
 			testsSheet.add(testInputExcel);

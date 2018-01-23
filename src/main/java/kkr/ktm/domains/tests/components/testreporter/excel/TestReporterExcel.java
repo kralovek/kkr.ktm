@@ -3,7 +3,10 @@ package kkr.ktm.domains.tests.components.testreporter.excel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -38,7 +41,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 	public void skipTest(Test test, String batchId) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			workRreport(test, batchId, true);
+			workReport(test, batchId, true);
 			LOG.trace("OK");
 		} finally {
 			LOG.trace("END");
@@ -48,7 +51,10 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 	public Status reportTest(TestOutput testOutput, String batchId) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Status status = workRreport(testOutput, batchId, false);
+			Collection<TestOutput> testsOutput = new ArrayList<TestOutput>();
+			testsOutput.add(testOutput);
+			Map<Test, Status> statuses = workReport(testsOutput, batchId, false);
+			Status status = statuses.values().iterator().next();
 			LOG.trace("OK");
 			return status;
 		} finally {
@@ -56,11 +62,91 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private Status workRreport(Test test, String batchID, boolean skip) throws BaseException {
+	public Map<Test, Status> reportTests(Collection<TestOutput> testsOutputs, String batchId) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			Map<Test, Status> retval = new HashMap<Test, Status>();
+			Map<String, Collection<TestOutput>> testsBySource = new LinkedHashMap<String, Collection<TestOutput>>();
+
+			for (TestOutput testOutput : testsOutputs) {
+				Collection<TestOutput> tests = testsBySource.get(testOutput.getSource());
+				if (tests == null) {
+					tests = new ArrayList<TestOutput>();
+					testsBySource.put(testOutput.getSource(), tests);
+				}
+				tests.add(testOutput);
+			}
+
+			for (Map.Entry<String, Collection<TestOutput>> entry : testsBySource.entrySet()) {
+				Map<Test, Status> statuses = workReport(entry.getValue(), batchId, false);
+				retval.putAll(statuses);
+			}
+
+			LOG.trace("OK");
+			return retval;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	private Map<Test, Status> workReport(Collection<TestOutput> tests, String batchId, boolean skip) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			Map<Test, Status> retval = new HashMap<Test, Status>();
+			if (tests.isEmpty()) {
+				LOG.trace("OK");
+				return retval;
+			}
+
+			Test firstTest = tests.iterator().next();
+
+			File fileSource = new File(firstTest.getSource());
+			File fileTarget = generateTargetFile(firstTest.getSource(), batchId);
+			File fileTmp = generateTempFile(fileTarget);
+
+			TWorkbook workbookSource;
+			if (fileTarget.exists()) {
+				workbookSource = excelAdapter.readWorkbook(fileTarget);
+			} else {
+				workbookSource = excelAdapter.readWorkbook(fileSource);
+			}
+			TWorkbook workbookTarget = excelAdapter.cloneWorkbook(workbookSource, fileTmp);
+
+			ExcelPosition excelPositionWorkbook = new ExcelPosition();
+			excelPositionWorkbook.setFile(workbookTarget.getFile());
+
+			excelAdapter.closeWorkbook(workbookSource);
+
+			CatalogStyles catalogStyles = catalogStylesFactory.createInstance(workbookTarget);
+
+			for (Test test : tests) {
+				Status status = workWorkbook(excelPositionWorkbook, workbookTarget, test, catalogStyles, skip);
+
+				workReview(excelPositionWorkbook, workbookTarget, test, status, catalogStyles);
+
+				retval.put(test, status);
+			}
+
+			excelAdapter.saveWorkbook(workbookTarget);
+
+			excelAdapter.closeWorkbook(workbookTarget);
+
+			renameFile(fileTmp, fileTarget);
+
+			catalogStyles.close();
+
+			LOG.trace("OK");
+			return retval;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	private Status workReport(Test test, String batchId, boolean skip) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			File fileSource = new File(test.getSource());
-			File fileTarget = generateTargetFile(test.getSource(), batchID);
+			File fileTarget = generateTargetFile(test.getSource(), batchId);
 			File fileTmp = generateTempFile(fileTarget);
 
 			TWorkbook workbookSource;
