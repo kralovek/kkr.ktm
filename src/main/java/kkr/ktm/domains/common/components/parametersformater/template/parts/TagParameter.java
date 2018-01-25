@@ -1,33 +1,32 @@
 package kkr.ktm.domains.common.components.parametersformater.template.parts;
 
-/**
- * TagParameter
- *
- * @author KRALOVEC-99999
- */
+import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
+
 public class TagParameter implements Part {
-    public static final String TAG = "PARAMETER";
-    public static final String ATTR_INDEXES = "INDEXES";
-    public static final String ATTR_NAME = "NAME";
-    public static final String ATTR_FORMAT = "FORMAT";
+	public static final String TAG = "PARAMETER";
+	public static final String ATTR_INDEXES = "INDEXES";
+	public static final String ATTR_NAME = "NAME";
+	public static final String ATTR_FORMAT = "FORMAT";
+	public static final String ATTR_FORMAT_TYPE = "FORMAT-TYPE";
 
-    protected String name;
-    protected String format;
-    private String[] indexes;
+	protected String name;
+	protected String formatType;
+	protected Format format;
+	private String[] indexes;
 
-    public String getTagName() {
-        return TAG;
-    }
+	public String getTagName() {
+		return TAG;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(final String pName) {
-        this.name = pName;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String[] getIndexes() {
+	public String[] getIndexes() {
 		return indexes;
 	}
 
@@ -35,38 +34,39 @@ public class TagParameter implements Part {
 		this.indexes = indexes;
 	}
 
-    public boolean isIndexed() {
-        return indexes != null && indexes.length != 0;
-    }
+	public boolean isIndexed() {
+		return indexes != null && indexes.length != 0;
+	}
 
-    public static String getSyntax() {
-        return "[" + TAG + "]";
-    }
+	public static String getSyntax() {
+		return "[" + TAG + "]";
+	}
 
-    
-    public String getFormat() {
+	public Format getFormat() {
 		return format;
 	}
 
-	public void setFormat(String format) {
+	public void setFormat(Format format) {
 		this.format = format;
 	}
 
 	public String toString() {
-    	return "[" + TAG
-    			+ (name != null ? " " + ATTR_NAME + "=\"" + name + "\"" : "")
-    			+ (format != null ? " " + ATTR_FORMAT + "=\"" + format + "\"" : "")
-    			+ (indexes != null ? " " + ATTR_INDEXES + "=\"" + toStringIndexes(indexes) + "\"" : "") + "]";
-    }
-    
-    private String toStringIndexes(String[] indexes) {
-    	StringBuffer buffer = new StringBuffer();
-    	for (String index : indexes) {
-    		if (buffer.length() != 0) {
-    			buffer.append(",");
-    		}
-    		buffer.append(index);
-    	}
-    	return buffer.toString();
-    }
+		return "[" + TAG //
+				+ (name != null ? " " + ATTR_NAME + "=\"" + name + "\"" : "") //
+				+ (format != null ? " " + ATTR_FORMAT + "=\"" + format + "\"" : "") //
+				+ (format != null ? " " + ATTR_FORMAT_TYPE + "=\"" + format.getType() + "\"" : "") //
+				+ (indexes != null ? " " + ATTR_INDEXES + "=\"" + toStringIndexes(indexes) + "\"" : "") //
+				+ "]";
+	}
+
+	private String toStringIndexes(String[] indexes) {
+		StringBuffer buffer = new StringBuffer();
+		for (String index : indexes) {
+			if (buffer.length() != 0) {
+				buffer.append(",");
+			}
+			buffer.append(index);
+		}
+		return buffer.toString();
+	}
 }
