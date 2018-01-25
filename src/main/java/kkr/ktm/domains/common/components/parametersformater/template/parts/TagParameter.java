@@ -10,7 +10,6 @@ public class TagParameter implements Part {
 	public static final String ATTR_FORMAT_TYPE = "FORMAT-TYPE";
 
 	protected String name;
-	protected String formatType;
 	protected Format format;
 	private String[] indexes;
 
