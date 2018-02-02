@@ -2,10 +2,10 @@ package kkr.ktm.domains.common.components.parametersformater.template.format;
 
 import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
 
-public class FormatDefault extends FormatBase implements Format {
+public class FormatAuto extends FormatBase implements Format {
 
-	public FormatDefault() {
-		super(FormatType.DEFAULT);
+	public FormatAuto() {
+		super(FormatType.AUTO);
 	}
 
 	public String format(Value value) {

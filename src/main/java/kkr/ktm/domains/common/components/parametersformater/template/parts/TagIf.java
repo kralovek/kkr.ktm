@@ -57,8 +57,9 @@ public class TagIf implements Part, Open {
 	public static String getSyntax() {
 		return "[" + TAG //
 				+ " " + ATTR_NAME + "=" + "\"ParameterName\"" //
-				+ " " + ATTR_INDEXES + "=" + "\"IndexNameList\"" //
-				+ " " + ATTR_TYPE + "=" + UtilsString.arrayToString(TagIf.Type.values(), "\"", "\"", "|") //
-				+ " " + ATTR_VALUE + "=" + "Value" + "]";
+				+ " " + ATTR_INDEXES + "=" + "\"IndexName1,IndexName2,...\"" //
+				+ " " + ATTR_TYPE + "=" + UtilsString.arrayToString(Type.values(), "\"", "\"", "|") //
+				+ " " + ATTR_VALUE + "=" + "Value" //
+				+ "]";
 	}
 }

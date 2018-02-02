@@ -101,7 +101,7 @@ public class TestInputExcel extends TestBase implements TestInput, Comparable<Te
 	}
 
 	public String toString() {
-		return "IN " + super.toString() + " [ORDER: " + orderOfSheet + "/" + orderInSheet + "]";
+		return "IN " + super.toString() + " [ORDER: " + orderOfSheet + "~" + orderInSheet + "]";
 	}
 
 	private int compare(Integer i1, Integer i2) {

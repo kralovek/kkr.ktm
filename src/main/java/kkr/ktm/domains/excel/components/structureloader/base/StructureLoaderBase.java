@@ -287,7 +287,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 							if (groupOrders.contains(order)) {
 								throw new ExcelException(excelPosition,
 										"The test Order is not unique for the group "
-												+ (structureTest.getGroup() != null ? structureTest.getGroup() : "DEFAULT") + " on the sheet: '"
+												+ (structureTest.getGroup() != null ? structureTest.getGroup() : "AUTO") + " on the sheet: '"
 												+ valueOrder + "'");
 							}
 							groupOrders.add(order);

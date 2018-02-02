@@ -1,6 +1,8 @@
 package kkr.ktm.domains.common.components.parametersformater.template.parts;
 
+import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
+import kkr.ktm.domains.common.components.parametersformater.template.format.FormatType;
 
 public class TagParameter implements Part {
 	public static final String TAG = "PARAMETER";
@@ -38,7 +40,12 @@ public class TagParameter implements Part {
 	}
 
 	public static String getSyntax() {
-		return "[" + TAG + "]";
+		return "[" + TAG //
+				+ " " + ATTR_NAME + "=\"IndexName\"" //
+				+ " " + ATTR_INDEXES + "=" + "\"IndexName1,IndexName2,...\"" //
+				+ " " + ATTR_FORMAT + "=" + "\"Pattern\"" //
+				+ " " + ATTR_FORMAT_TYPE + "=" + UtilsString.arrayToString(FormatType.values(), "\"", "\"", "|") //
+				+ "]";
 	}
 
 	public Format getFormat() {

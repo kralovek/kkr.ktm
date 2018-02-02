@@ -1,14 +1,13 @@
 package kkr.ktm.domains.common.components.parametersformater.template.parts;
 
+import kkr.common.utils.UtilsString;
+
 public class TagLoop implements Part, Open {
 	public static final String TAG = "LOOP";
 	public static final String ATTR_INDEX = "INDEX";
 	public static final String ATTR_INDEXES = "INDEXES";
 	public static final String ATTR_NAME = "NAME";
 	public static final String ATTR_TYPE = "TYPE";
-
-	public static final String TYPE_COUNT = "COUNT";
-	public static final String TYPE_LENGTH = "LENGTH";
 
 	public static enum Type {
 		COUNT, LENGTH
@@ -56,8 +55,12 @@ public class TagLoop implements Part, Open {
 	}
 
 	public static String getSyntax() {
-		return "[" + TAG + " " + ATTR_INDEX + "=\"IndexName\"" + " " + ATTR_NAME + "=\"ParameterName\"" + " "
-				+ ATTR_INDEXES + "=\"IndexNameList\"" + ATTR_TYPE + "=\"" + TYPE_COUNT + "|" + TYPE_LENGTH + "\"]";
+		return "[" + TAG //
+				+ " " + ATTR_INDEX + "=\"IndexName\"" //
+				+ " " + ATTR_NAME + "=\"ParameterName\"" //
+				+ " " + ATTR_INDEXES + "=\"IndexNameList\"" //
+				+ " " + ATTR_TYPE + "=" + UtilsString.arrayToString(Type.values(), "\"", "\"", "|") //
+				+ "]";
 	}
 
 	public String toString() {
