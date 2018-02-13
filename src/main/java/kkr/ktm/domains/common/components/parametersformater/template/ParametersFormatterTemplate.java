@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
 import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Block;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Content;
@@ -71,112 +72,173 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		}
 	}
 
+	private Map<String, Number> extractNumericParameters(Map<String, Object> parameters) {
+		Map<String, Number> retval = new HashMap<String, Number>();
+		for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+			Object object = entry.getValue();
+
+			for (; true //
+					&& object != null //
+					&& object.getClass().isArray() //
+					&& ((Object[]) object).length == 1; //
+					object = ((Object[]) object)[0]) {
+				// nothing to do
+			}
+
+			if (object == null) {
+				continue;
+			}
+
+			if (object instanceof Number) {
+				retval.put(entry.getKey(), (Number) object);
+				continue;
+			}
+			if (object instanceof String) {
+				try {
+					Double value = Double.parseDouble((String) object);
+					retval.put(entry.getKey(), value);
+				} catch (NumberFormatException ex) {
+					// OK
+				}
+			}
+		}
+		return retval;
+	}
+
+	private void evaluateTagParameter(Content contentTarget, TagParameter tagParameter, Map<String, Object> parameters,
+			Map<String, Integer> indexes) throws BaseException {
+		int[] tagIndexes = evaluateIndexes(indexes, tagParameter.getIndexes());
+
+		Value value = evaluateParameter(tagParameter.getName(), tagIndexes, parameters);
+		try {
+			String formatedValue = tagParameter.getFormat().format(value);
+			Text text = new Text();
+			text.setValue(formatedValue);
+			contentTarget.getContents().add(text);
+		} catch (Exception ex) {
+			throw new TemplateConfigurationException(null, "Bad format string for a STRING value ["
+					+ tagParameter.getTagName() + "]: " + tagParameter.getFormat(), ex);
+		}
+	}
+
+	private void evaluateTagIndex(Content contentTarget, TagIndex tagIndex, Map<String, Object> parameters,
+			Map<String, Integer> indexes, ContextIndexExpression context) throws BaseException {
+		Integer value = indexes.get(tagIndex.getName());
+		if (value == null) {
+			throw new TemplateConfigurationException(null,
+					"Unknown index requested by the tag [" + tagIndex.getTagName() + "]: " + tagIndex.getName());
+		}
+		try {
+			Value formatValue;
+			if (tagIndex.getExpression() != null) {
+				context.setValueIndex(value);
+				Number expressionValue = tagIndex.getExpression().evaluate(context);
+				formatValue = new ValueInteger(expressionValue.longValue());
+			} else {
+				formatValue = new ValueInteger(value);
+			}
+
+			String formatedValue = tagIndex.getFormat().format(formatValue);
+			Text text = new Text();
+			text.setValue(formatedValue);
+			contentTarget.getContents().add(text);
+		} catch (Exception ex) {
+			throw new TemplateConfigurationException(null,
+					"Bad format string for a INTEGER value [" + tagIndex.getTagName() + "]: " + tagIndex.getName());
+		}
+	}
+
+	private void evaluateTagIf(Content contentTarget, If iff, Map<String, Object> parameters,
+			Map<String, Integer> indexes) throws BaseException {
+		TagIf tagIf = iff.getTag();
+
+		int[] tagIndexes = evaluateIndexes(indexes, tagIf.getIndexes());
+
+		Value value = evaluateParameter(tagIf.getName(), tagIndexes, parameters);
+
+		boolean evaluate = true;
+
+		switch (tagIf.getType()) {
+		case EMPTY:
+			evaluate = value.isEmpty();
+			break;
+		case NONEMPTY:
+			evaluate = !value.isEmpty();
+			break;
+		case EQ:
+			evaluate = value.equals(tagIf.getValue());
+			break;
+		case NE:
+			evaluate = !value.equals(tagIf.getValue());
+			break;
+		}
+
+		if (evaluate) {
+			Content content = evaluateContent(iff.getContent(), parameters, indexes);
+			contentTarget.getContents().addAll(content.getContents());
+		}
+	}
+
+	private void evaluateTagLoop(Content contentTarget, Loop loop, Map<String, Object> parameters,
+			Map<String, Integer> indexes) throws BaseException {
+		TagLoop tagLoop = loop.getTag();
+
+		int[] tagIndexes = evaluateIndexes(indexes, tagLoop.getIndexes());
+
+		Integer count = null;
+		if (tagLoop.getType() == TagLoop.Type.COUNT) {
+			Value valueParameter = evaluateParameter(tagLoop.getName(), tagIndexes, parameters);
+			count = toInteger(valueParameter);
+			if (count == null || count < 0) {
+				throw new TemplateConfigurationException(null, "The value of the parameter " + tagLoop.getName()
+						+ toStringIndexes(tagIndexes) + " must be a non negativ integer");
+			}
+		} else if (tagLoop.getType() == TagLoop.Type.LENGTH) {
+			Object objectParameter = parameters.get(tagLoop.getName());
+			if (objectParameter == null) {
+				throw new TemplateConfigurationException(null, "Unknown parameter: " + tagLoop.getName());
+			}
+			Object objectLevel = retrieveObjectLevel(tagLoop.getName(), objectParameter, tagIndexes);
+			count = evaluateListLength(objectLevel);
+		} else {
+			throw new TemplateConfigurationException(null, "Unsupported LOOP type: " + tagLoop.getType());
+		}
+
+		Map<String, Integer> indexesLoc = new LinkedHashMap<String, Integer>();
+
+		if (indexes != null) {
+			if (indexes.containsKey(tagLoop.getIndex())) {
+				throw new TemplateConfigurationException(null,
+						"The loop index " + tagLoop.getIndex() + " is already used by a parent loop");
+			}
+			indexesLoc.putAll(indexes);
+		}
+		for (int iCount = 1; iCount <= count; iCount++) {
+			indexesLoc.put(tagLoop.getIndex(), iCount);
+			Content content = evaluateContent(loop.getContent(), parameters, indexesLoc);
+			contentTarget.getContents().addAll(content.getContents());
+		}
+	}
+
 	private Content evaluateContent(Content contentSource, Map<String, Object> parameters, Map<String, Integer> indexes)
 			throws BaseException {
 		Content contentTarget = new Content();
+
+		Map<String, Number> numericParameters = extractNumericParameters(parameters);
+		ContextIndexExpression context = new ContextIndexExpression(numericParameters);
 
 		for (int i = 0; i < contentSource.getContents().size(); i++) {
 			Object object = contentSource.getContents().get(i);
 			if (object instanceof Text) {
 				contentTarget.getContents().add(object);
 			} else if (object instanceof TagParameter) {
-				TagParameter tagParameter = (TagParameter) object;
-				int[] tagIndexes = evaluateIndexes(indexes, tagParameter.getIndexes());
-
-				Value value = evaluateParameter(tagParameter.getName(), tagIndexes, parameters);
-				try {
-					String formatedValue = tagParameter.getFormat().format(value);
-					Text text = new Text();
-					text.setValue(formatedValue);
-					contentTarget.getContents().add(text);
-				} catch (Exception ex) {
-					throw new TemplateConfigurationException(null, "Bad format string for a STRING value ["
-							+ tagParameter.getTagName() + "]: " + tagParameter.getFormat(), ex);
-				}
+				evaluateTagParameter(contentTarget, (TagParameter) object, parameters, indexes);
 			} else if (object instanceof TagIndex) {
-				TagIndex tagIndex = (TagIndex) object;
-				Integer value = indexes.get(tagIndex.getName());
-				if (value == null) {
-					throw new TemplateConfigurationException(null, "Unknown index requested by the tag ["
-							+ tagIndex.getTagName() + "]: " + tagIndex.getName());
-				}
-				try {
-					String formatedValue = tagIndex.getFormat().format(new ValueInteger(value));
-					Text text = new Text();
-					text.setValue(formatedValue);
-					contentTarget.getContents().add(text);
-				} catch (Exception ex) {
-					throw new TemplateConfigurationException(null, "Bad format string for a INTEGER value ["
-							+ tagIndex.getTagName() + "]: " + tagIndex.getName());
-				}
+				evaluateTagIndex(contentTarget, (TagIndex) object, parameters, indexes, context);
 			} else if (object instanceof If) {
-				If iff = (If) object;
-				TagIf tagIf = iff.getTag();
-
-				int[] tagIndexes = evaluateIndexes(indexes, tagIf.getIndexes());
-
-				Value value = evaluateParameter(tagIf.getName(), tagIndexes, parameters);
-
-				boolean evaluate = true;
-
-				switch (tagIf.getType()) {
-				case EMPTY:
-					evaluate = value.isEmpty();
-					break;
-				case NONEMPTY:
-					evaluate = !value.isEmpty();
-					break;
-				case EQ:
-					evaluate = value.equals(tagIf.getValue());
-					break;
-				case NE:
-					evaluate = !value.equals(tagIf.getValue());
-					break;
-				}
-
-				if (evaluate) {
-					Content content = evaluateContent(iff.getContent(), parameters, indexes);
-					contentTarget.getContents().addAll(content.getContents());
-				}
+				evaluateTagIf(contentTarget, (If) object, parameters, indexes);
 			} else if (object instanceof Loop) {
-				Loop loop = (Loop) object;
-				TagLoop tagLoop = loop.getTag();
-
-				int[] tagIndexes = evaluateIndexes(indexes, tagLoop.getIndexes());
-
-				Integer count = null;
-				if (tagLoop.getType() == TagLoop.Type.COUNT) {
-					Value valueParameter = evaluateParameter(tagLoop.getName(), tagIndexes, parameters);
-					count = toInteger(valueParameter);
-					if (count == null || count < 0) {
-						throw new TemplateConfigurationException(null, "The value of the parameter " + tagLoop.getName()
-								+ toStringIndexes(tagIndexes) + " must be a non negativ integer");
-					}
-				} else if (tagLoop.getType() == TagLoop.Type.LENGTH) {
-					Object objectParameter = parameters.get(tagLoop.getName());
-					if (objectParameter == null) {
-						throw new TemplateConfigurationException(null, "Unknown parameter: " + tagLoop.getName());
-					}
-					Object objectLevel = retrieveObjectLevel(tagLoop.getName(), objectParameter, tagIndexes);
-					count = evaluateListLength(objectLevel);
-				} else {
-					throw new TemplateConfigurationException(null, "Unsupported LOOP type: " + tagLoop.getType());
-				}
-
-				Map<String, Integer> indexesLoc = new LinkedHashMap<String, Integer>();
-
-				if (indexes != null) {
-					if (indexes.containsKey(tagLoop.getIndex())) {
-						throw new TemplateConfigurationException(null,
-								"The loop index " + tagLoop.getIndex() + " is already used by a parent loop");
-					}
-					indexesLoc.putAll(indexes);
-				}
-				for (int iCount = 1; iCount <= count; iCount++) {
-					indexesLoc.put(tagLoop.getIndex(), iCount);
-					Content content = evaluateContent(loop.getContent(), parameters, indexesLoc);
-					contentTarget.getContents().addAll(content.getContents());
-				}
+				evaluateTagLoop(contentTarget, (Loop) object, parameters, indexes);
 			} else {
 				throw new TemplateConfigurationException(null,
 						"Unknown content part: " + object.getClass().getSimpleName());
@@ -433,6 +495,19 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		} else {
 			Format format = FormatBase.newFormat(FormatType.AUTO, null);
 			tagIndex.setFormat(format);
+		}
+
+		if (attributes.containsKey(TagIndex.ATTR_EXPRESSION)) {
+			String attributeValue = attributes.remove(TagIndex.ATTR_EXPRESSION);
+
+			if (expressionParser == null) {
+				throw new TemplateConfigurationException(null, "" //
+						+ "Expression parser must be configured " //
+						+ "[" + tag.getName() + " " + TagIndex.ATTR_EXPRESSION + "=" + "\"" + attributeValue + "\"]");
+			}
+
+			Expression expression = expressionParser.parseExpression(attributeValue);
+			tagIndex.setExpression(expression);
 		}
 
 		if (!attributes.isEmpty()) {

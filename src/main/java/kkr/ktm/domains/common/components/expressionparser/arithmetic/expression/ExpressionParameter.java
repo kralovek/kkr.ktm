@@ -12,8 +12,8 @@ public class ExpressionParameter implements Expression {
 		this.name = name;
 	}
 
-	public double evaluate(Context context) throws EvaluateExpressionException {
-		Double value = context.getParameter(name);
+	public Number evaluate(Context context) throws EvaluateExpressionException {
+		Number value = context.getParameter(name);
 		if (value == null) {
 			throw new EvaluateExpressionException("Unknown parameter: " + name);
 		}

@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.parametersformater.template.value;
 public class ValueDecimal extends ValueBase implements Value {
 	double value;
 
-	ValueDecimal(double value) {
+	public ValueDecimal(double value) {
 		this.value = value;
 	}
 

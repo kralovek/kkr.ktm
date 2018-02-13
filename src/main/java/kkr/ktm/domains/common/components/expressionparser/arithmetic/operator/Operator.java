@@ -6,5 +6,5 @@ public interface Operator {
 
 	char getSymbol();
 
-	double evaluate(double argument1, double argument2);
+	Number evaluate(Number argument1, Number argument2);
 }

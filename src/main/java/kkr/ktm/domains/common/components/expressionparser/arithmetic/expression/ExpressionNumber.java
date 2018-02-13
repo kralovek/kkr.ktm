@@ -4,14 +4,17 @@ import kkr.ktm.domains.common.components.expressionparser.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 
 public class ExpressionNumber implements Expression {
-	private double value;
+	private Number value;
 
-	public ExpressionNumber(double value) {
+	public ExpressionNumber(Number value) {
 		super();
+		if (value == null) {
+			throw new IllegalArgumentException("Parameter may not be null");
+		}
 		this.value = value;
 	}
 
-	public double evaluate(Context context) {
+	public Number evaluate(Context context) {
 		return value;
 	}
 

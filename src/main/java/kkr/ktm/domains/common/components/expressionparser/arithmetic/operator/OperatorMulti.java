@@ -26,16 +26,16 @@ public enum OperatorMulti implements Operator {
 		return TIMES;
 	}
 
-	public double evaluate(double argument1, double argument2) {
+	public Number evaluate(Number argument1, Number argument2) {
 		switch (this) {
 		case TIMES:
-			return argument1 * argument2;
+			return argument1.doubleValue() * argument2.doubleValue();
 		case DEVIDED:
 		default:
-			if (argument2 == 0) {
+			if (argument2.doubleValue() == 0) {
 				throw new IllegalArgumentException("Division by 0");
 			}
-			return argument1 / argument2;
+			return argument1.doubleValue() / argument2.doubleValue();
 		}
 	}
 }

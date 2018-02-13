@@ -16,10 +16,10 @@ public class ExpressionOperator implements Expression {
 		this.expression2 = expression2;
 	}
 
-	public double evaluate(Context context) throws EvaluateExpressionException {
-		double argument1 = expression1.evaluate(context);
-		double argument2 = expression2.evaluate(context);
-		double value = operator.evaluate(argument1, argument2);
+	public Number evaluate(Context context) throws EvaluateExpressionException {
+		Number argument1 = expression1.evaluate(context);
+		Number argument2 = expression2.evaluate(context);
+		Number value = operator.evaluate(argument1, argument2);
 		return value;
 	}
 

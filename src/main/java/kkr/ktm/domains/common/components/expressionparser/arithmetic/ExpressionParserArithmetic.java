@@ -19,6 +19,7 @@ import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.Level;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.LevelAdd;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.OperatorSeparator;
 
 // 1^2 + 2*{A} + 3*{B}/{C} + (4*{A} + 5*7*{D}/(6 + {C})) + SIN(8)
 
@@ -225,12 +226,20 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			int iParentEnd = text.lastIndexOf(')');
 
 			String name = text.substring(0, iParentBegin).trim();
-			String argument = text.substring(iParentBegin, iParentEnd + 1);
+			String arguments = text.substring(iParentBegin + 1, iParentEnd);
 
-			Expression expression = parseOperator(position.movePosition(iParentBegin + 1), argument, LEVEL);
+			Position positionArgument = position.movePosition(iParentBegin + 1);
+
+			Collection<Addition> additions = parseAdditions(positionArgument, arguments, OperatorSeparator.COMMA);
+			Collection<Expression> expressions = new ArrayList<Expression>();
+			for (Addition argument : additions) {
+				Expression expression = parseOperator(argument.getPosition(), argument.getText(), LEVEL);
+				expressions.add(expression);
+			}
 
 			try {
-				ExpressionFunction expressionFunction = new ExpressionFunction(name, expression);
+				ExpressionFunction expressionFunction = new ExpressionFunction(name,
+						expressions.toArray(new Expression[expressions.size()]));
 				LOG.trace("OK");
 				return expressionFunction;
 			} catch (Exception ex) {
@@ -374,7 +383,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			LOG.info("Expression: " + text);
 			LOG.info("Formated:   " + expression.toString());
 
-			Map<String, Double> parameters = new HashMap<String, Double>();
+			Map<String, Number> parameters = new HashMap<String, Number>();
 
 			parameters.put("A", 1.);
 			parameters.put("B", 2.);
@@ -387,7 +396,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			ContextArithmetic context = new ContextArithmetic(parameters);
 
-			double result = expression.evaluate(context);
+			Number result = expression.evaluate(context);
 
 			LOG.info("Result:     " + result);
 

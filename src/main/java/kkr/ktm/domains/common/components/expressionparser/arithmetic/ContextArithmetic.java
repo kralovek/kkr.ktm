@@ -6,13 +6,17 @@ import kkr.ktm.domains.common.components.expressionparser.Context;
 
 public class ContextArithmetic implements Context {
 
-	private Map<String, Double> parameters;
+	private Map<String, Number> parameters;
 
-	public ContextArithmetic(Map<String, Double> parameters) {
+	public ContextArithmetic(Map<String, Number> parameters) {
 		this.parameters = parameters;
 	}
 
-	public Double getParameter(String name) {
+	public void addParameter(String name, Number value) {
+		parameters.put(name, value);
+	}
+
+	public Number getParameter(String name) {
 		return parameters.get(name);
 	}
 }

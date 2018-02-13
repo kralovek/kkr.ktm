@@ -1,16 +1,16 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.operator;
 
-public enum OperatorExp implements Operator {
-	EXPONENT('^');
+public enum OperatorSeparator implements Operator {
+	COMMA(',');
 
 	private char symbol;
 
-	private OperatorExp(char symbol) {
+	private OperatorSeparator(char symbol) {
 		this.symbol = symbol;
 	}
 
-	public OperatorExp valueOfSymbol(char symbol) {
-		for (OperatorExp operator : values()) {
+	public OperatorSeparator valueOfSymbol(char symbol) {
+		for (OperatorSeparator operator : values()) {
 			if (operator.symbol == symbol) {
 				return operator;
 			}
@@ -22,11 +22,11 @@ public enum OperatorExp implements Operator {
 		return symbol;
 	}
 
-	public OperatorExp getType() {
-		return EXPONENT;
+	public OperatorSeparator getType() {
+		return COMMA;
 	}
 
 	public Number evaluate(Number argument1, Number argument2) {
-		return Math.pow(argument1.doubleValue(), argument2.doubleValue());
+		throw new IllegalStateException("Not implemented");
 	}
 }

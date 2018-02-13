@@ -26,13 +26,13 @@ public enum OperatorAdd implements Operator {
 		return PLUS;
 	}
 
-	public double evaluate(double argument1, double argument2) {
+	public Number evaluate(Number argument1, Number argument2) {
 		switch (this) {
 		case PLUS:
-			return argument1 + argument2;
+			return argument1.doubleValue() + argument2.doubleValue();
 		case MINUS:
 		default:
-			return argument1 - argument2;
+			return argument1.doubleValue() - argument2.doubleValue();
 		}
 	}
 }
