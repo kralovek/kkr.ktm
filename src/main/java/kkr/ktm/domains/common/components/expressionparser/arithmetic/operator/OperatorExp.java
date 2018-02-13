@@ -25,4 +25,8 @@ public enum OperatorExp implements Operator {
 	public OperatorExp getType() {
 		return EXPONENT;
 	}
+
+	public double evaluate(double argument1, double argument2) {
+		return Math.pow(argument1, argument2);
+	}
 }

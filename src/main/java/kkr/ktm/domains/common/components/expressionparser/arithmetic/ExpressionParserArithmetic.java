@@ -2,6 +2,8 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -114,8 +116,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 				if (c == ')') {
 					openLevel--;
 					if (openLevel < 0) {
-						throw new ParseExpressionException(position.movePosition(iPos),
-								"Missing opening parenthese");
+						throw new ParseExpressionException(position.movePosition(iPos), "Missing opening parenthese");
 					}
 					continue;
 				}
@@ -228,10 +229,13 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			Expression expression = parseOperator(position.movePosition(iParentBegin + 1), argument, LEVEL);
 
-			ExpressionFunction expressionFunction = new ExpressionFunction(name, expression);
-
-			LOG.trace("OK");
-			return expressionFunction;
+			try {
+				ExpressionFunction expressionFunction = new ExpressionFunction(name, expression);
+				LOG.trace("OK");
+				return expressionFunction;
+			} catch (Exception ex) {
+				throw new ParseExpressionException(position, "Cannot evalueate function: " + name, ex);
+			}
 		} finally {
 			LOG.trace("END");
 		}
@@ -359,7 +363,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	public static final void main(String[] argv) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			String text = "1^2 + 2*{A} + 3*{B}/{C} + (4*{A} + 5*7*{D}/(6 + {C})) + SIN(8)";
+			String text = "2^({A} + 2) + 2.5*{B} + 3*{C}/{D} + (4*{E} + 5*7*{F}/(6 + {G})) + sin({H})";
 
 			LOG.info("Text: " + text);
 
@@ -367,7 +371,25 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			parser.config();
 			Expression expression = parser.parseExpression(text);
 
-			LOG.info("Format: " + expression.toString());
+			LOG.info("Expression: " + text);
+			LOG.info("Formated:   " + expression.toString());
+
+			Map<String, Double> parameters = new HashMap<String, Double>();
+
+			parameters.put("A", 1.);
+			parameters.put("B", 2.);
+			parameters.put("C", 3.);
+			parameters.put("D", 4.);
+			parameters.put("E", 5.);
+			parameters.put("F", 6.);
+			parameters.put("G", 7.);
+			parameters.put("H", 8.);
+
+			ContextArithmetic context = new ContextArithmetic(parameters);
+
+			double result = expression.evaluate(context);
+
+			LOG.info("Result:     " + result);
 
 			LOG.trace("OK");
 		} finally {

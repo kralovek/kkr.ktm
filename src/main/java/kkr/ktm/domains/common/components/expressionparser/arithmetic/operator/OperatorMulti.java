@@ -25,4 +25,17 @@ public enum OperatorMulti implements Operator {
 	public OperatorMulti getType() {
 		return TIMES;
 	}
+
+	public double evaluate(double argument1, double argument2) {
+		switch (this) {
+		case TIMES:
+			return argument1 * argument2;
+		case DEVIDED:
+		default:
+			if (argument2 == 0) {
+				throw new IllegalArgumentException("Division by 0");
+			}
+			return argument1 / argument2;
+		}
+	}
 }

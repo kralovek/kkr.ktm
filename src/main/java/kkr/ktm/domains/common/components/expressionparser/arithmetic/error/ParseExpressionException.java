@@ -12,6 +12,11 @@ public class ParseExpressionException extends BaseException {
 		this.position = position;
 	}
 
+	public ParseExpressionException(Position position, String message, Throwable cause) {
+		super(message, cause);
+		this.position = position;
+	}
+
 	public Position getPosition() {
 		return position;
 	}

@@ -5,4 +5,6 @@ public interface Operator {
 	Operator valueOfSymbol(char symbol);
 
 	char getSymbol();
+
+	double evaluate(double argument1, double argument2);
 }

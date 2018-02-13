@@ -25,4 +25,14 @@ public enum OperatorAdd implements Operator {
 	public OperatorAdd getType() {
 		return PLUS;
 	}
+
+	public double evaluate(double argument1, double argument2) {
+		switch (this) {
+		case PLUS:
+			return argument1 + argument2;
+		case MINUS:
+		default:
+			return argument1 - argument2;
+		}
+	}
 }
