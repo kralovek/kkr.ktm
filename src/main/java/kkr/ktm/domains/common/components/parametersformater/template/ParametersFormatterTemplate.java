@@ -56,14 +56,14 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		}
 	}
 
-	public String format(String source, final Map<String, Object> parameters) throws BaseException {
+	public String format(String source, Map<String, Object> parameters) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
-			final List<Object> contents = createTags(source);
-			final List<Part> parts = createParts(contents);
-			final Content content = createContent(parts, parameters);
-			final Content contentEvaluated = evaluateContent(content, parameters, null);
+			List<Object> contents = createTags(source);
+			List<Part> parts = createParts(contents);
+			Content content = createContent(parts, parameters);
+			Content contentEvaluated = evaluateContent(content, parameters, null);
 			String retval = contentToString(contentEvaluated);
 			LOG.trace("OK");
 			return retval;
@@ -213,7 +213,9 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 			}
 			indexesLoc.putAll(indexes);
 		}
-		for (int iCount = 1; iCount <= count; iCount++) {
+		// INDEXES
+		// for (int iCount = 1; iCount <= count; iCount++) {
+		for (int iCount = 0; iCount < count; iCount++) {
 			indexesLoc.put(tagLoop.getIndex(), iCount);
 			Content content = evaluateContent(loop.getContent(), parameters, indexesLoc);
 			contentTarget.getContents().addAll(content.getContents());
