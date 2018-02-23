@@ -72,11 +72,11 @@ public class ExpressionFunction implements Expression {
 
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < argumentExpressions.length; i++) {
+		for (Expression argumentExpression : argumentExpressions) {
 			if (buffer.length() != 0) {
 				buffer.append(OperatorSeparator.COMMA.getSymbol());
 			}
-			argumentExpressions.toString();
+			buffer.append(argumentExpression.toString());
 		}
 		return name + "(" + buffer.toString() + ")";
 	}

@@ -14,8 +14,8 @@ public class LevelMulti implements Level {
 	public Expression first(Position position, Operator operator, Expression expression)
 			throws ParseExpressionException {
 		if (operator != null) {
-			throw new ParseExpressionException(position,
-					"Expression cannot start with the operator " + operator.getSymbol());
+			throw new ParseExpressionException(position, "Expression cannot start with this operator",
+					String.valueOf(operator.getSymbol()));
 		}
 		return expression;
 	}

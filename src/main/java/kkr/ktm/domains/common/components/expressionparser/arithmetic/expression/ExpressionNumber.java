@@ -19,6 +19,17 @@ public class ExpressionNumber implements Expression {
 	}
 
 	public String toString() {
-		return String.valueOf(value);
+		String text = String.valueOf(value);
+		int iPos = text.indexOf('.');
+		if (iPos != -1) {
+			text = text.replaceAll("0*$", "");
+			if (iPos == text.length() - 1) {
+				text = text.substring(0, iPos);
+				if (text.length() == 0 || !Character.isDigit(text.charAt(text.length() - 1))) {
+					text = "0";
+				}
+			}
+		}
+		return text;
 	}
 }

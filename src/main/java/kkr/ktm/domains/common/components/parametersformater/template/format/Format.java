@@ -4,7 +4,7 @@ import kkr.ktm.domains.common.components.parametersformater.template.value.Value
 
 public interface Format {
 
-	String format(Value value);
+	String format(Value value) throws IllegalArgumentException;
 
 	FormatType getType();
 }

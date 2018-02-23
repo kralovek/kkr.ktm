@@ -17,7 +17,7 @@ public class ContextIndexExpression implements Context {
 		this.valueIndex = valueIndex;
 	}
 
-	public Number getParameter(String name) {
+	public Number getParameter(String name, Integer... indexes) {
 		if (INDEX.equals(name)) {
 			return valueIndex;
 		}

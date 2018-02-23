@@ -4,7 +4,7 @@ import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
 import kkr.ktm.domains.common.components.parametersformater.template.format.FormatType;
 
-public class TagParameter implements Part {
+public class TagParameter implements Tag {
 	public static final String TAG = "PARAMETER";
 	public static final String ATTR_INDEXES = "INDEXES";
 	public static final String ATTR_NAME = "NAME";
