@@ -15,7 +15,19 @@ public class StructureSheetImpl implements StructureSheet {
 	private String name;
 	private Orientation orientation;
 
-	private int indexStatusTest;
+	Integer indexCode;
+
+	Integer indexActive;
+
+	Integer indexOrder;
+
+	Integer indexGroup;
+
+	Integer indexStatus;
+
+	Integer indexName;
+
+	Integer indexDescription;
 	private ExcelIdCell indexStatusSheetOk;
 	private ExcelIdCell indexStatusSheetKo;
 	private ExcelIdCell indexStatusSheetSkip;
@@ -23,6 +35,7 @@ public class StructureSheetImpl implements StructureSheet {
 	private Map<String, StructureTest> tests = new LinkedHashMap<String, StructureTest>();
 
 	private Map<String, StructureParameter> parametersI = new LinkedHashMap<String, StructureParameter>();
+	// TODO: more instances of parameters O possible ... how to do it?
 	private Map<String, StructureParameter> parametersO = new LinkedHashMap<String, StructureParameter>();
 	private Map<String, StructureParameter> parametersE = new LinkedHashMap<String, StructureParameter>();
 
@@ -53,14 +66,6 @@ public class StructureSheetImpl implements StructureSheet {
 
 	public Iterator<StructureParameter> iteratorParametersE() {
 		return parametersE.values().iterator();
-	}
-
-	public int getIndexStatusTest() {
-		return indexStatusTest;
-	}
-
-	public void setIndexStatusTest(int indexStatusTest) {
-		this.indexStatusTest = indexStatusTest;
 	}
 
 	public ExcelIdCell getIndexStatusSheetOk() {
@@ -103,24 +108,81 @@ public class StructureSheetImpl implements StructureSheet {
 		return parametersE.get(name);
 	}
 
+	public void addSystemParameter(SystemParameter systemParameter, int index) {
+		switch (systemParameter) {
+		case CODE:
+			indexCode = index;
+			break;
+		case ACTIVE:
+			indexActive = index;
+			break;
+		case NAME:
+			indexName = index;
+			break;
+		case DESCRIPTION:
+			indexDescription = index;
+			break;
+		case ORDER:
+			indexOrder = index;
+			break;
+		case GROUP:
+			indexGroup = index;
+			break;
+		case STATUS:
+			indexStatus = index;
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	public void addParameter(StructureParameter structureParameter) {
 		switch (structureParameter.getIo()) {
-			case I :
-				parametersI.put(structureParameter.getName(), structureParameter);
-				break;
-			case O :
-				parametersO.put(structureParameter.getName(), structureParameter);
-				break;
-			case E :
-				parametersE.put(structureParameter.getName(), structureParameter);
-				break;
+		case I:
+			parametersI.put(structureParameter.getName(), structureParameter);
+			break;
+		case O:
+			parametersO.put(structureParameter.getName(), structureParameter);
+			break;
+		case E:
+			parametersE.put(structureParameter.getName(), structureParameter);
+			break;
 
-			default :
-				throw new IllegalArgumentException("Unsupported IO: " + structureParameter.getIo());
+		default:
+			throw new IllegalArgumentException("Unsupported IO: " + structureParameter.getIo());
 		}
 	}
 
 	public void addTest(StructureTest structureTest) {
 		tests.put(structureTest.getCode(), structureTest);
+	}
+
+	public Integer getIndexCode() {
+		return indexCode;
+	}
+
+	public Integer getIndexActive() {
+		return indexActive;
+	}
+
+	public Integer getIndexOrder() {
+		return indexOrder;
+	}
+
+	public Integer getIndexGroup() {
+		return indexGroup;
+	}
+
+	public Integer getIndexStatus() {
+		return indexStatus;
+	}
+
+	public Integer getIndexName() {
+		return indexName;
+	}
+
+	public Integer getIndexDescription() {
+		return indexDescription;
 	}
 }

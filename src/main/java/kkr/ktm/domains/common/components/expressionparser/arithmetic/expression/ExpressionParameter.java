@@ -1,8 +1,8 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression;
 
-import kkr.ktm.domains.common.components.expressionparser.Context;
+import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.EvaluateExpressionException;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 
 public class ExpressionParameter implements Expression {
 	private String name;
@@ -20,14 +20,14 @@ public class ExpressionParameter implements Expression {
 		this.indexExpressions = indexes;
 	}
 
-	public Number evaluate(Context context) throws EvaluateExpressionException {
+	public Number evaluate(ContextExpression context) throws ExpressionEvaluateException {
 		Integer[] indexes = null;
 		if (indexExpressions != null && indexExpressions.length != 0) {
 			indexes = new Integer[indexExpressions.length];
 			for (int i = 0; i < indexExpressions.length; i++) {
 				Number number = indexExpressions[i].evaluate(context);
 				if (number.longValue() != (long) number.doubleValue()) {
-					throw new EvaluateExpressionException(
+					throw new ExpressionEvaluateException(
 							"Evaluated index of parameter " + name + " is not an integer: " + number);
 				}
 				indexes[i] = number.intValue();
@@ -51,11 +51,11 @@ public class ExpressionParameter implements Expression {
 
 		Object value = context.getParameter(name, indexes);
 		if (value == null) {
-			throw new EvaluateExpressionException("Unknown parameter: " + name);
+			throw new ExpressionEvaluateException("Unknown parameter: " + name);
 		}
 
 		if (!(value instanceof Number)) {
-			throw new EvaluateExpressionException(
+			throw new ExpressionEvaluateException(
 					"Value of parameter " + name + toStringIndexes(indexes) + " is not a number: " + value.toString());
 		}
 

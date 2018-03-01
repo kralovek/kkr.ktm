@@ -3,19 +3,9 @@ package kkr.ktm.domains.common.components.parametersparser.xml;
 import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
 
-
-
-/**
- * ParametersParserXmlFwk
- * 
- * @author KRALOVEC-99999
- */
 public abstract class ParametersParserXmlFwk {
-    private boolean configured;
+	private boolean configured;
 
-	/**
-	 * Encoding norm
-	 */
 	private static final String ENCODE_UTF_8 = "UTF-8";
 
 	protected Boolean useTagPrefix;
@@ -36,8 +26,7 @@ public abstract class ParametersParserXmlFwk {
 		useValuePrefix = Boolean.TRUE.equals(useValuePrefix);
 
 		if (sysParamPrefix == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter _sysPrefix is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter _sysPrefix is not configured");
 		} else if (!sysParamPrefix.isEmpty() && !sysParamPrefix.endsWith("/")) {
 			sysParamPrefix += "/";
 		}
@@ -50,8 +39,7 @@ public abstract class ParametersParserXmlFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 

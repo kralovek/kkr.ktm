@@ -1,5 +1,6 @@
 package kkr.ktm.domains.common.components.parametersformater.template;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -8,7 +9,7 @@ import kkr.ktm.domains.common.components.expressionparser.arithmetic.ContextArit
 
 public class ContextNumberExpression extends ContextArithmetic {
 	private static final Logger LOG = Logger.getLogger(ContextNumberExpression.class);
-	private Map<String, Integer> currentIndexes;
+	private Map<String, Integer> currentIndexes = new HashMap<String, Integer>();
 
 	public ContextNumberExpression(Map<String, Object> parameters) {
 		LOG.trace("BEGIN");
@@ -79,8 +80,29 @@ public class ContextNumberExpression extends ContextArithmetic {
 		return super.getParameter(name, indexes);
 	}
 
+	public void updateIndex(String name, int value) throws IllegalArgumentException {
+		if (!currentIndexes.containsKey(name)) {
+			throw new IllegalArgumentException("Index was not initialized, so it cannot be updated: " + name);
+		}
+		currentIndexes.put(name, value);
+	}
+
+	public void addIndex(String name, int value) throws IllegalArgumentException {
+		if (isParameter(name)) {
+			throw new IllegalArgumentException("Conflict in the name of the index and an existing parameter: " + name);
+		}
+		if (currentIndexes.containsKey(name)) {
+			throw new IllegalArgumentException(
+					"Conflict in the name of the index and an existing parent index: " + name);
+		}
+		currentIndexes.put(name, value);
+	}
+
+	public void removeIndex(String name) {
+		currentIndexes.remove(name);
+	}
+
 	public void setIndexes(Map<String, Integer> indexes) throws IllegalArgumentException {
-		this.currentIndexes = indexes;
 		if (indexes != null) {
 			for (Map.Entry<String, Integer> entry : indexes.entrySet()) {
 				if (isParameter(entry.getKey())) {
@@ -91,6 +113,9 @@ public class ContextNumberExpression extends ContextArithmetic {
 					throw new IllegalArgumentException("Value of the index is NULL: " + entry.getKey());
 				}
 			}
+			currentIndexes = indexes;
+		} else {
+			currentIndexes.clear();
 		}
 	}
 }

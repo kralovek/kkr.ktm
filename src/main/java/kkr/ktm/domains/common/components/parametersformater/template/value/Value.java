@@ -6,4 +6,6 @@ public interface Value {
 	boolean isEmpty();
 
 	boolean equals(String value);
+
+	ValueType getType();
 }

@@ -1,5 +1,5 @@
 package kkr.ktm.domains.common.components.parametersformater.template.parts;
 
-public interface Tag extends Part {
+public interface TagBase extends Part {
 	String getTagName();
 }

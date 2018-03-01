@@ -2,12 +2,13 @@ package kkr.ktm.domains.excel.utils;
 
 import java.util.Collection;
 
-import kkr.ktm.domains.excel.data.ExcelIdCell;
 import kkr.common.errors.ConfigurationException;
+import kkr.ktm.domains.excel.data.ExcelIdCell;
 
 public class UtilsExcel implements ConstantsExcel {
 
-	public static ExcelIdCell adaptAndCheckCellId(Class clazz, String cellId, String name) throws ConfigurationException {
+	public static ExcelIdCell adaptAndCheckCellId(Class<?> clazz, String cellId, String name)
+			throws ConfigurationException {
 		if (cellId == null) {
 			return null;
 		}
@@ -30,8 +31,9 @@ public class UtilsExcel implements ConstantsExcel {
 		if (columnIntId == null || rowIntId == null || //
 				columnIntId < idColumnExcelMin || columnIntId > idColumnExcelMax || //
 				rowIntId < EXCEL_MIN_ROW || rowIntId > EXCEL_MAX_ROW) {
-			throw new ConfigurationException(clazz.getSimpleName() + ": Parameter '" + name + "' must be form the range: <" + EXCEL_MIN_COLUMN
-					+ EXCEL_MIN_ROW + " - " + EXCEL_MAX_COLUMN + EXCEL_MAX_ROW + ">");
+			throw new ConfigurationException(
+					clazz.getSimpleName() + ": Parameter '" + name + "' must be form the range: <" + EXCEL_MIN_COLUMN
+							+ EXCEL_MIN_ROW + " - " + EXCEL_MAX_COLUMN + EXCEL_MAX_ROW + ">");
 		}
 		ExcelIdCell idCell = new ExcelIdCell();
 		idCell.setColumn(columnIntId);
@@ -50,18 +52,19 @@ public class UtilsExcel implements ConstantsExcel {
 		data.add(item);
 	}
 
-	public static Integer adaptAndCheckRowId(Class clazz, Integer rowId, String name) throws ConfigurationException {
+	public static Integer adaptAndCheckRowId(Class<?> clazz, Integer rowId, String name) throws ConfigurationException {
 		if (rowId == null) {
 			return null;
 		}
 		if (rowId < EXCEL_MIN_ROW || rowId > EXCEL_MAX_ROW) {
-			throw new ConfigurationException(
-					clazz.getSimpleName() + ": Parameter '" + name + "' must be form the range: <" + EXCEL_MIN_ROW + " - " + EXCEL_MAX_ROW + ">");
+			throw new ConfigurationException(clazz.getSimpleName() + ": Parameter '" + name
+					+ "' must be form the range: <" + EXCEL_MIN_ROW + " - " + EXCEL_MAX_ROW + ">");
 		}
 		return rowId - 1;
 	}
 
-	public static Integer adaptAndCheckColumnId(Class clazz, String columnId, String name) throws ConfigurationException {
+	public static Integer adaptAndCheckColumnId(Class<?> clazz, String columnId, String name)
+			throws ConfigurationException {
 		if (isEmpty(columnId)) {
 			return null;
 		}
@@ -70,8 +73,8 @@ public class UtilsExcel implements ConstantsExcel {
 		Integer columnIntId = columnToIndex(columnId);
 
 		if (columnIntId == null || columnIntId < idColumnExcelMin || columnIntId > idColumnExcelMax) {
-			throw new ConfigurationException(clazz.getSimpleName() + ": Parameter '" + name + "' must be form the range: <" + EXCEL_MIN_COLUMN + " - "
-					+ EXCEL_MAX_COLUMN + ">");
+			throw new ConfigurationException(clazz.getSimpleName() + ": Parameter '" + name
+					+ "' must be form the range: <" + EXCEL_MIN_COLUMN + " - " + EXCEL_MAX_COLUMN + ">");
 		}
 		return columnIntId;
 	}

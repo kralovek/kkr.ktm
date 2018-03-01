@@ -41,7 +41,7 @@ import kkr.ktm.domains.common.components.parametersformater.template.value.Value
 public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk implements ParametersFormatter {
 	private static final Logger LOG = Logger.getLogger(ParametersFormatterTemplate.class);
 
-	private static final Pattern PATTERN_NAME = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]*$");
+	private static final Pattern PATTERN_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_.]*$");
 
 	private static final String[] TAGS = new String[] { TagLoop.TAG, TagEnd.TAG, TagIf.TAG, TagParameter.TAG,
 			TagNumber.TAG };
@@ -66,7 +66,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 			List<Object> contents = createTags(source);
 			List<Part> parts = createParts(contents);
 			Content content = createContent(parts, parameters);
-			Content contentEvaluated = evaluateContent(content, parameters, null);
+			Content contentEvaluated = evaluateContent(content, parameters);
 			String retval = contentToString(contentEvaluated);
 			LOG.trace("OK");
 			return retval;
@@ -145,6 +145,11 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 		int[] tagIndexes = evaluateIndexes(indexes, tagLoop.getIndexes());
 
+		if (!parameters.containsKey(tagLoop.getName())) {
+			throw new TemplateConfigurationException(null, "Missing parameter defined by the attribute [" + TagLoop.TAG
+					+ " " + TagLoop.ATTR_NAME + "]: " + tagLoop.getName());
+		}
+
 		Integer count = null;
 		if (tagLoop.getType() == TagLoop.Type.COUNT) {
 			Value valueParameter = evaluateParameter(tagLoop.getName(), tagIndexes, parameters);
@@ -173,13 +178,16 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 			}
 			indexesLoc.putAll(indexes);
 		}
-		// INDEXES
-		// for (int iCount = 1; iCount <= count; iCount++) {
+
 		for (int iCount = 0; iCount < count; iCount++) {
 			indexesLoc.put(tagLoop.getIndex(), iCount);
 			Content content = evaluateContent(loop.getContent(), parameters, indexesLoc);
 			contentTarget.getContents().addAll(content.getContents());
 		}
+	}
+
+	private Content evaluateContent(Content contentSource, Map<String, Object> parameters) throws BaseException {
+		return evaluateContent(contentSource, parameters, null);
 	}
 
 	private Content evaluateContent(Content contentSource, Map<String, Object> parameters, Map<String, Integer> indexes)
@@ -189,8 +197,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		ContextNumberExpression contextNumber = new ContextNumberExpression(parameters);
 		contextNumber.setIndexes(indexes);
 
-		for (int i = 0; i < contentSource.getContents().size(); i++) {
-			Object object = contentSource.getContents().get(i);
+		for (Object object : contentSource.getContents()) {
 			if (object instanceof Text) {
 				contentTarget.getContents().add(object);
 			} else if (object instanceof TagParameter) {
@@ -673,16 +680,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 	}
 
 	private boolean isNameParameter(String text) {
-		if (text.isEmpty()) {
-			return false;
-		}
-		for (int i = 0; i < text.length(); i++) {
-			char c = text.charAt(i);
-			if (!Character.isJavaIdentifierPart(c) && c != '-' && c != '.' && c != '/') {
-				return false;
-			}
-		}
-		return true;
+		return PATTERN_NAME.matcher(text).matches();
 	}
 
 	private boolean isNameIndex(String text) {
@@ -709,16 +707,16 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		final Position p = new Position(source);
 
 		while (true) {
-			final int current = p.position;
-			final int indexTag = nextTag(builder, p.position);
+			int current = p.position;
+			int indexTag = nextTag(builder, p.position);
 			if (indexTag != -1) {
-				final String text = builder.substring(current, indexTag);
+				String text = builder.substring(current, indexTag);
 				contents.add(text);
 				p.position = indexTag;
-				final Tag tag = createTag(builder, p);
+				Tag tag = createTag(builder, p);
 				contents.add(tag);
 			} else {
-				final String text = builder.substring(current);
+				String text = builder.substring(current);
 				contents.add(text);
 				break;
 			}
@@ -727,130 +725,130 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return contents;
 	}
 
-	private Tag createTag(StringBuilder pBuilder, final Position pP) throws BaseException {
+	private Tag createTag(StringBuilder pBuilder, Position position) throws BaseException {
 		Tag tag = new Tag();
 
 		//
 		// [
 		//
-		pP.position++;
-		pP.position += countSpace(pBuilder, pP.position);
+		position.position++;
+		position.position += countSpace(pBuilder, position.position);
 
 		//
 		// Name
 		//
-		int diff = countName(pBuilder, pP.position);
-		final String name = pBuilder.substring(pP.position, pP.position + diff);
+		int diff = countName(pBuilder, position.position);
+		final String name = pBuilder.substring(position.position, position.position + diff);
 		tag.setName(name);
-		pP.position += diff;
-		diff = countSpace(pBuilder, pP.position);
+		position.position += diff;
+		diff = countSpace(pBuilder, position.position);
 
-		if (!isBorder(pBuilder, pP.position)) {
-			throw new TemplateConfigurationException(null, "Unexpected character: " + pP);
+		if (!isBorder(pBuilder, position.position)) {
+			throw new TemplateConfigurationException(null, "Unexpected character: " + position);
 		}
 
 		//
 		// End
 		//
-		if (pBuilder.charAt(pP.position + diff) == ']') {
-			pP.position += diff;
-			pP.position++;
+		if (pBuilder.charAt(position.position + diff) == ']') {
+			position.position += diff;
+			position.position++;
 			return tag;
 		}
 
-		pP.position += diff;
+		position.position += diff;
 
 		//
 		// Attribute
 		//
 		while (true) {
-			final Attribute attribute = createAttribute(pBuilder, pP);
+			final Attribute attribute = createAttribute(pBuilder, position);
 			if (tag.getAttributes().containsKey(attribute.getName())) {
 				throw new TemplateConfigurationException(null,
 						"Attribute " + attribute.getName() + " exists already in the tag " + tag.getName());
 			}
 			tag.getAttributes().put(attribute.getName(), attribute.getValue());
 
-			if (!isBorder(pBuilder, pP.position)) {
-				throw new TemplateConfigurationException(null, "Unexpected character on position: " + pP);
+			if (!isBorder(pBuilder, position.position)) {
+				throw new TemplateConfigurationException(null, "Unexpected character on position: " + position);
 			}
 
-			diff = countSpace(pBuilder, pP.position);
-			pP.position += diff;
+			diff = countSpace(pBuilder, position.position);
+			position.position += diff;
 
 			//
 			// End
 			//
-			if (pBuilder.charAt(pP.position) == ']') {
-				pP.position += diff;
-				pP.position++;
+			if (pBuilder.charAt(position.position) == ']') {
+				position.position += diff;
+				position.position++;
 				return tag;
 			}
 
-			if (pP.position >= pBuilder.length()) {
-				throw new TemplateConfigurationException(null, "Missing the character '[': " + pP);
+			if (position.position >= pBuilder.length()) {
+				throw new TemplateConfigurationException(null, "Missing the character '[': " + position);
 			}
 		}
 	}
 
-	private Attribute createAttribute(StringBuilder pBuilder, final Position pP) throws BaseException {
+	private Attribute createAttribute(StringBuilder pBuilder, Position position) throws BaseException {
 		final Attribute attribute = new Attribute();
 
-		int diff = countSpace(pBuilder, pP.position);
-		pP.position += diff;
+		int diff = countSpace(pBuilder, position.position);
+		position.position += diff;
 
 		//
 		// Name
 		//
-		diff = countName(pBuilder, pP.position);
+		diff = countName(pBuilder, position.position);
 		if (diff == 0) {
-			throw new TemplateConfigurationException(null, "Cannot extract attribute name: " + pP);
+			throw new TemplateConfigurationException(null, "Cannot extract attribute name: " + position);
 		}
-		final String name = pBuilder.substring(pP.position, pP.position + diff);
+		String name = pBuilder.substring(position.position, position.position + diff);
 		attribute.setName(name);
-		pP.position += diff;
-		diff = countSpace(pBuilder, pP.position);
-		pP.position += diff;
+		position.position += diff;
+		diff = countSpace(pBuilder, position.position);
+		position.position += diff;
 
 		//
 		// =
 		//
-		if (pBuilder.charAt(pP.position) != '=') {
-			throw new TemplateConfigurationException(null, "Attribut is missing '=': " + pP);
+		if (pBuilder.charAt(position.position) != '=') {
+			throw new TemplateConfigurationException(null, "Attribut is missing '=': " + position);
 		}
-		pP.position++;
-		diff = countSpace(pBuilder, pP.position);
-		pP.position += diff;
+		position.position++;
+		diff = countSpace(pBuilder, position.position);
+		position.position += diff;
 
 		//
 		// ValueBase
 		//
-		final boolean quot = pBuilder.charAt(pP.position) == '"';
+		boolean quot = pBuilder.charAt(position.position) == '"';
 		if (quot) {
-			pP.position++;
-			final int quotPos = pBuilder.indexOf("\"", pP.position);
+			position.position++;
+			final int quotPos = pBuilder.indexOf("\"", position.position);
 			if (quotPos == -1) {
-				throw new TemplateConfigurationException(null, "Quotations are not closed: " + pP);
+				throw new TemplateConfigurationException(null, "Quotations are not closed: " + position);
 			}
-			final String value = pBuilder.substring(pP.position, quotPos);
+			final String value = pBuilder.substring(position.position, quotPos);
 			attribute.setValue(value);
-			pP.position = quotPos + 1;
+			position.position = quotPos + 1;
 		} else {
-			diff = countValue(pBuilder, pP.position);
-			final String value = pBuilder.substring(pP.position, pP.position + diff);
-			pP.position += diff;
+			diff = countValue(pBuilder, position.position);
+			final String value = pBuilder.substring(position.position, position.position + diff);
+			position.position += diff;
 			attribute.setValue(value);
-			if (!isBorder(pBuilder, pP.position)) {
-				throw new TemplateConfigurationException(null, "Unexpected character: " + pP);
+			if (!isBorder(pBuilder, position.position)) {
+				throw new TemplateConfigurationException(null, "Unexpected character: " + position);
 			}
 		}
 
 		return attribute;
 	}
 
-	private int countValue(StringBuilder pBuilder, final int pPos) {
+	private int countValue(StringBuilder pBuilder, int pos) {
 		int j = 0;
-		for (int i = pPos; i < pBuilder.length(); i++, j++) {
+		for (int i = pos; i < pBuilder.length(); i++, j++) {
 			char c = pBuilder.charAt(i);
 			if (!Character.isJavaIdentifierPart(c) && c != '-') {
 				break;
@@ -859,9 +857,9 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return j;
 	}
 
-	private int countName(StringBuilder pBuilder, final int pPos) {
+	private int countName(StringBuilder pBuilder, int pos) {
 		int j = 0;
-		for (int i = pPos; i < pBuilder.length(); i++, j++) {
+		for (int i = pos; i < pBuilder.length(); i++, j++) {
 			char c = pBuilder.charAt(i);
 			if (j == 0 && !Character.isJavaIdentifierStart(c)
 					|| !Character.isJavaIdentifierPart(c) && c != '-' && c != '.') {
@@ -871,19 +869,18 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return j;
 	}
 
-	private int countSpace(StringBuilder pBuilder, final int pPos) {
+	private int countSpace(StringBuilder pBuilder, int pos) {
 		int j = 0;
-		for (int i = pPos; i < pBuilder.length() && Character.isWhitespace(pBuilder.charAt(i)); i++, j++) {
+		for (int i = pos; i < pBuilder.length() && Character.isWhitespace(pBuilder.charAt(i)); i++, j++) {
 		}
 		return j;
 	}
 
-	private int nextTag(StringBuilder pBuilder, final int pPos) {
-
+	private int nextTag(StringBuilder pBuilder, int pos) {
 		int min = -1;
 
 		for (String tag : TAGS) {
-			int found = pBuilder.indexOf(tag, pPos);
+			int found = pBuilder.indexOf(tag, pos);
 			if (found == -1) {
 				continue;
 			}
@@ -899,9 +896,9 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return min;
 	}
 
-	private int startTag(StringBuilder pBuilder, final int pPos, final String pTag) {
+	private int startTag(StringBuilder pBuilder, int pos, String tag) {
 		int startTag = -1;
-		for (int i = pPos - 1; i >= 0; i--) {
+		for (int i = pos - 1; i >= 0; i--) {
 			char c = pBuilder.charAt(i);
 			if (c == '[') {
 				startTag = i;
@@ -912,7 +909,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 			}
 			return -1;
 		}
-		char lastChar = pBuilder.charAt(pPos + pTag.length());
+		char lastChar = pBuilder.charAt(pos + tag.length());
 		if (Character.isWhitespace(lastChar) || //
 				lastChar == ']') {
 			return startTag;
@@ -920,8 +917,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return -1;
 	}
 
-	private boolean isBorder(StringBuilder pBuilder, final int pPos) {
-		final char c = pBuilder.charAt(pPos);
+	private boolean isBorder(StringBuilder pBuilder, int pos) {
+		char c = pBuilder.charAt(pos);
 		return Character.isWhitespace(c) || c == ']';
 	}
 }

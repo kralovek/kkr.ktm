@@ -33,13 +33,9 @@ public abstract class StructureLoaderBaseFwk {
 
 	protected int indexParameter;
 	protected int indexIo;
-	protected int indexCode;
-	protected Integer indexActive;
-	protected Integer indexName;
-	protected Integer indexDescription;
-	protected Integer indexGroup;
-	protected Integer indexOrder;
-	protected Integer indexStatusTest;
+
+	protected Collection<Integer> indexesParametersIgnored;
+	protected Collection<Integer> indexesTestsIgnored;
 
 	public void config() throws ConfigurationException {
 		configured = false;

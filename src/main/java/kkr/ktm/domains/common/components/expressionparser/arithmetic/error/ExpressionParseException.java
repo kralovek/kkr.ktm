@@ -3,19 +3,19 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic.error;
 import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
 
-public class ParseExpressionException extends BaseException {
+public class ExpressionParseException extends BaseException {
 
 	private Position position;
 	private String expression;
 	private String part;
 
-	public ParseExpressionException(Position position, String message, String part) {
+	public ExpressionParseException(Position position, String message, String part) {
 		super(message);
 		this.position = position;
 		this.part = part;
 	}
 
-	public ParseExpressionException(Position position, String message, String part, Throwable cause) {
+	public ExpressionParseException(Position position, String message, String part, Throwable cause) {
 		super(message, cause);
 		this.position = position;
 		this.part = part;

@@ -14,6 +14,10 @@ public class ValueNull extends ValueBase implements Value {
 		return value == null || value.isEmpty();
 	}
 
+	public ValueType getType() {
+		return ValueType.NULL;
+	}
+
 	public String toString() {
 		return "";
 	}

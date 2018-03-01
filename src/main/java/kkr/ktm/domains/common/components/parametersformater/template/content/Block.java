@@ -1,7 +1,7 @@
 package kkr.ktm.domains.common.components.parametersformater.template.content;
 
 public interface Block {
-    Content getContent();
+	Content getContent();
 
-    void setContent(final Content pContent);
+	void setContent(Content content);
 }

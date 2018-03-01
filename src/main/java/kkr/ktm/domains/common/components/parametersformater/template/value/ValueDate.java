@@ -24,6 +24,10 @@ public class ValueDate extends ValueBase implements Value {
 		throw new IllegalStateException("ValueDate cannot be compared to a string");
 	}
 
+	public ValueType getType() {
+		return ValueType.DATE;
+	}
+
 	public String toString() {
 		return value.toString();
 	}

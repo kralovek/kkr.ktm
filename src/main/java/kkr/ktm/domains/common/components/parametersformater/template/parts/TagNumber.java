@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.parametersformater.template.parts;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
 
-public class TagNumber implements Tag {
+public class TagNumber implements TagBase {
 	public static final String TAG = "NUMBER";
 	public static final String ATTR_FORMAT = "FORMAT";
 	public static final String ATTR_EXPRESSION = "EXPRESSION";

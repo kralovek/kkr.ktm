@@ -25,6 +25,10 @@ public class ValueBoolean extends ValueBase implements Value {
 		}
 	}
 
+	public ValueType getType() {
+		return ValueType.BOOLEAN;
+	}
+
 	public String toString() {
 		return String.valueOf(value).toUpperCase();
 	}

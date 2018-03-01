@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.ExpressionParser;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ParseExpressionException;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionParseException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionFunction;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionNumber;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionOperator;
@@ -30,7 +30,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	private static final Pattern PATTERN_NUMBER = Pattern.compile("^(0?|[1-9][0-9]*)(\\.[0-9]*)?$");
 	private static final Pattern PATTERN_PARAMETER_START = Pattern.compile("^\\{.*");
 	private static final Pattern PATTERN_PARAMETER = Pattern
-			.compile("^\\{ *[a-z_A-Z][a-z_A-Z0-9]*( *\\[.*\\]| *)*\\}$");
+			.compile("^\\{ *[a-zA-Z_][a-zA-Z0-9_.]*( *\\[.*\\]| *)*\\}$");
 	private static final Pattern PATTERN_FUNCTION_START = Pattern.compile("^[a-z_A-Z].*");
 	private static final Pattern PATTERN_FUNCTION = Pattern.compile("^[a-z_A-Z][a-z_A-Z0-9]* *\\(.*\\)$");
 	private static final Pattern PATTERN_PARENTHESE_START = Pattern.compile("^\\(.*");
@@ -101,7 +101,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	}
 
 	private Collection<Addition> parseAdditions(Position position, String text, Operator operatorType)
-			throws ParseExpressionException {
+			throws ExpressionParseException {
 		LOG.trace("BEGIN: {" + operatorType.getClass().getSimpleName() + "} [" + position.getPosition() + "] '" + text
 				+ "'");
 		try {
@@ -141,7 +141,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 						parentheseOpen = null;
 						parentheseClose = null;
 					} else if (parentheseLevel < 0) {
-						throw new ParseExpressionException(position.movePosition(iPos), "Missing opening parenthese",
+						throw new ExpressionParseException(position.movePosition(iPos), "Missing opening parenthese",
 								text);
 					}
 					continue;
@@ -178,7 +178,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			if (parentheseLevel != 0) {
-				throw new ParseExpressionException(position.movePosition(iPosOpen), "Missing closing parenthese", text);
+				throw new ExpressionParseException(position.movePosition(iPosOpen), "Missing closing parenthese", text);
 			}
 
 			if (cutCurrent != null) {
@@ -194,7 +194,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	private Expression parseParentheses(Position position, String text) throws ParseExpressionException {
+	private Expression parseParentheses(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			if (!PATTERN_PARENTHESE_START.matcher(text).matches()) {
@@ -202,7 +202,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 				return null;
 			}
 			if (!PATTERN_PARENTHESE.matcher(text).matches()) {
-				throw new ParseExpressionException(position, "Literal is not a parenthese closed expression", text);
+				throw new ExpressionParseException(position, "Literal is not a parenthese closed expression", text);
 			}
 			String subtext = text.substring(1, text.length() - 1);
 			Expression retval = parseOperator(position.movePosition(1), subtext, LEVEL);
@@ -213,7 +213,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	private Expression parseNumber(Position position, String text) throws ParseExpressionException {
+	private Expression parseNumber(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			if (!PATTERN_NUMBER_START.matcher(text).matches()) {
@@ -222,7 +222,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			if (!PATTERN_NUMBER.matcher(text).matches()) {
-				throw new ParseExpressionException(position, "Literal is not a number", text);
+				throw new ExpressionParseException(position, "Literal is not a number", text);
 			}
 
 			double value = Double.parseDouble(text);
@@ -234,7 +234,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	private Expression parseFunction(Position position, String text) throws ParseExpressionException {
+	private Expression parseFunction(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			if (!PATTERN_FUNCTION_START.matcher(text).matches()) {
@@ -243,7 +243,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			if (!PATTERN_FUNCTION.matcher(text).matches()) {
-				throw new ParseExpressionException(position, "Literal is not a function", text);
+				throw new ExpressionParseException(position, "Literal is not a function", text);
 			}
 
 			int iParentBegin = text.indexOf('(');
@@ -267,14 +267,14 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 				LOG.trace("OK");
 				return expressionFunction;
 			} catch (Exception ex) {
-				throw new ParseExpressionException(position, "Cannot evalueate function", name, ex);
+				throw new ExpressionParseException(position, "Cannot evalueate function", name, ex);
 			}
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Expression parseParameter(Position position, String text) throws ParseExpressionException {
+	private Expression parseParameter(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			if (!PATTERN_PARAMETER_START.matcher(text).matches()) {
@@ -283,7 +283,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			if (!PATTERN_PARAMETER.matcher(text).matches()) {
-				throw new ParseExpressionException(position, "Literal is not a parameter", text);
+				throw new ExpressionParseException(position, "Literal is not a parameter", text);
 			}
 			String content = text.substring(1, text.length() - 1);
 
@@ -320,7 +320,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 								LEVEL);
 						expressions.add(expression);
 					} else if (iOpenLevel < 0) {
-						throw new ParseExpressionException(positionIndexes.movePosition(iPosOpen),
+						throw new ExpressionParseException(positionIndexes.movePosition(iPosOpen),
 								"Not matched closing bracket ']", contentIndexes.substring(iPosOpen, iPos + 1));
 					}
 					break;
@@ -332,14 +332,14 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 					break;
 				default:
 					if (iOpenLevel == 0 && !isSpace(c)) {
-						throw new ParseExpressionException(positionIndexes.movePosition(iPosOpen),
+						throw new ExpressionParseException(positionIndexes.movePosition(iPosOpen),
 								"Not allowed character between ']' and '['", contentIndexes);
 					}
 				}
 			}
 
 			if (iOpenLevel != 0) {
-				throw new ParseExpressionException(positionIndexes.movePosition(iPosOpen), "Missing closing bracket",
+				throw new ExpressionParseException(positionIndexes.movePosition(iPosOpen), "Missing closing bracket",
 						contentIndexes);
 			}
 
@@ -352,7 +352,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	private Expression parseLiteral(Position position, String text) throws ParseExpressionException {
+	private Expression parseLiteral(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			char[] chars = text.toCharArray();
@@ -365,7 +365,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			if (text.length() == 0) {
-				throw new ParseExpressionException(position, "Missing a literal", text);
+				throw new ExpressionParseException(position, "Missing a literal", text);
 			}
 
 			Expression expression = parseParentheses(position, text);
@@ -392,14 +392,14 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 				return expression;
 			}
 
-			throw new ParseExpressionException(position, "Unknown literal", text);
+			throw new ExpressionParseException(position, "Unknown literal", text);
 
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private Expression parseOperator(Position position, String text, Level level) throws ParseExpressionException {
+	private Expression parseOperator(Position position, String text, Level level) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
 			Collection<Addition> additions = parseAdditions(position, text, level.getOperator());
@@ -432,7 +432,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			if (expressionOperator == null) {
 				if (expressionFirst == null) {
-					throw new ParseExpressionException(position, "Missing expression", text);
+					throw new ExpressionParseException(position, "Missing expression", text);
 				}
 				LOG.trace("OK");
 				return expressionFirst;
@@ -445,12 +445,12 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	public Expression parseExpression(String text) throws ParseExpressionException {
+	public Expression parseExpression(String text) throws ExpressionParseException {
 		Position position = new Position();
 		try {
 			Expression retval = parseOperator(position, text, LEVEL);
 			return retval;
-		} catch (ParseExpressionException ex) {
+		} catch (ExpressionParseException ex) {
 			ex.setExpression(text);
 			throw ex;
 		}
@@ -461,7 +461,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		try {
 			// String text = "2^({A} + 2) + 2.5*{B} + 3*{C}/{D} + (4*{E} + 5*7*{F}/(6 +
 			// {G})) + sin({H}) + {PAR[1][{PAR2}][1 + 2*sin(8)]}";
-			String text = "1 + {PAR[1][{PAR2}][1 + 2*sin(8)]}";
+			String text = "1 + {PAR.1[1][{PAR2}][1 + 2*sin(8)]}";
 
 			LOG.info("Text: " + text);
 
@@ -474,14 +474,8 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			Map<String, Object> parameters = new HashMap<String, Object>();
 
-			parameters.put("A", 1.);
-			parameters.put("B", 2.);
-			parameters.put("C", 3.);
-			parameters.put("D", 4.);
-			parameters.put("E", 5.);
-			parameters.put("F", 6.);
-			parameters.put("G", 7.);
-			parameters.put("H", 8.);
+			parameters.put("PAR.1", new Object[] { 0, new Object[] { 0, 0, new Object[] { 0, 0, 4 } } });
+			parameters.put("PAR2", 2.);
 
 			ContextArithmetic context = new ContextArithmetic();
 			context.addParameters(parameters);

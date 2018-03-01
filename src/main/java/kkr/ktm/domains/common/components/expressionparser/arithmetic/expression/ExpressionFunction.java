@@ -5,9 +5,9 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import kkr.ktm.domains.common.components.expressionparser.Context;
+import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.EvaluateExpressionException;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.OperatorSeparator;
 
 public class ExpressionFunction implements Expression {
@@ -47,17 +47,17 @@ public class ExpressionFunction implements Expression {
 		return methods;
 	}
 
-	public ExpressionFunction(String name, Expression[] argumentExpressions) throws EvaluateExpressionException {
+	public ExpressionFunction(String name, Expression[] argumentExpressions) throws ExpressionEvaluateException {
 		this.name = name;
 		this.argumentExpressions = argumentExpressions;
 		Map<String, Method> countMethods = methods.get(argumentExpressions.length);
 		if (countMethods == null || (function = countMethods.get(name)) == null) {
-			throw new EvaluateExpressionException(
+			throw new ExpressionEvaluateException(
 					"Unsupported function: " + name + " with " + argumentExpressions.length + " arguments");
 		}
 	}
 
-	public Number evaluate(Context context) throws EvaluateExpressionException {
+	public Number evaluate(ContextExpression context) throws ExpressionEvaluateException {
 		Object[] argumentValues = new Object[argumentExpressions.length];
 		for (int i = 0; i < argumentValues.length; i++) {
 			argumentValues[i] = argumentExpressions[i].evaluate(context);
@@ -66,7 +66,7 @@ public class ExpressionFunction implements Expression {
 			double value = (Double) function.invoke(null, argumentValues);
 			return value;
 		} catch (Exception ex) {
-			throw new EvaluateExpressionException("Cannot call function " + toString());
+			throw new ExpressionEvaluateException("Cannot call function " + toString());
 		}
 	}
 

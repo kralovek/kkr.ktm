@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.parametersformater.template.parts;
 
 import kkr.common.utils.UtilsString;
 
-public class TagLoop implements Tag, Open {
+public class TagLoop implements TagBase, Open {
 	public static final String TAG = "LOOP";
 	public static final String ATTR_INDEX = "INDEX";
 	public static final String ATTR_INDEXES = "INDEXES";

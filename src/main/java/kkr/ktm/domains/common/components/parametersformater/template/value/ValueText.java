@@ -22,6 +22,10 @@ public class ValueText extends ValueBase implements Value {
 		return this.value.equals(value);
 	}
 
+	public ValueType getType() {
+		return ValueType.TEXT;
+	}
+
 	public String toString() {
 		return value;
 	}

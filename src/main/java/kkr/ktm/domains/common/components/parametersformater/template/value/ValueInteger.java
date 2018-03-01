@@ -28,6 +28,10 @@ public class ValueInteger extends ValueBase implements Value {
 		}
 	}
 
+	public ValueType getType() {
+		return ValueType.INTEGER;
+	}
+
 	public String toString() {
 		return String.valueOf(value);
 	}

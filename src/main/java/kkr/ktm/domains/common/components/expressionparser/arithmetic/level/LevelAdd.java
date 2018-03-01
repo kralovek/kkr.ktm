@@ -2,7 +2,7 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic.level;
 
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ParseExpressionException;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionParseException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionNumber;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionOperator;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
@@ -14,7 +14,7 @@ public class LevelAdd implements Level {
 	private LevelMulti nextLevel = new LevelMulti();
 
 	public Expression first(Position position, Operator operator, Expression expression)
-			throws ParseExpressionException {
+			throws ExpressionParseException {
 		if (operator == OperatorAdd.MINUS) {
 			ExpressionNumber expressionNumber = new ExpressionNumber(0);
 			ExpressionOperator expressionOperator = new ExpressionOperator(operator, expressionNumber, expression);

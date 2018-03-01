@@ -12,20 +12,14 @@ public abstract class StructureLoaderHorizontalFwk extends StructureLoaderBase {
 
 	private Integer _rowParameter;
 	private Integer _rowIo;
-	private String _columnCode;
-	private String _columnActive;
-	private String _columnName;
-	private String _columnDescription;
-	private String _columnGroup;
-	private String _columnOrder;
-	private String _columnStatusTest;
 
 	public void config() throws ConfigurationException {
 		configured = false;
 		super.config();
 
 		if (_rowParameter == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'rowParameter' is not configured");
+			throw new ConfigurationException(
+					getClass().getSimpleName() + ": Parameter 'rowParameter' is not configured");
 		} else {
 			indexParameter = UtilsExcel.adaptAndCheckRowId(getClass(), _rowParameter, "rowParameter");
 		}
@@ -34,53 +28,13 @@ public abstract class StructureLoaderHorizontalFwk extends StructureLoaderBase {
 		} else {
 			indexIo = UtilsExcel.adaptAndCheckRowId(getClass(), _rowIo, "rowIo");
 		}
-		if (_columnCode == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnCode' is not configured");
-		} else {
-			indexCode = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnCode, "columnCode");
-		}
-		if (_columnActive == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnActive' is not configured");
-		} else {
-			indexActive = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnActive, "columnActive");
-		}
-		if (_columnStatusTest == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnStatusTest' is not configured");
-		} else {
-			indexStatusTest = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnStatusTest, "columnStatusTest");
-		}
-		if (_columnName == null) {
-			indexName = null;
-		} else {
-			indexName = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnName, "columnName");
-		}
-		if (_columnDescription == null) {
-			indexDescription = null;
-		} else {
-			indexDescription = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnDescription, "columnDescription");
-		}
-		if (_columnGroup == null) {
-			indexGroup = null;
-		} else {
-			indexGroup = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnGroup, "columnGroup");
-		}
-		if (_columnOrder == null) {
-			indexOrder = null;
-		} else {
-			indexOrder = UtilsExcel.adaptAndCheckColumnId(getClass(), _columnOrder, "columnOrder");
-		}
 
 		Set<Integer> rows = new HashSet<Integer>();
 		UtilsExcel.checkDoubles(rows, _rowParameter, "rowParameter");
 		UtilsExcel.checkDoubles(rows, _rowIo, "rowIo");
 
-		Set<String> columns = new HashSet<String>();
-		UtilsExcel.checkDoubles(columns, _columnCode, "columnCode");
-		UtilsExcel.checkDoubles(columns, _columnActive, "columnActive");
-		UtilsExcel.checkDoubles(columns, _columnStatusTest, "columnStatusTest");
-		UtilsExcel.checkDoubles(columns, _columnName, "columnName");
-		UtilsExcel.checkDoubles(columns, _columnDescription, "columnDescription");
-		UtilsExcel.checkDoubles(columns, _columnOrder, "columnOrder");
+		indexesParametersIgnored = columnsIgnored;
+		indexesTestsIgnored = rowsIgnored;
 
 		configured = true;
 	}
@@ -106,61 +60,5 @@ public abstract class StructureLoaderHorizontalFwk extends StructureLoaderBase {
 
 	public void setRowIo(Integer rowIo) {
 		this._rowIo = rowIo;
-	}
-
-	public String getColumnCode() {
-		return _columnCode;
-	}
-
-	public void setColumnCode(String columnCode) {
-		this._columnCode = columnCode;
-	}
-
-	public String getColumnActive() {
-		return _columnActive;
-	}
-
-	public void setColumnActive(String columnActive) {
-		this._columnActive = columnActive;
-	}
-
-	public String getColumnName() {
-		return _columnName;
-	}
-
-	public void setColumnName(String columnName) {
-		this._columnName = columnName;
-	}
-
-	public String getColumnDescription() {
-		return _columnDescription;
-	}
-
-	public void setColumnDescription(String columnDescription) {
-		this._columnDescription = columnDescription;
-	}
-
-	public String getColumnGroup() {
-		return _columnGroup;
-	}
-
-	public void setColumnGroup(String columnGroup) {
-		this._columnGroup = columnGroup;
-	}
-
-	public String getColumnOrder() {
-		return _columnOrder;
-	}
-
-	public void setColumnOrder(String columnOrder) {
-		this._columnOrder = columnOrder;
-	}
-
-	public String getColumnStatusTest() {
-		return _columnStatusTest;
-	}
-
-	public void setColumnStatusTest(String columnStatusTest) {
-		this._columnStatusTest = columnStatusTest;
 	}
 }

@@ -162,38 +162,44 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 
 	private Object readValue(ExcelPosition excelPosition, TSheet tSheet, int indexTest, int indexParameter,
 			Orientation orientation, Io io) throws BaseException {
-		TCell tCell;
-		switch (orientation) {
-		case V:
-			excelPosition.setRow(indexParameter);
-			excelPosition.setColumn(indexTest);
-			tCell = excelAdapter.getCell(tSheet, indexParameter, indexTest);
-			break;
-		case H:
-			excelPosition.setColumn(indexParameter);
-			excelPosition.setRow(indexTest);
-			tCell = excelAdapter.getCell(tSheet, indexTest, indexParameter);
-			break;
+		try {
+			TCell tCell;
+			switch (orientation) {
+			case V:
+				excelPosition.setRow(indexParameter);
+				excelPosition.setColumn(indexTest);
+				tCell = excelAdapter.getCell(tSheet, indexParameter, indexTest);
+				break;
+			case H:
+				excelPosition.setColumn(indexParameter);
+				excelPosition.setRow(indexTest);
+				tCell = excelAdapter.getCell(tSheet, indexTest, indexParameter);
+				break;
 
-		default:
-			throw new TechnicalException("Unsupported rientation: " + orientation);
+			default:
+				throw new TechnicalException("Unsupported rientation: " + orientation);
+			}
+
+			Object value = excelAdapter.getValue(tCell);
+
+			Object retval;
+			switch (io) {
+			case I:
+				retval = valueGenerator.parseValue(excelPosition, value);
+				break;
+
+			case E:
+				retval = valueGenerator.parsePattern(excelPosition, value);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected IO: " + io);
+			}
+			return retval;
+		} catch (ExcelException ex) {
+			throw ex;
+		} catch (BaseException ex) {
+			throw new ExcelException(excelPosition, "Unexpected error", ex);
 		}
-
-		Object value = excelAdapter.getValue(tCell);
-
-		Object retval;
-		switch (io) {
-		case I:
-			retval = valueGenerator.parseValue(excelPosition, value);
-			break;
-
-		case E:
-			retval = valueGenerator.parsePattern(excelPosition, value);
-			break;
-		default:
-			throw new IllegalArgumentException("Unexpected IO: " + io);
-		}
-		return retval;
 	}
 
 	private Collection<TestInput> workSheet(ExcelPosition excelPositionWorkbook, TSheet tSheet,

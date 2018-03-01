@@ -89,7 +89,8 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private Map<Test, Status> workReport(Collection<TestOutput> tests, String batchId, boolean skip) throws BaseException {
+	private Map<Test, Status> workReport(Collection<TestOutput> tests, String batchId, boolean skip)
+			throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			Map<Test, Status> retval = new HashMap<Test, Status>();
@@ -262,21 +263,23 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 	private void renameFile(File fileSource, File fileTarget) throws BaseException {
 		UtilsFile.createFileDirectory(fileTarget);
 		if (fileTarget.exists() && !fileTarget.delete()) {
-			throw new TechnicalException("Cannot delete the file '" + fileSource.getAbsolutePath() + "' to '" + fileTarget.getAbsolutePath() + "'");
+			throw new TechnicalException("Cannot delete the file '" + fileSource.getAbsolutePath() + "' to '"
+					+ fileTarget.getAbsolutePath() + "'");
 		}
 		if (!fileSource.renameTo(fileTarget)) {
-			throw new TechnicalException(
-					"Cannot rename the temp file '" + fileSource.getAbsolutePath() + "' to '" + fileTarget.getAbsolutePath() + "'");
+			throw new TechnicalException("Cannot rename the temp file '" + fileSource.getAbsolutePath() + "' to '"
+					+ fileTarget.getAbsolutePath() + "'");
 		}
 	}
 
-	private Status workWorkbook(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, Test test, CatalogStyles catalogStyles, boolean skip)
-			throws BaseException {
+	private Status workWorkbook(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, Test test,
+			CatalogStyles catalogStyles, boolean skip) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			TSheet tSheet = excelAdapter.getSheet(tWorkbook, test.getType());
 			if (tSheet == null) {
-				throw new ExcelException(excelPositionWorkbook, "The excel file does not contain a sheet: " + test.getType());
+				throw new ExcelException(excelPositionWorkbook,
+						"The excel file does not contain a sheet: " + test.getType());
 			}
 
 			Status status = workSheet(excelPositionWorkbook, tWorkbook, tSheet, test, catalogStyles, skip);
@@ -288,8 +291,8 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private Status workSheet(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, TSheet tSheet, Test test, CatalogStyles catalogStyles,
-			boolean skip) throws BaseException {
+	private Status workSheet(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, TSheet tSheet, Test test,
+			CatalogStyles catalogStyles, boolean skip) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			Status status = Status.OK;
@@ -311,20 +314,24 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 				Iterator<StructureParameter> iteratorO = structureSheet.iteratorParametersO();
 				while (iteratorO.hasNext()) {
 					StructureParameter structureParameterO = iteratorO.next();
-					updateExcelPosition(excelPositionCell, structureTest.getIndex(), structureParameterO.getIndex(), structureSheet.getOrientation());
+					updateExcelPosition(excelPositionCell, structureTest.getIndex(), structureParameterO.getIndex(),
+							structureSheet.getOrientation());
 
-					TCell tCellO = loadCell(tSheet, structureTest.getIndex(), structureParameterO.getIndex(), structureSheet.getOrientation());
+					TCell tCellO = loadCell(tSheet, structureTest.getIndex(), structureParameterO.getIndex(),
+							structureSheet.getOrientation());
 					Object valueSourceO = testOutput.getDataOutput().get(structureParameterO.getName());
 					Object valueTargetO = valueGenerator.formatValue(excelPositionCell, valueSourceO);
 
 					StructureParameter parameterInfoE = structureSheet.findParameterE(structureParameterO.getName());
 					if (parameterInfoE != null) {
 						ExcelPosition excelPositionCellE = excelPositionCell.clone();
-						updateExcelPosition(excelPositionCellE, structureTest.getIndex(), parameterInfoE.getIndex(), structureSheet.getOrientation());
-						TCell tCellE = loadCell(tSheet, structureTest.getIndex(), parameterInfoE.getIndex(), structureSheet.getOrientation());
+						updateExcelPosition(excelPositionCellE, structureTest.getIndex(), parameterInfoE.getIndex(),
+								structureSheet.getOrientation());
+						TCell tCellE = loadCell(tSheet, structureTest.getIndex(), parameterInfoE.getIndex(),
+								structureSheet.getOrientation());
 
-						boolean resultValue = writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE, valueSourceO, valueTargetO,
-								catalogStyles);
+						boolean resultValue = writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE,
+								valueSourceO, valueTargetO, catalogStyles);
 						if (!resultValue) {
 							status = Status.KO;
 						}
@@ -339,20 +346,22 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 			writeStatusTest(excelPositionSheet, tSheet, structureSheet, structureTest, status, catalogStyles);
 			writeStatusSheet(excelPositionSheet, tSheet, structureSheet, status, catalogStyles);
 
-			LOG.trace("OK");;
+			LOG.trace("OK");
+			;
 			return status;
 		} finally {
 			LOG.trace("END");
 		}
 	}
 
-	private void writeValue(ExcelPosition excelPositionCell, TCell tCellO, Object value, CatalogStyles catalogStyles) throws BaseException {
+	private void writeValue(ExcelPosition excelPositionCell, TCell tCellO, Object value, CatalogStyles catalogStyles)
+			throws BaseException {
 		excelAdapter.setValue(tCellO, value);
 		applyStyle(tCellO, KtmStyle.OUTPUT, catalogStyles);
 	}
 
-	private boolean writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, TCell tCellO, TCell tCellE, Object valueSourceO,
-			Object valueTargetO, CatalogStyles catalogStyles) throws BaseException {
+	private boolean writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, TCell tCellO,
+			TCell tCellE, Object valueSourceO, Object valueTargetO, CatalogStyles catalogStyles) throws BaseException {
 		Object valueSourceE = excelAdapter.getValue(tCellE);
 		ValuePattern patternSourceE = valueGenerator.parsePattern(excelPositionCell, valueSourceE);
 
@@ -371,47 +380,48 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		return result;
 	}
 
-	private void writeStatusTest(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet, StructureTest structureTest,
-			Status status, CatalogStyles catalogStyles) throws BaseException {
-		TCell tCellRt = loadCell(tSheet, structureTest.getIndex(), structureSheet.getIndexStatusTest(), structureSheet.getOrientation());
+	private void writeStatusTest(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet,
+			StructureTest structureTest, Status status, CatalogStyles catalogStyles) throws BaseException {
+		TCell tCellRt = loadCell(tSheet, structureTest.getIndex(), structureSheet.getIndexStatus(),
+				structureSheet.getOrientation());
 
 		switch (status) {
-			case OK :
-				excelAdapter.setValue(tCellRt, Status.OK.name());
-				applyStyle(tCellRt, KtmStyle.OK, catalogStyles);
-				break;
+		case OK:
+			excelAdapter.setValue(tCellRt, Status.OK.name());
+			applyStyle(tCellRt, KtmStyle.OK, catalogStyles);
+			break;
 
-			case KO :
-				excelAdapter.setValue(tCellRt, Status.KO.name());
-				applyStyle(tCellRt, KtmStyle.KO, catalogStyles);
-				break;
+		case KO:
+			excelAdapter.setValue(tCellRt, Status.KO.name());
+			applyStyle(tCellRt, KtmStyle.KO, catalogStyles);
+			break;
 
-			case SKIP :
-				excelAdapter.setValue(tCellRt, Status.SKIP.name());
-				applyStyle(tCellRt, KtmStyle.SKIP, catalogStyles);
-				break;
-			default :
-				throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
+		case SKIP:
+			excelAdapter.setValue(tCellRt, Status.SKIP.name());
+			applyStyle(tCellRt, KtmStyle.SKIP, catalogStyles);
+			break;
+		default:
+			throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
 		}
 	}
 
 	private KtmStyle statusToStyle(Status status) {
 		switch (status) {
-			case OK :
-				return KtmStyle.OK;
+		case OK:
+			return KtmStyle.OK;
 
-			case KO :
-				return KtmStyle.KO;
+		case KO:
+			return KtmStyle.KO;
 
-			case SKIP :
-				return KtmStyle.SKIP;
-			default :
-				throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
+		case SKIP:
+			return KtmStyle.SKIP;
+		default:
+			throw new IllegalArgumentException("Unsupported DiffStatus: " + status);
 		}
 	}
 
-	private void writeTotalCount(ExcelPosition excelPositionSheet, TSheet tSheet, ExcelIdCell idCell, CatalogStyles catalogStyles)
-			throws BaseException {
+	private void writeTotalCount(ExcelPosition excelPositionSheet, TSheet tSheet, ExcelIdCell idCell,
+			CatalogStyles catalogStyles) throws BaseException {
 		if (idCell != null) {
 			ExcelPosition excelPositionCell = excelPositionSheet.clone();
 			excelPositionCell.setRow(idCell.getRow());
@@ -425,8 +435,8 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private void writeStatusCount(ExcelPosition excelPositionSheet, TSheet tSheet, ExcelIdCell idCell, CatalogStyles catalogStyles, Status statusCell,
-			Status statusResult) throws BaseException {
+	private void writeStatusCount(ExcelPosition excelPositionSheet, TSheet tSheet, ExcelIdCell idCell,
+			CatalogStyles catalogStyles, Status statusCell, Status statusResult) throws BaseException {
 		if (idCell != null) {
 			ExcelPosition excelPositionCell = excelPositionSheet.clone();
 			excelPositionCell.setRow(idCell.getRow());
@@ -447,11 +457,14 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private void writeStatusSheet(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet, Status status,
-			CatalogStyles catalogStyles) throws BaseException {
-		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetOk(), catalogStyles, Status.OK, status);
-		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetKo(), catalogStyles, Status.KO, status);
-		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetSkip(), catalogStyles, Status.SKIP, status);
+	private void writeStatusSheet(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet,
+			Status status, CatalogStyles catalogStyles) throws BaseException {
+		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetOk(), catalogStyles, Status.OK,
+				status);
+		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetKo(), catalogStyles, Status.KO,
+				status);
+		writeStatusCount(excelPositionSheet, tSheet, structureSheet.getIndexStatusSheetSkip(), catalogStyles,
+				Status.SKIP, status);
 	}
 
 	private int readCellInteger(ExcelPosition excelPositionCell, TCell tCell) throws BaseException {
@@ -469,34 +482,35 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		return value;
 	}
 
-	private void updateExcelPosition(ExcelPosition excelPosition, int testIndex, int parameterIndex, Orientation orientation) {
+	private void updateExcelPosition(ExcelPosition excelPosition, int testIndex, int parameterIndex,
+			Orientation orientation) {
 		switch (orientation) {
-			case V :
-				excelPosition.setRow(parameterIndex);
-				excelPosition.setColumn(testIndex);
-				break;
-			case H :
-				excelPosition.setColumn(parameterIndex);
-				excelPosition.setRow(testIndex);
-				break;
-			default :
-				throw new IllegalArgumentException("Unsupported orientation: " + orientation);
+		case V:
+			excelPosition.setRow(parameterIndex);
+			excelPosition.setColumn(testIndex);
+			break;
+		case H:
+			excelPosition.setColumn(parameterIndex);
+			excelPosition.setRow(testIndex);
+			break;
+		default:
+			throw new IllegalArgumentException("Unsupported orientation: " + orientation);
 		}
 	}
 
 	private TCell loadCell(TSheet tSheet, int testIndex, int parameterIndex, Orientation orientation) {
 		switch (orientation) {
-			case V :
-				return excelAdapter.getOrCreateCell(tSheet, parameterIndex, testIndex);
-			case H :
-				return excelAdapter.getOrCreateCell(tSheet, testIndex, parameterIndex);
-			default :
-				throw new IllegalArgumentException("Unsupported orientation: " + orientation);
+		case V:
+			return excelAdapter.getOrCreateCell(tSheet, parameterIndex, testIndex);
+		case H:
+			return excelAdapter.getOrCreateCell(tSheet, testIndex, parameterIndex);
+		default:
+			throw new IllegalArgumentException("Unsupported orientation: " + orientation);
 		}
 	}
 
-	private void workReview(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, Test test, Status status, CatalogStyles catalogStyles)
-			throws BaseException {
+	private void workReview(ExcelPosition excelPositionWorkbook, TWorkbook tWorkbook, Test test, Status status,
+			CatalogStyles catalogStyles) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			if (!review) {
@@ -516,7 +530,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 
 			//
 			// HEADER_COLUMN
-			// 
+			//
 			if (reviewRowHeader != null) {
 				TStyle tStyleHeader = catalogStyles.createStyle(KtmStyle.HEADER_COLUMN.name());
 
@@ -577,7 +591,7 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 
 			//
 			// NAME
-			// 
+			//
 			TStyle tStyleName = catalogStyles.createStyle(KtmStyle.HEADER_LINE.name());
 			TCell tCellName = excelAdapter.getOrCreateCell(tSheet, rowFound, reviewColumnName);
 			excelAdapter.setValue(tCellName, test.getType());

@@ -2,6 +2,8 @@ package kkr.ktm.domains.excel.data;
 
 import java.util.Iterator;
 
+import kkr.ktm.domains.excel.components.structureloader.base.SystemParameter;
+
 public interface StructureSheet {
 
 	String getName();
@@ -24,8 +26,6 @@ public interface StructureSheet {
 
 	StructureParameter findParameterE(String name);
 
-	int getIndexStatusTest();
-
 	ExcelIdCell getIndexStatusSheetOk();
 
 	ExcelIdCell getIndexStatusSheetKo();
@@ -34,5 +34,21 @@ public interface StructureSheet {
 
 	void addParameter(StructureParameter structureParameter);
 
+	void addSystemParameter(SystemParameter systemParameter, int index);
+
 	void addTest(StructureTest structureTest);
+
+	Integer getIndexCode();
+
+	Integer getIndexActive();
+
+	Integer getIndexOrder();
+
+	Integer getIndexGroup();
+
+	Integer getIndexStatus();
+
+	Integer getIndexName();
+
+	Integer getIndexDescription();
 }

@@ -24,6 +24,10 @@ public class ValueDecimal extends ValueBase implements Value {
 		}
 	}
 
+	public ValueType getType() {
+		return ValueType.DECIMAL;
+	}
+
 	public String toString() {
 		return String.valueOf(value);
 	}

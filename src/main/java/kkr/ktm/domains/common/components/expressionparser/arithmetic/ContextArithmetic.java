@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.domains.common.components.expressionparser.Context;
+import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
 
-public class ContextArithmetic implements Context {
+public class ContextArithmetic implements ContextExpression {
 	private static final Logger LOG = Logger.getLogger(ContextArithmetic.class);
 
 	private Map<String, Object> parameters = new HashMap<String, Object>();

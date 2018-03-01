@@ -1,8 +1,8 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression;
 
-import kkr.ktm.domains.common.components.expressionparser.Context;
+import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.EvaluateExpressionException;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
 
 public class ExpressionOperator implements Expression {
@@ -16,7 +16,7 @@ public class ExpressionOperator implements Expression {
 		this.expression2 = expression2;
 	}
 
-	public Number evaluate(Context context) throws EvaluateExpressionException {
+	public Number evaluate(ContextExpression context) throws ExpressionEvaluateException {
 		Number argument1 = expression1.evaluate(context);
 		Number argument2 = expression2.evaluate(context);
 		Number value = operator.evaluate(argument1, argument2);

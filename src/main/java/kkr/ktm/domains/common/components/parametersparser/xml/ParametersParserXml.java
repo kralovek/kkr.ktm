@@ -20,11 +20,6 @@ import kkr.ktm.domains.common.components.parametersparser.ParametersParser;
 import kkr.ktm.utils.xml.Attribute;
 import kkr.ktm.utils.xml.Tag;
 
-/**
- * ParametersParserXml
- * 
- * @author KRALOVEC-99999
- */
 public class ParametersParserXml extends ParametersParserXmlFwk implements ParametersParser {
 	private static final Logger LOG = Logger.getLogger(ParametersParserXml.class);
 
@@ -146,8 +141,9 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 		XMLStreamReader xmlStreamReader = null;
 		String osName = System.getProperty("os.name");
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(pSource.getBytes());
-		// On ne force l'encodage que si la machine est une machine windows 
-		//(cf probl�me d'encodage sur le proxi : machine linux : pas besoin d'encodage)
+		// On ne force l'encodage que si la machine est une machine windows
+		// (cf probl�me d'encodage sur le proxi : machine linux : pas besoin
+		// d'encodage)
 		try {
 			if (pEncoding != null && osName.contains(OS_WINDOWS_NAME)) {
 				xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(byteArrayInputStream, pEncoding);
@@ -178,36 +174,38 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 		int code;
 		while ((code = pXmlStreamReader.next()) != XMLStreamConstants.END_DOCUMENT) {
 			switch (code) {
-				case XMLStreamConstants.START_ELEMENT :
-					final Tag tag = readTag(pXmlStreamReader);
-					if (mainTag != null) {
-						tags.get(tags.size() - 1).getTags().add(tag);
-					} else {
-						mainTag = tag;
-					}
-					tags.add(tag);
-					break;
-				case XMLStreamConstants.CHARACTERS :
-					final String currentValue = tags.get(tags.size() - 1).getValue();
-					tags.get(tags.size() - 1).setValue((currentValue == null ? "" : currentValue) + pXmlStreamReader.getText());
-					break;
-				case XMLStreamConstants.END_ELEMENT :
-					tags.remove(tags.size() - 1);
-					break;
+			case XMLStreamConstants.START_ELEMENT:
+				final Tag tag = readTag(pXmlStreamReader);
+				if (mainTag != null) {
+					tags.get(tags.size() - 1).getTags().add(tag);
+				} else {
+					mainTag = tag;
+				}
+				tags.add(tag);
+				break;
+			case XMLStreamConstants.CHARACTERS:
+				final String currentValue = tags.get(tags.size() - 1).getValue();
+				tags.get(tags.size() - 1)
+						.setValue((currentValue == null ? "" : currentValue) + pXmlStreamReader.getText());
+				break;
+			case XMLStreamConstants.END_ELEMENT:
+				tags.remove(tags.size() - 1);
+				break;
 			}
 		}
 
 		return mainTag;
 	}
 
-	private Map<String, List<Value>> createMapValues(Map<String, List<Value>> pMapValues, final Tag pTag, Value pValue) {
+	private Map<String, List<Value>> createMapValues(Map<String, List<Value>> pMapValues, final Tag pTag,
+			Value pValue) {
 		if (pMapValues == null) {
 			pMapValues = new LinkedHashMap<String, List<Value>>();
 		}
 
 		if (pValue == null) {
 			pValue = new Value();
-			pValue.setIndex(new int[]{0});
+			pValue.setIndex(new int[] { 0 });
 			pValue.setPath(useTagPrefix ? pTag.getComplexName() : pTag.getName());
 			pValue.setValue(pTag.getValue());
 		}
@@ -218,7 +216,8 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 			for (final Attribute attribute : pTag.getAttributes()) {
 				final Value value = new Value();
 				value.setIndex(extendIndex(pValue.getIndex(), i++));
-				value.setPath(pValue.getPath() + PATH_SEPARATOR + (useAttributePrefix ? attribute.getComplexName() : attribute.getName()));
+				value.setPath(pValue.getPath() + PATH_SEPARATOR
+						+ (useAttributePrefix ? attribute.getComplexName() : attribute.getName()));
 				value.setValue(attribute.getValue());
 				addValue(pMapValues, value);
 			}
@@ -227,9 +226,10 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 			for (final Tag tag : pTag.getTags()) {
 				final Value value = new Value();
 				value.setIndex(extendIndex(pValue.getIndex(), i++));
-				value.setPath(pValue.getPath() + PATH_SEPARATOR + (useTagPrefix ? tag.getComplexName() : tag.getName()));
+				value.setPath(
+						pValue.getPath() + PATH_SEPARATOR + (useTagPrefix ? tag.getComplexName() : tag.getName()));
 				value.setValue(tag.getValue());
-				//addValue(pMapValues, value);
+				// addValue(pMapValues, value);
 				createMapValues(pMapValues, tag, value);
 			}
 		} else {
@@ -356,7 +356,7 @@ public class ParametersParserXml extends ParametersParserXmlFwk implements Param
 		}
 		for (int i = 0; i < pTreeValues.length; i++) {
 			if (!pTreeValues[i].getClass().isArray()) {
-				pTreeValues[i] = new Object[]{pTreeValues[i]};
+				pTreeValues[i] = new Object[] { pTreeValues[i] };
 			}
 			adaptTreeValues((Object[]) pTreeValues[i], pLevel - 1);
 		}

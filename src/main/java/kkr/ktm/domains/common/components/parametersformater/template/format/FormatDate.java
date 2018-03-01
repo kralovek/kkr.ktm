@@ -9,6 +9,7 @@ import kkr.ktm.domains.common.components.parametersformater.template.value.Value
 
 public class FormatDate extends FormatBase implements Format {
 	private DateFormat format;
+	private String pattern;
 
 	public FormatDate(String format) {
 		super(FormatType.DATE);
@@ -16,6 +17,7 @@ public class FormatDate extends FormatBase implements Format {
 			throw new IllegalArgumentException("Format is not defined");
 		}
 		try {
+			this.pattern = format;
 			this.format = new SimpleDateFormat(format);
 			this.format.format(new Date());
 		} catch (Exception ex) {
@@ -34,6 +36,6 @@ public class FormatDate extends FormatBase implements Format {
 	}
 
 	public String toString() {
-		return format.toString();
+		return pattern;
 	}
 }
