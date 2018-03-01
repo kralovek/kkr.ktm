@@ -1,13 +1,7 @@
 package kkr.ktm.domains.common.components.parametersformater.template.content;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 
-public class Content {
-
-	private Collection<Object> contents = new ArrayList<Object>();
-
-	public Collection<Object> getContents() {
-		return contents;
-	}
+public interface Content {
+	String evaluate(ContextContent context) throws ContentEvaluateException;
 }

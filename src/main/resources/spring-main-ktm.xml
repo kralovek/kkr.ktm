@@ -45,23 +45,16 @@
     <bean abstract="true" id="structureLoaderV" class="kkr.ktm.domains.excel.components.structureloader.vertical.StructureLoaderVertical">
         <property name="excelAdapter" ref="excelAdapter" />
 
-        <property name="columnParameter" value="A" />
-        <property name="columnIo" value="B" />
-        <property name="rowName" value="1" />
-        <property name="rowDescription" value="2" />
-        <property name="rowActive" value="3" />
-        <property name="rowCode" value="4" />
-        <property name="rowGroup" value="7" />
-        <property name="rowOrder" value="8" />
+        <property name="columnParameter" value="B" />
+        <property name="columnIo" value="C" />
 
-        <property name="rowStatusTest" value="6" />
-        <property name="cellStatusSheetOk" value="A3" />
-        <property name="cellStatusSheetKo" value="A4" />
-        <property name="cellStatusSheetSkip" value="A5" />
+        <property name="cellStatusSheetOk" value="A6" />
+        <property name="cellStatusSheetKo" value="A7" />
+        <property name="cellStatusSheetSkip" value="A8" />
 
         <property name="columnsIgnored">
             <set>
-                <value>C</value>
+                <value>A</value>
             </set>
         </property>
 
@@ -89,14 +82,7 @@
 
         <property name="rowParameter" value="1" />
         <property name="rowIo" value="2" />
-        <property name="columnName" value="A" />
-        <property name="columnDescription" value="B" />
-        <property name="columnActive" value="C" />
-        <property name="columnCode" value="D" />
-        <property name="columnGroup" value="G" />
-        <property name="columnOrder" value="H" />
 
-        <property name="columnStatusTest" value="F" />
         <property name="cellStatusSheetOk" value="C1" />
         <property name="cellStatusSheetKo" value="D1" />
         <property name="cellStatusSheetSkip" value="E1" />
@@ -108,7 +94,7 @@
 
         <property name="rowsIgnored">
             <set>
-                <value>3</value>
+                <value>1</value>
             </set>
         </property>
 

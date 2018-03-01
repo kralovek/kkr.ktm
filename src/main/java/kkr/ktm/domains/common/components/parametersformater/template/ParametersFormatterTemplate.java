@@ -1,73 +1,46 @@
 package kkr.ktm.domains.common.components.parametersformater.template;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
-import kkr.common.utils.UtilsString;
-import kkr.ktm.domains.common.components.expressionparser.Expression;
+import kkr.common.utils.UtilsFile;
 import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
-import kkr.ktm.domains.common.components.parametersformater.template.content.Block;
+import kkr.ktm.domains.common.components.parametersformater.template.content.Close;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Content;
-import kkr.ktm.domains.common.components.parametersformater.template.content.If;
-import kkr.ktm.domains.common.components.parametersformater.template.content.Loop;
-import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatBase;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatType;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.Close;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.Open;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.Part;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagEnd;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagIf;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagLoop;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagNumber;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagParameter;
-import kkr.ktm.domains.common.components.parametersformater.template.parts.Text;
-import kkr.ktm.domains.common.components.parametersformater.template.tags.Attribute;
-import kkr.ktm.domains.common.components.parametersformater.template.tags.Tag;
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueBase;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueDecimal;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueInteger;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueText;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentBase;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentComposed;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentEnd;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentIf;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentLoop;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentNumber;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentParameter;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentText;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContextContent;
+import kkr.ktm.domains.common.components.parametersformater.template.content.Open;
+import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
+import kkr.ktm.domains.common.components.parametersformater.template.part.Part;
+import kkr.ktm.domains.common.components.parametersformater.template.part.PartTag;
+import kkr.ktm.domains.common.components.parametersformater.template.part.PartText;
+import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
 
 public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk implements ParametersFormatter {
 	private static final Logger LOG = Logger.getLogger(ParametersFormatterTemplate.class);
 
-	private static final Pattern PATTERN_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_.]*$");
-
-	private static final String[] TAGS = new String[] { TagLoop.TAG, TagEnd.TAG, TagIf.TAG, TagParameter.TAG,
-			TagNumber.TAG };
-
-	private class Position {
-		String source;
-		int position = 0;
-
-		public Position(String source) {
-			this.source = source;
-		}
-
-		public String toString() {
-			return (source != null ? "[" + source + "] " : "") + position;
-		}
-	}
-
-	public String format(String source, Map<String, Object> parameters) throws BaseException {
+	public String format(Content content, Map<String, Object> parameters) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			testConfigured();
-			List<Object> contents = createTags(source);
-			List<Part> parts = createParts(contents);
-			Content content = createContent(parts, parameters);
-			Content contentEvaluated = evaluateContent(content, parameters);
-			String retval = contentToString(contentEvaluated);
+			String retval;
+			if (content != null) {
+				ContextContent context = new ContextContent(parameters);
+				retval = content.evaluate(context);
+			} else {
+				retval = "";
+			}
 			LOG.trace("OK");
 			return retval;
 		} finally {
@@ -75,850 +48,378 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		}
 	}
 
-	private void evaluateTagParameter(Content contentTarget, TagParameter tagParameter, Map<String, Object> parameters,
-			Map<String, Integer> indexes) throws BaseException {
-		int[] tagIndexes = evaluateIndexes(indexes, tagParameter.getIndexes());
-
-		Value value = evaluateParameter(tagParameter.getName(), tagIndexes, parameters);
+	public String format(String source, Map<String, Object> parameters) throws BaseException {
+		LOG.trace("BEGIN");
 		try {
-			String formatedValue = tagParameter.getFormat().format(value);
-			Text text = new Text();
-			text.setValue(formatedValue);
-			contentTarget.getContents().add(text);
-		} catch (Exception ex) {
-			throw new TemplateConfigurationException(null, "Bad format string for a STRING value ["
-					+ tagParameter.getTagName() + "]: " + tagParameter.getFormat(), ex);
+			Content content = parse(source);
+			UtilsFile.contentToFile(content.toString(), new File("CONTENT.txt"));
+			String retval = format(content, parameters);
+			UtilsFile.contentToFile(retval, new File("RESULT.txt"));
+			LOG.trace("OK");
+			return retval;
+		} finally {
+			LOG.trace("END");
 		}
 	}
 
-	private void evaluateTagNumber(Content contentTarget, TagNumber tagNumber, Map<String, Object> parameters,
-			ContextNumberExpression context) throws BaseException {
-		Value formatValue;
-		Number expressionValue = tagNumber.getExpression().evaluate(context);
-		formatValue = new ValueInteger(expressionValue.longValue());
-		Text text = new Text();
-		contentTarget.getContents().add(text);
-
+	public Content parse(String source) throws BaseException {
+		LOG.trace("BEGIN");
 		try {
-			String formatedValue = tagNumber.getFormat().format(formatValue);
-			text.setValue(formatedValue);
-		} catch (IllegalArgumentException ex) {
-			throw new TemplateConfigurationException(null,
-					"Bad format string for a numeric value [" + tagNumber.getTagName() + "]: " + formatValue);
+			Collection<Part> parts = createParts(source);
+
+			Collection<Content> contentsFlat = createContentFlat(parts);
+
+			Content contentTree = createContentTree(contentsFlat);
+
+			LOG.trace("OK");
+			return contentTree;
+		} finally {
+			LOG.trace("END");
 		}
 	}
 
-	private void evaluateTagIf(Content contentTarget, If iff, Map<String, Object> parameters,
-			Map<String, Integer> indexes) throws BaseException {
-		TagIf tagIf = iff.getTag();
+	private Content createContentTree(Collection<Content> contentsFlat) throws ContentParseException, BaseException {
+		LOG.trace("BEGIN");
+		try {
+			int open = 0;
 
-		int[] tagIndexes = evaluateIndexes(indexes, tagIf.getIndexes());
+			Collection<Content> contentCurrentList = new ArrayList<Content>();
+			Collection<Content> contentBodyList = new ArrayList<Content>();
+			Open contentOpen = null;
 
-		Value value = evaluateParameter(tagIf.getName(), tagIndexes, parameters);
-
-		boolean evaluate = true;
-
-		switch (tagIf.getType()) {
-		case EMPTY:
-			evaluate = value.isEmpty();
-			break;
-		case NONEMPTY:
-			evaluate = !value.isEmpty();
-			break;
-		case EQ:
-			evaluate = value.equals(tagIf.getValue());
-			break;
-		case NE:
-			evaluate = !value.equals(tagIf.getValue());
-			break;
-		}
-
-		if (evaluate) {
-			Content content = evaluateContent(iff.getContent(), parameters, indexes);
-			contentTarget.getContents().addAll(content.getContents());
-		}
-	}
-
-	private void evaluateTagLoop(Content contentTarget, Loop loop, Map<String, Object> parameters,
-			Map<String, Integer> indexes) throws BaseException {
-		TagLoop tagLoop = loop.getTag();
-
-		int[] tagIndexes = evaluateIndexes(indexes, tagLoop.getIndexes());
-
-		if (!parameters.containsKey(tagLoop.getName())) {
-			throw new TemplateConfigurationException(null, "Missing parameter defined by the attribute [" + TagLoop.TAG
-					+ " " + TagLoop.ATTR_NAME + "]: " + tagLoop.getName());
-		}
-
-		Integer count = null;
-		if (tagLoop.getType() == TagLoop.Type.COUNT) {
-			Value valueParameter = evaluateParameter(tagLoop.getName(), tagIndexes, parameters);
-			count = toInteger(valueParameter);
-			if (count == null || count < 0) {
-				throw new TemplateConfigurationException(null, "The value of the parameter " + tagLoop.getName()
-						+ toStringIndexes(tagIndexes) + " must be a non negativ integer");
-			}
-		} else if (tagLoop.getType() == TagLoop.Type.LENGTH) {
-			Object objectParameter = parameters.get(tagLoop.getName());
-			if (objectParameter == null) {
-				throw new TemplateConfigurationException(null, "Unknown parameter: " + tagLoop.getName());
-			}
-			Object objectLevel = retrieveObjectLevel(tagLoop.getName(), objectParameter, tagIndexes);
-			count = evaluateListLength(objectLevel);
-		} else {
-			throw new TemplateConfigurationException(null, "Unsupported LOOP type: " + tagLoop.getType());
-		}
-
-		Map<String, Integer> indexesLoc = new LinkedHashMap<String, Integer>();
-
-		if (indexes != null) {
-			if (indexes.containsKey(tagLoop.getIndex())) {
-				throw new TemplateConfigurationException(null,
-						"The loop index " + tagLoop.getIndex() + " is already used by a parent loop");
-			}
-			indexesLoc.putAll(indexes);
-		}
-
-		for (int iCount = 0; iCount < count; iCount++) {
-			indexesLoc.put(tagLoop.getIndex(), iCount);
-			Content content = evaluateContent(loop.getContent(), parameters, indexesLoc);
-			contentTarget.getContents().addAll(content.getContents());
-		}
-	}
-
-	private Content evaluateContent(Content contentSource, Map<String, Object> parameters) throws BaseException {
-		return evaluateContent(contentSource, parameters, null);
-	}
-
-	private Content evaluateContent(Content contentSource, Map<String, Object> parameters, Map<String, Integer> indexes)
-			throws BaseException {
-		Content contentTarget = new Content();
-
-		ContextNumberExpression contextNumber = new ContextNumberExpression(parameters);
-		contextNumber.setIndexes(indexes);
-
-		for (Object object : contentSource.getContents()) {
-			if (object instanceof Text) {
-				contentTarget.getContents().add(object);
-			} else if (object instanceof TagParameter) {
-				evaluateTagParameter(contentTarget, (TagParameter) object, parameters, indexes);
-			} else if (object instanceof TagNumber) {
-				evaluateTagNumber(contentTarget, (TagNumber) object, parameters, contextNumber);
-			} else if (object instanceof If) {
-				evaluateTagIf(contentTarget, (If) object, parameters, indexes);
-			} else if (object instanceof Loop) {
-				evaluateTagLoop(contentTarget, (Loop) object, parameters, indexes);
-			} else {
-				throw new TemplateConfigurationException(null,
-						"Unknown content part: " + object.getClass().getSimpleName());
-			}
-		}
-
-		return contentTarget;
-	}
-
-	private Object retrieveObjectLevel(String name, Object object, int[] indexes) throws BaseException {
-		Object retval = null;
-		Object objectCurrent = object;
-		if (indexes != null && indexes.length > 0) {
-			for (int index : indexes) {
-				if (index > 1) {
-					Object[] array;
-					if (objectCurrent == null || !objectCurrent.getClass().isArray()
-							|| (array = (Object[]) objectCurrent).length < index) {
-						throw new TemplateConfigurationException(null, "Not enough values of the parameter " + name
-								+ " for the index: " + toStringIndexes(indexes));
-					}
-					retval = objectCurrent = array[index - 1];
-				} else {
-					if (objectCurrent == null) {
-						objectCurrent = "";
-					}
-					if (objectCurrent.getClass().isArray()) {
-						Object[] array = (Object[]) objectCurrent;
-						if (array.length < 1) {
-							retval = objectCurrent = "";
-						} else {
-							retval = objectCurrent = array[0];
-						}
+			for (Content content : contentsFlat) {
+				if (content instanceof Open) {
+					if (open == 0) {
+						contentOpen = (Open) content;
+						contentCurrentList.add(contentOpen);
+						contentBodyList.clear();
 					} else {
-						retval = objectCurrent;
-						objectCurrent = null;
+						contentBodyList.add(content);
+					}
+					open++;
+					continue;
+				}
+				if (content instanceof Close) {
+					open--;
+					if (open == 0) {
+						Content contentTree = createContentTree(contentBodyList);
+						contentOpen.setContent(contentTree);
+						contentOpen = null;
+					} else if (open > 0) {
+						contentBodyList.add(content);
+					} else {
+						throw new ContentParseException(((Close) content).getPosition(),
+								"Missing opening Tag for a closing one");
+					}
+					continue;
+				}
+				if (open != 0) {
+					contentBodyList.add(content);
+				} else {
+					contentCurrentList.add(content);
+				}
+			}
+
+			if (open < 0) {
+				throw new ContentParseException(contentOpen.getPosition(), "Missing closing Tag for an opening one");
+			}
+
+			Content contentRetval;
+			if (contentCurrentList.size() == 0) {
+				contentRetval = null;
+			} else if (contentCurrentList.size() == 1) {
+				contentRetval = contentCurrentList.iterator().next();
+			} else {
+				ContentComposed contentComposed = null;
+				for (Content content : contentCurrentList) {
+					if (contentComposed == null) {
+						contentComposed = new ContentComposed(((ContentBase) content).getPosition());
+					}
+					contentComposed.addContent(content);
+				}
+				contentRetval = contentComposed;
+			}
+
+			LOG.trace("OK");
+			return contentRetval;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	private Collection<Content> createContentFlat(Collection<Part> parts) throws ContentParseException, BaseException {
+		LOG.trace("BEGIN");
+		try {
+			Collection<Content> contentsFlat = new ArrayList<Content>();
+
+			for (Part part : parts) {
+				if (part instanceof PartText) {
+					PartText partText = (PartText) part;
+					ContentText content = new ContentText(part.getPosition());
+					content.setText(partText.getText());
+					contentsFlat.add(content);
+				} else //
+				if (part instanceof PartTag) {
+					PartTag partTag = (PartTag) part;
+					try {
+						TagType tagType = TagType.valueOf(partTag.getName());
+						Content content;
+						switch (tagType) {
+						case PARAMETER: {
+							content = new ContentParameter(part.getPosition(), partTag.getAttributes());
+							break;
+						}
+
+						case NUMBER: {
+							content = new ContentNumber(part.getPosition(), partTag.getAttributes(), expressionParser);
+							break;
+						}
+						case IF: {
+							content = new ContentIf(part.getPosition(), partTag.getAttributes());
+							break;
+						}
+						case LOOP: {
+							content = new ContentLoop(part.getPosition(), partTag.getAttributes());
+							break;
+						}
+						case END: {
+							content = new ContentEnd(part.getPosition(), partTag.getAttributes());
+							break;
+						}
+
+						default:
+							throw new ContentParseException(part.getPosition(),
+									"Unsupported Tag: " + partTag.toString());
+						}
+						contentsFlat.add(content);
+					} catch (IllegalArgumentException ex) {
+						throw new ContentParseException(part.getPosition(), "Unknown Tag: " + partTag.toString());
+					}
+				} else {
+					throw new ContentParseException(part.getPosition(),
+							"Unsupported content Part: " + part.getClass().getName());
+				}
+
+			}
+			LOG.trace("OK");
+			return contentsFlat;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	private Collection<Part> createParts(String source) throws ContentParseException {
+		LOG.trace("BEGIN");
+		try {
+			Collection<Part> parts = new ArrayList<Part>();
+			Position position = new Position();
+
+			StringBuffer buffer = new StringBuffer(source);
+			char[] chars = source.toCharArray();
+
+			int iPos = 0;
+			while (true) {
+				//
+				// TEXT
+				//
+				{
+					int iPosStart = iPos;
+					boolean escaped = false;
+					for (; iPos < chars.length; iPos++) {
+						if (escaped) {
+							escaped = false;
+							continue;
+						}
+						if (chars[iPos] == symbolEscape) {
+							buffer.deleteCharAt(iPos);
+							chars = buffer.toString().toCharArray();
+							iPos--;
+							escaped = true;
+							continue;
+						}
+						if (chars[iPos] == symbolBracketOpen) {
+							break;
+						}
+					}
+
+					if (iPosStart != iPos) {
+						PartText partText = new PartText(position.movePosition(iPos),
+								buffer.substring(iPosStart, iPos));
+						parts.add(partText);
+					}
+				}
+
+				if (iPos >= chars.length) {
+					break;
+				}
+
+				//
+				// TAG
+				//
+				{
+					PartTag partTag;
+					int iPosStartTag = iPos;
+					iPos++;
+					iPos += countSpaces(chars, iPos);
+
+					//
+					// NAME
+					//
+					{
+						if (isEnd(chars, iPos) || !isNameStart(chars[iPos])) {
+							throw new ContentParseException(position.movePosition(iPos), "Tag name is expected");
+						}
+						int iPosStart = iPos;
+						iPos += countName(chars, iPos);
+						String tagName = buffer.substring(iPosStart, iPos);
+
+						partTag = new PartTag(position.movePosition(iPosStartTag), tagName);
+						parts.add(partTag);
+
+						if (!isSpace(chars[iPos]) && !isEnd(chars, iPos) && chars[iPos] != symbolBracketClose) {
+							throw new ContentParseException(position.movePosition(iPos),
+									"Unexpected character in tag name: '" + chars[iPos] + "'");
+						}
+
+						iPos += countSpaces(chars, iPos);
+					}
+
+					if (chars[iPos] == symbolBracketClose) {
+						iPos++;
+						continue;
+					}
+
+					//
+					// ATTRIBUTES
+					//
+					while (true) {
+						String attributeName;
+						{
+							//
+							// ATTRIBUTE-NAME
+							//
+							iPos += countSpaces(chars, iPos);
+
+							if (isEnd(chars, iPos) || !isNameStart(chars[iPos])) {
+								throw new ContentParseException(position.movePosition(iPos),
+										"Attribute start is expected");
+							}
+							int iPosStart = iPos;
+							iPos += countName(chars, iPos);
+							attributeName = buffer.substring(iPosStart, iPos);
+
+							iPos += countSpaces(chars, iPos);
+						}
+						{
+							//
+							// ATTRIBUTE-OPERATOR
+							//
+							if (chars[iPos] != '=') {
+								throw new ContentParseException(position.movePosition(iPos), "Expected character '='");
+							}
+
+							iPos++;
+						}
+						String attributeValue;
+						{
+							//
+							// ATTRIBUTE-VALUE
+							//
+							iPos += countSpaces(chars, iPos);
+
+							if (isEnd(chars, iPos) || chars[iPos] != symbolQuote) {
+								throw new ContentParseException(position.movePosition(iPos),
+										"Expected opening character '" + symbolQuote + "'");
+							}
+
+							iPos++;
+							int iPosStart = iPos;
+							boolean escaped = false;
+							for (; iPos < chars.length; iPos++) {
+								if (escaped) {
+									escaped = false;
+									continue;
+								}
+								if (chars[iPos] == symbolEscape) {
+									escaped = true;
+									buffer.deleteCharAt(iPos);
+									iPos--;
+									chars = buffer.toString().toCharArray();
+									continue;
+								}
+								if (chars[iPos] == symbolQuote) {
+									break;
+								}
+							}
+
+							if (chars[iPos] != symbolQuote) {
+								throw new ContentParseException(position.movePosition(iPos),
+										"Expected closing character '" + symbolQuote + "'");
+							}
+
+							attributeValue = buffer.substring(iPosStart, iPos);
+							iPos++;
+
+							if (!isSpace(chars[iPos]) && !isEnd(chars, iPos) && chars[iPos] != symbolBracketClose) {
+								throw new ContentParseException(position.movePosition(iPos),
+										"Unexpected character after attribute " + attributeName + " value: '"
+												+ chars[iPos] + "'");
+							}
+
+							iPos += countSpaces(chars, iPos);
+						}
+
+						partTag.addAttribute(attributeName, attributeValue);
+
+						if (chars[iPos] == symbolBracketClose) {
+							iPos++;
+							break;
+						}
 					}
 				}
 			}
-			if (retval == null) {
-				throw new TemplateConfigurationException(null,
-						"Not enough values of the parameter " + name + " for the index: " + toStringIndexes(indexes));
-			}
-		} else {
-			return object;
-		}
-		return retval;
-	}
 
-	private Integer evaluateListLength(Object pObject) {
-		return pObject == null ? //
-				0 : pObject.getClass().isArray() ? //
-						((Object[]) pObject).length : "".equals(pObject) ? //
-								0 : 1;
-	}
-
-	private int[] evaluateIndexes(Map<String, Integer> indexes, String[] indexNames) throws BaseException {
-		int[] values = new int[indexNames != null ? indexNames.length : 0];
-		for (int i = 0; i < values.length; i++) {
-			Integer value = indexes.get(indexNames[i]);
-			if (value == null) {
-				throw new TemplateConfigurationException(null, "Unknown index name: " + indexNames[i]);
-			}
-			values[i] = value;
-		}
-		return values;
-	}
-
-	private String toStringIndexes(int[] indexes) {
-		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < indexes.length; i++) {
-			buffer.append("[").append(indexes[i]).append("]");
-		}
-		return buffer.toString();
-	}
-
-	private Value evaluateParameter(String name, int[] indexes, final Map<String, Object> parameters)
-			throws BaseException {
-		if (!parameters.containsKey(name)) {
-			throw new TemplateConfigurationException(null, "Unknown parameter: " + name);
-		}
-
-		Object object = parameters.get(name);
-
-		Object objectLevel = retrieveObjectLevel(name, object, indexes);
-
-		try {
-			Value value = ValueBase.newValue(objectLevel);
-			return value;
-		} catch (IllegalArgumentException ex) {
-			throw new TemplateConfigurationException(null,
-					"The parameter " + name + toStringIndexes(indexes) + " must contain a scalar of allowed type", ex);
+			LOG.trace("OK");
+			return parts;
+		} finally {
+			LOG.trace("END");
 		}
 	}
 
-	private Content createContent(List<Part> pParts, Map<String, Object> pParameters) throws BaseException {
-		Content contentRoot = new Content();
-		Content contentCurrent = contentRoot;
-
-		LinkedList<Content> contents = new LinkedList<Content>();
-
-		for (int i = 0; i < pParts.size(); i++) {
-			Part part = pParts.get(i);
-			if (part instanceof Open) {
-				Block block = createBlock((Open) part);
-				if (block == null) {
-					throw new TemplateConfigurationException(null, "Unknown block: " + ((Open) part).getTagName());
-				}
-				contentCurrent.getContents().add(block);
-				contents.add(contentCurrent);
-				contentCurrent = new Content();
-				block.setContent(contentCurrent);
-			} else if (part instanceof Close) {
-				if (contents.isEmpty()) {
-					throw new TemplateConfigurationException(null, "Closing tag without opening tag");
-				}
-				contentCurrent = contents.removeLast();
-			} else {
-				contentCurrent.getContents().add(part);
-			}
+	private int countSpaces(char[] chars, int iPos) {
+		int count = 0;
+		for (; iPos < chars.length && isSpace(chars[iPos]); iPos++, count++) {
 		}
-
-		if (!contents.isEmpty()) {
-			throw new TemplateConfigurationException(null, "Opening tag without closing tag");
-		}
-
-		return contentRoot;
+		return count;
 	}
 
-	private Block createBlock(Open pOpen) {
-		if (pOpen instanceof TagIf) {
-			final If blockIf = new If();
-			blockIf.setTag((TagIf) pOpen);
-			return blockIf;
-		} else if (pOpen instanceof TagLoop) {
-			final Loop blockLoop = new Loop();
-			blockLoop.setTag((TagLoop) pOpen);
-			return blockLoop;
+	private int countName(char[] chars, int iPos) {
+		int count = 0;
+		for (; iPos < chars.length && isName(chars[iPos]); iPos++, count++) {
 		}
-		return null;
+		return count;
 	}
 
-	private List<Part> createParts(List<Object> pContents) throws BaseException {
-		List<Part> parts = new ArrayList<Part>();
-		for (Object object : pContents) {
-			if (object instanceof String) {
-				final Text text = new Text();
-				text.setValue((String) object);
-				parts.add(text);
-			} else if (object instanceof Tag) {
-				final Part part = createTag((Tag) object);
-				parts.add(part);
-			}
-		}
-		return parts;
+	private boolean isEnd(char[] chars, int iPos) {
+		return iPos >= chars.length;
 	}
 
-	private TagParameter createTagParameter(Tag tag) throws BaseException {
-		Map<String, String> attributes = new HashMap<String, String>(tag.getAttributes());
-		TagParameter tagParameter = new TagParameter();
-
-		if (attributes.containsKey(TagParameter.ATTR_NAME)) {
-			String attributeValue = attributes.remove(TagParameter.ATTR_NAME);
-			if (!isNameParameter(attributeValue)) {
-				throw new TemplateConfigurationException(null,
-						"Cannot evaluate the value of the attribute [" + tag.getName() + " " + TagParameter.ATTR_NAME
-								+ "] " + TagParameter.ATTR_NAME + " as a parameter name: " + attributeValue);
-			}
-			tagParameter.setName(attributeValue);
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagParameter.TAG + " " + TagParameter.ATTR_NAME + "]");
-		}
-
-		if (attributes.containsKey(TagParameter.ATTR_INDEXES)) {
-			String attributeValue = attributes.remove(TagParameter.ATTR_INDEXES);
-			String[] indexes = toArray(attributeValue);
-			if (indexes == null) {
-				throw new TemplateConfigurationException(null,
-						"Cannot evaluate the value of the attribute [" + tag.getName() + " " + TagParameter.ATTR_INDEXES
-								+ "]" + TagParameter.ATTR_NAME + "  as a comma separated list of index names: "
-								+ attributeValue);
-			}
-			for (String index : indexes) {
-				if (!isNameIndex(index)) {
-					throw new TemplateConfigurationException(null,
-							"Cannot evaluate the value of the attribute [" + tag.getName() + " "
-									+ TagParameter.ATTR_INDEXES + "]" + " an index name has bad format: "
-									+ attributeValue);
-				}
-			}
-			tagParameter.setIndexes(indexes);
-		}
-
-		FormatType formatType = null;
-		if (attributes.containsKey(TagParameter.ATTR_FORMAT_TYPE)) {
-			String attributeValue = attributes.remove(TagParameter.ATTR_FORMAT_TYPE);
-			try {
-				formatType = FormatType.valueOf(attributeValue);
-			} catch (Exception ex) {
-				throw new TemplateConfigurationException(null,
-						"Bad format-type of the attribute [" + tag.getName() + " " + TagParameter.ATTR_FORMAT_TYPE + "]"
-								+ " value: " + attributeValue + " problem: " + ex.getMessage());
-			}
-		}
-
-		{
-			String attributeValue = attributes.remove(TagParameter.ATTR_FORMAT);
-			if (formatType == null && !UtilsString.isEmpty(attributeValue)) {
-				formatType = FormatType.VALUE;
-			} else {
-				formatType = FormatType.AUTO;
-			}
-			try {
-				Format format = FormatBase.newFormat(formatType, attributeValue);
-				tagParameter.setFormat(format);
-			} catch (Exception ex) {
-				throw new TemplateConfigurationException(null,
-						"Bad format of the attribute [" + tag.getName() + " " + TagParameter.ATTR_FORMAT + "=\""
-								+ attributeValue + "\"]" + " value: " + attributeValue + " problem: "
-								+ ex.getMessage());
-			}
-		}
-
-		if (!attributes.isEmpty()) {
-			throw new TemplateConfigurationException(null,
-					"Unknown attribute " + attributes.keySet().iterator().next() + " in the tag " + TagParameter.TAG);
-		}
-		return tagParameter;
+	private boolean isSpace(char c) {
+		return Character.isWhitespace(c);
 	}
 
-	private TagNumber createTagNumber(Tag tag) throws BaseException {
-		Map<String, String> attributes = new HashMap<String, String>(tag.getAttributes());
-		TagNumber tagNumber = new TagNumber();
-
-		if (attributes.containsKey(TagNumber.ATTR_FORMAT)) {
-			String attributeValue = attributes.remove(TagNumber.ATTR_FORMAT);
-			try {
-				Format format = FormatBase.newFormat(FormatType.VALUE, attributeValue);
-				format.format(new ValueInteger(0));
-				tagNumber.setFormat(format);
-			} catch (Exception ex) {
-				throw new TemplateConfigurationException(null, "" //
-						+ "Bad format of the attribute " //
-						+ "[" + tag.getName() + " " + TagNumber.ATTR_FORMAT + "=" + "\"" + attributeValue + "\"]" //
-						+ ". Problem: " + ex.getMessage());
-			}
-		} else {
-			Format format = FormatBase.newFormat(FormatType.AUTO, null);
-			tagNumber.setFormat(format);
-		}
-
-		if (attributes.containsKey(TagNumber.ATTR_EXPRESSION)) {
-			String attributeValue = attributes.remove(TagNumber.ATTR_EXPRESSION);
-
-			if (expressionParser == null) {
-				throw new TemplateConfigurationException(null, "" //
-						+ "Expression parser must be configured " //
-						+ "[" + tag.getName() + " " + TagNumber.ATTR_EXPRESSION + "=" + "\"" + attributeValue + "\"]");
-			}
-
-			Expression expression = expressionParser.parseExpression(attributeValue);
-			tagNumber.setExpression(expression);
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagNumber.TAG + " " + TagNumber.ATTR_EXPRESSION + "]");
-		}
-
-		if (!attributes.isEmpty()) {
-			throw new TemplateConfigurationException(null,
-					"Unknown attribute " + attributes.keySet().iterator().next() + " in the tag " + TagNumber.TAG);
-		}
-
-		return tagNumber;
+	private boolean isNameStart(char c) {
+		return false //
+				|| c >= 'a' && c <= 'z' //
+				|| c >= 'A' && c <= 'Z' //
+				|| c == '_' //
+		;
 	}
 
-	private TagLoop createTagLoop(Tag tag) throws BaseException {
-		Map<String, String> attributes = new HashMap<String, String>(tag.getAttributes());
-		TagLoop tagLoop = new TagLoop();
-
-		//
-		// INDEX
-		//
-		if (attributes.containsKey(TagLoop.ATTR_INDEX)) {
-			String attributeValue = attributes.remove(TagLoop.ATTR_INDEX);
-			if (!isNameParameter(attributeValue)) {
-				throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '"
-						+ TagLoop.ATTR_INDEX + "' as a parameter name: " + tag.getName());
-			}
-			tagLoop.setIndex(attributeValue);
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_INDEX + "]");
-		}
-		//
-		// NAME
-		//
-		if (attributes.containsKey(TagLoop.ATTR_NAME)) {
-			String attributeValue = attributes.remove(TagLoop.ATTR_NAME);
-			if (!isNameParameter(attributeValue)) {
-				throw new TemplateConfigurationException(null, "Cannot evaluate the attribute [" + tag.getName() + " "
-						+ TagLoop.ATTR_NAME + "] as a parameter name");
-			}
-			tagLoop.setName(attributeValue);
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_NAME + "]");
-		}
-
-		//
-		// INDEXES
-		//
-		if (attributes.containsKey(TagLoop.ATTR_INDEXES)) {
-			String attributeValue = attributes.remove(TagLoop.ATTR_INDEXES);
-			String[] indexes = toArray(attributeValue);
-			if (indexes == null) {
-				throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '"
-						+ TagParameter.ATTR_INDEXES + "' as a comma separated list of index names: " + tag.getName());
-			}
-			tagLoop.setIndexes(indexes);
-		}
-		//
-		// TYPE
-		//
-		if (attributes.containsKey(TagLoop.ATTR_TYPE)) {
-			String attributeValue = attributes.remove(TagLoop.ATTR_TYPE);
-			TagLoop.Type type;
-			try {
-				type = TagLoop.Type.valueOf(attributeValue);
-				tagLoop.setType(type);
-			} catch (Exception ex) {
-				throw new TemplateConfigurationException(null, "Bad value of the attribute [" + tag.getName() + " "
-						+ TagLoop.ATTR_TYPE + "]" + " value: " + attributeValue + " problem: " + ex.getMessage());
-			}
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagLoop.TAG + " " + TagLoop.ATTR_TYPE + "]");
-		}
-
-		if (!attributes.isEmpty()) {
-			throw new TemplateConfigurationException(null,
-					"Unknown attribute " + attributes.keySet().iterator().next() + " in the tag " + TagLoop.TAG);
-		}
-		return tagLoop;
-	}
-
-	private TagIf createTagIf(Tag tag) throws BaseException {
-		Map<String, String> attributes = new HashMap<String, String>(tag.getAttributes());
-		TagIf tagIf = new TagIf();
-
-		if (attributes.containsKey(TagIf.ATTR_NAME)) {
-			String attributeValue = attributes.remove(TagIf.ATTR_NAME);
-			if (!isNameParameter(attributeValue)) {
-				throw new TemplateConfigurationException(null, "Cannot evaluate the attribute [" + tag.getName() + " "
-						+ TagIf.ATTR_NAME + "] as a parameter name");
-			}
-			tagIf.setName(attributeValue);
-		} else {
-			throw new TemplateConfigurationException(null,
-					"Missing attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "]");
-		}
-		if (attributes.containsKey(TagIf.ATTR_VALUE)) {
-			String attributeValue = attributes.remove(TagIf.ATTR_VALUE);
-			tagIf.setValue(attributeValue);
-		}
-		if (attributes.containsKey(TagIf.ATTR_INDEXES)) {
-			String attributeValue = attributes.remove(TagIf.ATTR_INDEXES);
-			String[] indexes = toArray(attributeValue);
-			if (indexes == null) {
-				throw new TemplateConfigurationException(null, "Cannot evaluate the value of the attribute '"
-						+ TagParameter.ATTR_INDEXES + "' as a comma separated list of index names: " + tag.getName());
-			}
-			tagIf.setIndexes(indexes);
-		}
-		if (attributes.containsKey(TagIf.ATTR_TYPE)) {
-			String attributeValue = attributes.remove(TagIf.ATTR_TYPE);
-			try {
-				TagIf.Type valueType = TagIf.Type.valueOf(attributeValue);
-				tagIf.setType(valueType);
-			} catch (Exception ex) {
-				throw new TemplateConfigurationException(null,
-						"The value of the attribute [" + tag.getName() + " " + TagIf.ATTR_TYPE + "] must be one of: " //
-								+ UtilsString.arrayToString(TagIf.Type.values(), null, null, ","));
-			}
-		}
-
-		if (!attributes.isEmpty()) {
-			throw new TemplateConfigurationException(null,
-					"Unknown attribute " + attributes.keySet().iterator().next() + " in the tag " + TagIf.TAG);
-		}
-
-		if (tagIf.getIndexes() == null) {
-			tagIf.setIndexes(new String[0]);
-		}
-		if (tagIf.getType() == null) {
-			throw new TemplateConfigurationException(null,
-					"Attribute [" + TagIf.TAG + " " + TagIf.ATTR_NAME + "] must be defined.");
-		} else if ((tagIf.getType() == TagIf.Type.EQ || tagIf.getType() == TagIf.Type.NE) && tagIf.getValue() == null) {
-			throw new TemplateConfigurationException(null,
-					"The attribut " + TagIf.ATTR_VALUE + " is expected when the value of the attribute ["
-							+ tag.getName() + " " + TagIf.ATTR_TYPE + "=\"" + tagIf.getType() + "\"]");
-		} else if ((tagIf.getType() == TagIf.Type.EMPTY || tagIf.getType() == TagIf.Type.NONEMPTY)
-				&& tagIf.getValue() != null) {
-			throw new TemplateConfigurationException(null,
-					"The attribut " + TagIf.ATTR_VALUE + " may not be used when the value of the attribute ["
-							+ tag.getName() + " " + TagIf.ATTR_TYPE + "=\"" + tagIf.getType() + "\"]");
-		}
-		return tagIf;
-	}
-
-	private TagEnd createTagEnd(Tag tag) throws BaseException {
-		if (!tag.getAttributes().isEmpty()) {
-			throw new TemplateConfigurationException(null, "Unknown attribute '"
-					+ tag.getAttributes().keySet().iterator().next() + "' for the tag '" + TagEnd.TAG + "'");
-		}
-		return new TagEnd();
-	}
-
-	private Part createTag(Tag tag) throws BaseException {
-		if (TagParameter.TAG.equals(tag.getName())) {
-			return createTagParameter(tag);
-		} else if (TagNumber.TAG.equals(tag.getName())) {
-			return createTagNumber(tag);
-		} else if (TagLoop.TAG.equals(tag.getName())) {
-			return createTagLoop(tag);
-		} else if (TagIf.TAG.equals(tag.getName())) {
-			return createTagIf(tag);
-		} else if (TagEnd.TAG.equals(tag.getName())) {
-			return createTagEnd(tag);
-		} else {
-			throw new TemplateConfigurationException(null, "Unknown tag '" + tag.getName() + "'");
-		}
-	}
-
-	private Integer toInteger(Value value) {
-		if (value instanceof ValueText) {
-			try {
-				return Integer.parseInt(((ValueText) value).getValue());
-			} catch (NumberFormatException ex) {
-				return null;
-			}
-		}
-		if (value instanceof ValueInteger) {
-			return ((ValueInteger) value).getValue().intValue();
-		}
-		if (value instanceof ValueDecimal) {
-			double valueDecimal = ((ValueDecimal) value).getValue();
-			int valueInt = (int) valueDecimal;
-			if (valueDecimal == (double) valueInt) {
-				return valueInt;
-			}
-		}
-		return null;
-	}
-
-	private String[] toArray(String value) {
-		String[] array = value.split(",");
-		if (array.length == 0) {
-			return null;
-		}
-		for (int i = 0; i < array.length; i++) {
-			String adapt = array[i].trim();
-			if (adapt.length() == 0) {
-				return null;
-			} else {
-				array[i] = adapt;
-			}
-		}
-		return array;
-	}
-
-	private boolean isNameParameter(String text) {
-		return PATTERN_NAME.matcher(text).matches();
-	}
-
-	private boolean isNameIndex(String text) {
-		return PATTERN_NAME.matcher(text).matches();
-	}
-
-	private String contentToString(Content pContent) throws BaseException {
-		final StringBuilder builder = new StringBuilder();
-		for (Object object : pContent.getContents()) {
-			if (object instanceof Text) {
-				builder.append(((Text) object).getValue());
-			} else if (object instanceof Content) {
-				final String contentLoop = contentToString((Content) object);
-				builder.append(contentLoop);
-			}
-		}
-		return builder.toString();
-	}
-
-	private List<Object> createTags(String source) throws BaseException {
-		final List<Object> contents = new ArrayList<Object>();
-
-		final StringBuilder builder = new StringBuilder(source);
-		final Position p = new Position(source);
-
-		while (true) {
-			int current = p.position;
-			int indexTag = nextTag(builder, p.position);
-			if (indexTag != -1) {
-				String text = builder.substring(current, indexTag);
-				contents.add(text);
-				p.position = indexTag;
-				Tag tag = createTag(builder, p);
-				contents.add(tag);
-			} else {
-				String text = builder.substring(current);
-				contents.add(text);
-				break;
-			}
-		}
-
-		return contents;
-	}
-
-	private Tag createTag(StringBuilder pBuilder, Position position) throws BaseException {
-		Tag tag = new Tag();
-
-		//
-		// [
-		//
-		position.position++;
-		position.position += countSpace(pBuilder, position.position);
-
-		//
-		// Name
-		//
-		int diff = countName(pBuilder, position.position);
-		final String name = pBuilder.substring(position.position, position.position + diff);
-		tag.setName(name);
-		position.position += diff;
-		diff = countSpace(pBuilder, position.position);
-
-		if (!isBorder(pBuilder, position.position)) {
-			throw new TemplateConfigurationException(null, "Unexpected character: " + position);
-		}
-
-		//
-		// End
-		//
-		if (pBuilder.charAt(position.position + diff) == ']') {
-			position.position += diff;
-			position.position++;
-			return tag;
-		}
-
-		position.position += diff;
-
-		//
-		// Attribute
-		//
-		while (true) {
-			final Attribute attribute = createAttribute(pBuilder, position);
-			if (tag.getAttributes().containsKey(attribute.getName())) {
-				throw new TemplateConfigurationException(null,
-						"Attribute " + attribute.getName() + " exists already in the tag " + tag.getName());
-			}
-			tag.getAttributes().put(attribute.getName(), attribute.getValue());
-
-			if (!isBorder(pBuilder, position.position)) {
-				throw new TemplateConfigurationException(null, "Unexpected character on position: " + position);
-			}
-
-			diff = countSpace(pBuilder, position.position);
-			position.position += diff;
-
-			//
-			// End
-			//
-			if (pBuilder.charAt(position.position) == ']') {
-				position.position += diff;
-				position.position++;
-				return tag;
-			}
-
-			if (position.position >= pBuilder.length()) {
-				throw new TemplateConfigurationException(null, "Missing the character '[': " + position);
-			}
-		}
-	}
-
-	private Attribute createAttribute(StringBuilder pBuilder, Position position) throws BaseException {
-		final Attribute attribute = new Attribute();
-
-		int diff = countSpace(pBuilder, position.position);
-		position.position += diff;
-
-		//
-		// Name
-		//
-		diff = countName(pBuilder, position.position);
-		if (diff == 0) {
-			throw new TemplateConfigurationException(null, "Cannot extract attribute name: " + position);
-		}
-		String name = pBuilder.substring(position.position, position.position + diff);
-		attribute.setName(name);
-		position.position += diff;
-		diff = countSpace(pBuilder, position.position);
-		position.position += diff;
-
-		//
-		// =
-		//
-		if (pBuilder.charAt(position.position) != '=') {
-			throw new TemplateConfigurationException(null, "Attribut is missing '=': " + position);
-		}
-		position.position++;
-		diff = countSpace(pBuilder, position.position);
-		position.position += diff;
-
-		//
-		// ValueBase
-		//
-		boolean quot = pBuilder.charAt(position.position) == '"';
-		if (quot) {
-			position.position++;
-			final int quotPos = pBuilder.indexOf("\"", position.position);
-			if (quotPos == -1) {
-				throw new TemplateConfigurationException(null, "Quotations are not closed: " + position);
-			}
-			final String value = pBuilder.substring(position.position, quotPos);
-			attribute.setValue(value);
-			position.position = quotPos + 1;
-		} else {
-			diff = countValue(pBuilder, position.position);
-			final String value = pBuilder.substring(position.position, position.position + diff);
-			position.position += diff;
-			attribute.setValue(value);
-			if (!isBorder(pBuilder, position.position)) {
-				throw new TemplateConfigurationException(null, "Unexpected character: " + position);
-			}
-		}
-
-		return attribute;
-	}
-
-	private int countValue(StringBuilder pBuilder, int pos) {
-		int j = 0;
-		for (int i = pos; i < pBuilder.length(); i++, j++) {
-			char c = pBuilder.charAt(i);
-			if (!Character.isJavaIdentifierPart(c) && c != '-') {
-				break;
-			}
-		}
-		return j;
-	}
-
-	private int countName(StringBuilder pBuilder, int pos) {
-		int j = 0;
-		for (int i = pos; i < pBuilder.length(); i++, j++) {
-			char c = pBuilder.charAt(i);
-			if (j == 0 && !Character.isJavaIdentifierStart(c)
-					|| !Character.isJavaIdentifierPart(c) && c != '-' && c != '.') {
-				break;
-			}
-		}
-		return j;
-	}
-
-	private int countSpace(StringBuilder pBuilder, int pos) {
-		int j = 0;
-		for (int i = pos; i < pBuilder.length() && Character.isWhitespace(pBuilder.charAt(i)); i++, j++) {
-		}
-		return j;
-	}
-
-	private int nextTag(StringBuilder pBuilder, int pos) {
-		int min = -1;
-
-		for (String tag : TAGS) {
-			int found = pBuilder.indexOf(tag, pos);
-			if (found == -1) {
-				continue;
-			}
-			int startTag = startTag(pBuilder, found, tag);
-			if (startTag == -1) {
-				continue;
-			}
-			if (min == -1 || startTag < min) {
-				min = startTag;
-			}
-		}
-
-		return min;
-	}
-
-	private int startTag(StringBuilder pBuilder, int pos, String tag) {
-		int startTag = -1;
-		for (int i = pos - 1; i >= 0; i--) {
-			char c = pBuilder.charAt(i);
-			if (c == '[') {
-				startTag = i;
-				break;
-			}
-			if (Character.isWhitespace(c)) {
-				continue;
-			}
-			return -1;
-		}
-		char lastChar = pBuilder.charAt(pos + tag.length());
-		if (Character.isWhitespace(lastChar) || //
-				lastChar == ']') {
-			return startTag;
-		}
-		return -1;
-	}
-
-	private boolean isBorder(StringBuilder pBuilder, int pos) {
-		char c = pBuilder.charAt(pos);
-		return Character.isWhitespace(c) || c == ']';
+	private boolean isName(char c) {
+		return false //
+				|| isNameStart(c) //
+				|| c >= '0' && c <= '9' //
+		;
 	}
 }

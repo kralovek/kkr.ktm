@@ -1,7 +1,5 @@
 package kkr.ktm.domains.common.components.parametersformater.template.format;
 
-import kkr.ktm.domains.common.components.parametersformater.template.parts.TagParameter;
-
 public abstract class FormatBase {
 	private FormatType type;
 
@@ -17,8 +15,8 @@ public abstract class FormatBase {
 			return new FormatValue(format);
 		case AUTO:
 			if (format != null && !format.isEmpty()) {
-				throw new IllegalArgumentException("When " + TagParameter.ATTR_FORMAT_TYPE + " is " + FormatType.AUTO
-						+ " no pattern cannot be specified: " + format);
+				throw new IllegalArgumentException(
+						"When format type is " + FormatType.AUTO + " no pattern cannot be specified: " + format);
 			}
 			return new FormatAuto();
 		default:
