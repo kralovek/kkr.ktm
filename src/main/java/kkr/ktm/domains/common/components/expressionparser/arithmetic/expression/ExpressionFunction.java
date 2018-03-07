@@ -1,72 +1,46 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-
-import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
+import kkr.ktm.domains.common.components.calculator.Calculator;
+import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.OperatorSeparator;
 
 public class ExpressionFunction implements Expression {
 	private String name;
-	Method function;
+	private String function;
 	private Expression[] argumentExpressions;
-	private static Map<Integer, Map<String, Method>> methods = prepareMethods();
+	private Calculator calculator;
 
-	private static Map<Integer, Map<String, Method>> prepareMethods() {
-		Map<Integer, Map<String, Method>> methods = new HashMap<Integer, Map<String, Method>>();
-		Method[] mathMethods = Math.class.getMethods();
-		methods: for (Method method : mathMethods) {
-			if (!Modifier.isStatic(method.getModifiers())) {
-				continue;
-			}
-			if (!Modifier.isPublic(method.getModifiers())) {
-				continue;
-			}
-			if (!method.getReturnType().equals(double.class)) {
-				continue;
-			}
-			if (method.getParameterCount() != 1) {
-				continue;
-			}
-			for (int i = 0; i < method.getParameterTypes().length; i++) {
-				if (!method.getParameterTypes()[i].equals(double.class)) {
-					continue methods;
+	public ExpressionFunction(String name, Expression[] argumentExpressions, Calculator calculator)
+			throws ExpressionEvaluateException {
+		this.name = name;
+		this.calculator = calculator;
+		this.argumentExpressions = argumentExpressions;
+		this.function = name;
+	}
+
+	public Object evaluate(Context context) throws ExpressionEvaluateException {
+		try {
+			Object[] argumentValues = new Object[argumentExpressions.length];
+			for (int i = 0; i < argumentValues.length; i++) {
+				argumentValues[i] = argumentExpressions[i].evaluate(context);
+				if (argumentValues[i] == null) {
+					throw new ExpressionEvaluateException(
+							"Cannot call function " + toString() + ". Problem: argument[" + i + "] is null");
 				}
 			}
-			Map<String, Method> countMethods = methods.get(method.getParameterTypes().length);
-			if (countMethods == null) {
-				countMethods = new HashMap<String, Method>();
-				methods.put(method.getParameterTypes().length, countMethods);
+			Object value = calculator.calculate(function, argumentValues);
+			if (value == null) {
+				throw new ExpressionEvaluateException(
+						"Cannot call function " + toString() + ". Problem: result is null");
 			}
-			countMethods.put(method.getName(), method);
-		}
-		return methods;
-	}
-
-	public ExpressionFunction(String name, Expression[] argumentExpressions) throws ExpressionEvaluateException {
-		this.name = name;
-		this.argumentExpressions = argumentExpressions;
-		Map<String, Method> countMethods = methods.get(argumentExpressions.length);
-		if (countMethods == null || (function = countMethods.get(name)) == null) {
-			throw new ExpressionEvaluateException(
-					"Unsupported function: " + name + " with " + argumentExpressions.length + " arguments");
-		}
-	}
-
-	public Number evaluate(ContextExpression context) throws ExpressionEvaluateException {
-		Object[] argumentValues = new Object[argumentExpressions.length];
-		for (int i = 0; i < argumentValues.length; i++) {
-			argumentValues[i] = argumentExpressions[i].evaluate(context);
-		}
-		try {
-			double value = (Double) function.invoke(null, argumentValues);
 			return value;
+		} catch (ExpressionEvaluateException ex) {
+			throw ex;
 		} catch (Exception ex) {
-			throw new ExpressionEvaluateException("Cannot call function " + toString());
+			throw new ExpressionEvaluateException(
+					"Cannot call function " + toString() + ". Problem: " + ex.getMessage(), ex);
 		}
 	}
 

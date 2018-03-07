@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.parametersformater.template.format;
 
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
+import kkr.ktm.domains.common.components.parametersformater.template.value.UtilsValue;
 
 public class FormatAuto extends FormatBase implements Format {
 
@@ -8,11 +8,14 @@ public class FormatAuto extends FormatBase implements Format {
 		super(FormatType.AUTO);
 	}
 
-	public String format(Value value) {
+	public String format(Object value) {
 		if (value == null) {
 			return "";
 		}
-		return value.getValue().toString();
+		if (UtilsValue.isValidValue(value)) {
+			throw new IllegalArgumentException("Formated object is not a supported value: " + value);
+		}
+		return value.toString();
 	}
 
 	public String toString() {

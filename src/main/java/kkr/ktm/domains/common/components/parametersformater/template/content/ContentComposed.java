@@ -5,8 +5,10 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
+import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
+import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 
 public class ContentComposed extends ContentBase implements Content {
 	private static final Logger LOG = Logger.getLogger(ContentComposed.class);
@@ -26,7 +28,13 @@ public class ContentComposed extends ContentBase implements Content {
 		contents.add(content);
 	}
 
-	public String evaluate(ContextContent context) throws ContentEvaluateException {
+	public void validate(Context context) throws ContentParseException {
+		for (Content content : contents) {
+			content.validate(context);
+		}
+	}
+
+	public String evaluate(Context context) throws ContentEvaluateException {
 		StringBuffer buffer = new StringBuffer();
 		for (Content content : contents) {
 			String text = content.evaluate(context);

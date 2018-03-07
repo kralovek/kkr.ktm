@@ -1,11 +1,9 @@
 package kkr.ktm.domains.common.components.parametersformater.template.format;
 
+import java.util.Date;
 import java.util.Formatter;
 import java.util.IllegalFormatException;
 import java.util.Locale;
-
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueDate;
 
 public class FormatValue extends FormatBase implements Format {
 	private String format;
@@ -18,23 +16,23 @@ public class FormatValue extends FormatBase implements Format {
 		this.format = format;
 	}
 
-	public String format(Value value) {
+	public String format(Object value) {
 		if (value == null) {
 			return "";
 		}
 		try {
-			if (value instanceof ValueDate) {
+			if (value instanceof Date) {
 				throw new IllegalArgumentException("Date cannot be formated with the value formatter");
 			}
 
 			Formatter formatter = new Formatter(Locale.US);
-			formatter.format(format, value.getValue());
+			formatter.format(format, value);
 			String retval = formatter.toString();
 			formatter.close();
 			return retval;
 		} catch (IllegalFormatException ex) {
 			throw new IllegalArgumentException(
-					"Bad format pattern: " + format + " for the type: " + value.getValue().getClass().getName(), ex);
+					"Bad format pattern: " + format + " for the type: " + value.getClass().getName(), ex);
 		}
 	}
 

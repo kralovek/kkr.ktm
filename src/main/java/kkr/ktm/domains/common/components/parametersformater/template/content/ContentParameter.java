@@ -5,30 +5,42 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import kkr.common.errors.BaseException;
 import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.common.components.context.Context;
+import kkr.ktm.domains.common.components.context.content.ContextContent;
+import kkr.ktm.domains.common.components.formatter.Formatter;
+import kkr.ktm.domains.common.components.formatter.FormatterException;
+import kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
-import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatBase;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatType;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
 
-public class ContentParameter extends ContentBase implements Content {
+public class ContentParameter extends ContentTagBase implements Content {
 	private static final Logger LOG = Logger.getLogger(ContentParameter.class);
-	public static final TagType TAG = TagType.PARAMETER;
 	public static final String ATTR_INDEXES = "INDEXES";
 	public static final String ATTR_NAME = "NAME";
-	public static final String ATTR_FORMAT = "FORMAT";
-	public static final String ATTR_FORMAT_TYPE = "FORMAT-TYPE";
+
+	public static final String ATTR_FORMAT_DATE = "FORMAT-DATE";
+	public static final String ATTR_FORMAT_DECIMAL = "FORMAT-DECIMAL";
+	public static final String ATTR_FORMAT_INTEGER = "FORMAT-INTEGER";
+	public static final String ATTR_FORMAT_STRING = "FORMAT-STRING";
+	public static final String ATTR_FORMAT_BOOLEAN = "FORMAT-BOOLEAN";
 
 	protected String name;
-	protected Format format;
+	protected Formatter formatter;
 	private String[] indexes;
 
-	public ContentParameter(Position position, Map<String, String> attributes) throws ContentParseException {
-		super(position);
+	private String formatString;
+	private String formatBoolean;
+	private String formatInteger;
+	private String formatDecimal;
+	private String formatDate;
+
+	public ContentParameter(Position position, Map<String, String> attributes, FormatterFactoryByType formatterFactory)
+			throws ContentParseException, BaseException {
+		super(position, TagType.PARAMETER);
 		LOG.trace("BEGIN");
 		try {
 
@@ -37,63 +49,23 @@ public class ContentParameter extends ContentBase implements Content {
 			//
 			// NAME
 			//
-			if (attributesLocal.containsKey(ATTR_NAME)) {
-				String attributeValue = attributesLocal.remove(ATTR_NAME);
-				if (!isName(attributeValue)) {
-					throw new ContentParseException(position, "Cannot evaluate the value of the attribute [" + TAG + " "
-							+ ATTR_NAME + "] " + " as a parameter name: " + attributeValue);
-				}
-				name = attributeValue;
-			} else {
-				throw new ContentParseException(position, "Missing attribute [" + TAG + " " + ATTR_NAME + "]");
-			}
+			name = attributeName(true, ATTR_NAME, attributesLocal.remove(ATTR_NAME));
 
 			//
 			// INDEXES
 			//
-			if (attributesLocal.containsKey(ATTR_INDEXES)) {
-				String attributeValue = attributesLocal.remove(ATTR_INDEXES);
-
-				try {
-					indexes = toArrayValue(attributeValue);
-				} catch (IllegalArgumentException ex) {
-					throw new ContentParseException(position, "Cannot evaluate the value of the attribute '"
-							+ ATTR_INDEXES + "' as a comma separated list of index names: " + ex.getMessage());
-				}
-			}
+			indexes = attributeNames(false, ATTR_INDEXES, attributesLocal.remove(ATTR_INDEXES));
 
 			//
-			// FORMAT TYPE
+			// FORMATTER
 			//
-			FormatType formatType = null;
-			if (attributesLocal.containsKey(ATTR_FORMAT_TYPE)) {
-				String attributeValue = attributesLocal.remove(ATTR_FORMAT_TYPE);
-				try {
-					formatType = FormatType.valueOf(attributeValue);
-				} catch (Exception ex) {
-					throw new ContentParseException(position, "Bad format-type of the attribute [" + TAG + " "
-							+ ATTR_FORMAT_TYPE + "]" + " value: " + attributeValue + " problem: " + ex.getMessage());
-				}
-			}
-
-			//
-			// FORMAT
-			//
-			{
-				String attributeValue = attributesLocal.remove(ATTR_FORMAT);
-				if (formatType == null && !UtilsString.isEmpty(attributeValue)) {
-					formatType = FormatType.VALUE;
-				} else {
-					formatType = FormatType.AUTO;
-				}
-				try {
-					format = FormatBase.newFormat(formatType, attributeValue);
-				} catch (Exception ex) {
-					throw new ContentParseException(position,
-							"Bad format of the attribute [" + TAG + " " + ATTR_FORMAT + "=\"" + attributeValue + "\"]"
-									+ " value: " + attributeValue + " problem: " + ex.getMessage());
-				}
-			}
+			formatter = attributeFormat( //
+					(formatString = attributesLocal.remove(ATTR_FORMAT_STRING)), //
+					(formatBoolean = attributesLocal.remove(ATTR_FORMAT_BOOLEAN)), //
+					(formatInteger = attributesLocal.remove(ATTR_FORMAT_INTEGER)), //
+					(formatDecimal = attributesLocal.remove(ATTR_FORMAT_DECIMAL)), //
+					(formatDate = attributesLocal.remove(ATTR_FORMAT_DATE)), //
+					formatterFactory);
 
 			checkUnknownAttributes(TAG, attributesLocal);
 			LOG.trace("OK");
@@ -102,14 +74,20 @@ public class ContentParameter extends ContentBase implements Content {
 		}
 	}
 
-	public String evaluate(ContextContent context) throws ContentEvaluateException {
-		Value value = context.getParameter(name, indexes);
+	public void validate(Context context) throws ContentParseException {
+		validateIndexes(context, ATTR_INDEXES, indexes);
+	}
+
+	public String evaluate(Context context) throws ContentEvaluateException {
+		ContextContent contextContent = (ContextContent) context;
+		Integer[] indexValues = contextContent.getContextIndex().evaluateIndexes(indexes);
+		Object value = contextContent.getParameter(name, indexValues);
 		try {
-			String valueFormated = format.format(value);
+			String valueFormated = formatter.format(value);
 			return valueFormated;
-		} catch (Exception ex) {
-			throw new ContentEvaluateException(position, "Bad format string for a " + value.getType() + " value [" + TAG
-					+ " " + ATTR_FORMAT + "]: " + format.toString(), ex);
+		} catch (FormatterException ex) {
+			throw new ContentEvaluateException(position,
+					"[" + TAG + "]: Cannot format the value " + value + " Problem: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -122,8 +100,11 @@ public class ContentParameter extends ContentBase implements Content {
 					.append(toStringAttribute(ATTR_INDEXES, UtilsString.arrayToString(indexes, null, null, ",")));
 		}
 
-		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_TYPE, format.getType().toString()));
-		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT, format.toString()));
+		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_STRING, formatString));
+		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_BOOLEAN, formatBoolean));
+		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_INTEGER, formatInteger));
+		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_DECIMAL, formatDecimal));
+		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_DATE, formatDate));
 		buffer.append(']');
 		return buffer.toString();
 	}

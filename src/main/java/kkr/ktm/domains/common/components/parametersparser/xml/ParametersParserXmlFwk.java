@@ -26,7 +26,8 @@ public abstract class ParametersParserXmlFwk {
 		useValuePrefix = Boolean.TRUE.equals(useValuePrefix);
 
 		if (sysParamPrefix == null) {
-			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter _sysPrefix is not configured");
+			throw new ConfigurationException(
+					getClass().getSimpleName() + ": Parameter 'sysParamPrefix' is not configured");
 		} else if (!sysParamPrefix.isEmpty() && !sysParamPrefix.endsWith("/")) {
 			sysParamPrefix += "/";
 		}

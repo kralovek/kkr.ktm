@@ -2,7 +2,9 @@ package kkr.ktm.domains.common.components.parametersformater.template.content;
 
 import org.apache.log4j.Logger;
 
+import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
+import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 
 public class ContentText extends ContentBase implements Content {
 	private static final Logger LOG = Logger.getLogger(ContentText.class);
@@ -22,7 +24,10 @@ public class ContentText extends ContentBase implements Content {
 		this.text = text != null ? text : "";
 	}
 
-	public String evaluate(ContextContent context) {
+	public void validate(Context context) throws ContentParseException {
+	}
+
+	public String evaluate(Context context) {
 		return text;
 	}
 

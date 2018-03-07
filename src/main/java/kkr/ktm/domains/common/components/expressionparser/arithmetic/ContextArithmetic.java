@@ -14,7 +14,7 @@ public class ContextArithmetic implements ContextExpression {
 
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public void checkValue(String parameter, Object value) {
+	private void checkValue(String parameter, Object value) {
 		checkValue(parameter, value, null);
 	}
 

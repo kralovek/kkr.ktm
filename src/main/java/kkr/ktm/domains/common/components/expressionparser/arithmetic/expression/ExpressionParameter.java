@@ -1,6 +1,7 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression;
 
-import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
+import kkr.ktm.domains.common.components.context.Context;
+import kkr.ktm.domains.common.components.context.level.ContextLevel;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 
@@ -20,46 +21,46 @@ public class ExpressionParameter implements Expression {
 		this.indexExpressions = indexes;
 	}
 
-	public Number evaluate(ContextExpression context) throws ExpressionEvaluateException {
+	public Object evaluate(Context context) throws ExpressionEvaluateException {
+		if (context != null && !(context instanceof ContextLevel)) {
+			throw new ExpressionEvaluateException("Unsupported context. Expect: " + ContextLevel.class.getName()
+					+ " Received: " + String.valueOf(context));
+		}
+		ContextLevel contextLevel = (ContextLevel) context;
+
 		Integer[] indexes = null;
 		if (indexExpressions != null && indexExpressions.length != 0) {
 			indexes = new Integer[indexExpressions.length];
-			for (int i = 0; i < indexExpressions.length; i++) {
-				Number number = indexExpressions[i].evaluate(context);
-				if (number.longValue() != (long) number.doubleValue()) {
-					throw new ExpressionEvaluateException(
-							"Evaluated index of parameter " + name + " is not an integer: " + number);
+			int i = 0;
+			for (; i < indexExpressions.length; i++) {
+				Object object = null;
+				try {
+					object = indexExpressions[i].evaluate(context);
+				} catch (ExpressionEvaluateException ex) {
+					throw new ExpressionEvaluateException("Cannot evaluate parameter " + toString() + ". Index " + i
+							+ " is not evaluated as an integer: " + indexExpressions[i] + " Problem: "
+							+ ex.getMessage(), ex);
+				}
+				Number number;
+				if (false //
+						|| object == null //
+						|| !(object instanceof Number)//
+						|| (number = (Number) object).doubleValue() != (double) number.intValue()) {
+					throw new ExpressionEvaluateException("Cannot evaluate parameter " + toString() + ". Index " + i
+							+ " is not evaluated as an integer: " + String.valueOf(object));
 				}
 				indexes[i] = number.intValue();
 			}
-			/*
-			 * for (int i = 0; i < indexExpressions.length; i++) { if (value == null) {
-			 * throw new EvaluateExpressionException( "Value of parameter " + name +
-			 * toStringIndexes(indexes) + " is null"); } if (!value.getClass().isArray()) {
-			 * throw new EvaluateExpressionException("Value of parameter " + name +
-			 * toStringIndexes(indexes) + " has lower dimmension than required"); } Object[]
-			 * values = (Object[]) value; if (indexes[i] >= values.length) { throw new
-			 * EvaluateExpressionException( "Value of parameter " + name +
-			 * toStringIndexes(indexes) + " is out of bound"); } value = values[indexes[i]];
-			 * }
-			 * 
-			 * if (value.getClass().isArray()) { throw new
-			 * EvaluateExpressionException("Value of parameter " + name +
-			 * toStringIndexes(indexes) + " has higher dimmension than required"); }
-			 */
 		}
 
-		Object value = context.getParameter(name, indexes);
-		if (value == null) {
-			throw new ExpressionEvaluateException("Unknown parameter: " + name);
-		}
-
-		if (!(value instanceof Number)) {
+		try {
+			Object value = contextLevel.getParameter(name, indexes);
+			return value;
+		} catch (Exception ex) {
 			throw new ExpressionEvaluateException(
-					"Value of parameter " + name + toStringIndexes(indexes) + " is not a number: " + value.toString());
+					"Cannot evaluate parameter: " + name + toStringIndexes(indexes) + " Problem: " + ex.getMessage(),
+					ex);
 		}
-
-		return (Number) value;
 	}
 
 	private String toStringIndexes(Integer[] indexes) {
@@ -70,7 +71,7 @@ public class ExpressionParameter implements Expression {
 			}
 			return buffer.toString();
 		} else {
-			return "0";
+			return "";
 		}
 	}
 
@@ -79,6 +80,6 @@ public class ExpressionParameter implements Expression {
 		for (Expression expression : indexExpressions) {
 			buffer.append('[').append(expression.toString()).append(']');
 		}
-		return "{" + name + buffer.toString() + "}";
+		return name + buffer.toString();
 	}
 }

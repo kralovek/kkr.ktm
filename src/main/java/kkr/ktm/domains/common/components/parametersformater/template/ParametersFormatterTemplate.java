@@ -9,18 +9,23 @@ import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
 import kkr.common.utils.UtilsFile;
+import kkr.ktm.domains.common.components.context.Context;
+import kkr.ktm.domains.common.components.context.content.ContextContent;
+import kkr.ktm.domains.common.components.context.name.ContextName;
 import kkr.ktm.domains.common.components.parametersformater.ParametersFormatter;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Close;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Content;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentBase;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentComposed;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentElse;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentEmpty;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentEnd;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentIf;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentLoop;
-import kkr.ktm.domains.common.components.parametersformater.template.content.ContentNumber;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentParameter;
 import kkr.ktm.domains.common.components.parametersformater.template.content.ContentText;
-import kkr.ktm.domains.common.components.parametersformater.template.content.ContextContent;
+import kkr.ktm.domains.common.components.parametersformater.template.content.ContentValue;
+import kkr.ktm.domains.common.components.parametersformater.template.content.Middle;
 import kkr.ktm.domains.common.components.parametersformater.template.content.Open;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.Part;
@@ -36,7 +41,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		try {
 			String retval;
 			if (content != null) {
-				ContextContent context = new ContextContent(parameters);
+				Context context = createEvaluateContext(parameters);
 				retval = content.evaluate(context);
 			} else {
 				retval = "";
@@ -71,11 +76,21 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 			Content contentTree = createContentTree(contentsFlat);
 
+			ContextName contextName = new ContextName();
+
+			contentTree.validate(contextName);
+
 			LOG.trace("OK");
 			return contentTree;
 		} finally {
 			LOG.trace("END");
 		}
+	}
+
+	private Context createEvaluateContext(Map<String, Object> parameters) {
+		ContextContent contextContent = new ContextContent();
+		contextContent.setParameters(parameters);
+		return contextContent;
 	}
 
 	private Content createContentTree(Collection<Content> contentsFlat) throws ContentParseException, BaseException {
@@ -103,7 +118,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					open--;
 					if (open == 0) {
 						Content contentTree = createContentTree(contentBodyList);
-						contentOpen.setContent(contentTree);
+						contentOpen.addContent(contentTree);
 						contentOpen = null;
 					} else if (open > 0) {
 						contentBodyList.add(content);
@@ -112,6 +127,29 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 								"Missing opening Tag for a closing one");
 					}
 					continue;
+				}
+				if (content instanceof Middle) {
+					if (open == 0) {
+						throw new ContentParseException(((Close) content).getPosition(),
+								"Missing opening Tag for a middle one");
+					}
+					if (open == 1) {
+						if (content instanceof ContentElse && !(contentOpen instanceof ContentIf)) {
+							throw new ContentParseException(((Close) content).getPosition(),
+									"Missing opening " + TagType.IF + " for a middle " + TagType.ELSE);
+						}
+
+						Content contentTree = createContentTree(contentBodyList);
+						contentOpen.addContent(contentTree);
+						continue;
+					}
+
+					if (content instanceof ContentElse) {
+						if (!(contentOpen instanceof ContentIf)) {
+							throw new ContentParseException(((Close) content).getPosition(),
+									"Missing opening Tag for a closing one");
+						}
+					}
 				}
 				if (open != 0) {
 					contentBodyList.add(content);
@@ -126,7 +164,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 			Content contentRetval;
 			if (contentCurrentList.size() == 0) {
-				contentRetval = null;
+				contentRetval = new ContentEmpty();
 			} else if (contentCurrentList.size() == 1) {
 				contentRetval = contentCurrentList.iterator().next();
 			} else {
@@ -158,24 +196,30 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					ContentText content = new ContentText(part.getPosition());
 					content.setText(partText.getText());
 					contentsFlat.add(content);
-				} else //
-				if (part instanceof PartTag) {
+				} else if (part instanceof PartTag) {
 					PartTag partTag = (PartTag) part;
 					try {
 						TagType tagType = TagType.valueOf(partTag.getName());
 						Content content;
 						switch (tagType) {
 						case PARAMETER: {
-							content = new ContentParameter(part.getPosition(), partTag.getAttributes());
+							content = new ContentParameter(part.getPosition(), partTag.getAttributes(),
+									formatterFactory);
 							break;
 						}
 
-						case NUMBER: {
-							content = new ContentNumber(part.getPosition(), partTag.getAttributes(), expressionParser);
+						case VALUE: {
+							content = new ContentValue(part.getPosition(), partTag.getAttributes(), formatterFactory,
+									expressionParser);
 							break;
 						}
+
 						case IF: {
-							content = new ContentIf(part.getPosition(), partTag.getAttributes());
+							content = new ContentIf(part.getPosition(), partTag.getAttributes(), expressionParser);
+							break;
+						}
+						case ELSE: {
+							content = new ContentElse(part.getPosition(), partTag.getAttributes());
 							break;
 						}
 						case LOOP: {
@@ -420,6 +464,6 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		return false //
 				|| isNameStart(c) //
 				|| c >= '0' && c <= '9' //
-		;
+				|| c == '-';
 	}
 }

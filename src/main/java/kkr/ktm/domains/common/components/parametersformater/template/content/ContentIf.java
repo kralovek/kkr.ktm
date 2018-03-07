@@ -1,116 +1,61 @@
 package kkr.ktm.domains.common.components.parametersformater.template.content;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import kkr.common.utils.UtilsString;
+import kkr.ktm.domains.common.components.context.Context;
+import kkr.ktm.domains.common.components.expressionparser.Expression;
+import kkr.ktm.domains.common.components.expressionparser.ExpressionParser;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
+import kkr.ktm.domains.common.components.parametersformater.template.value.ComparatorValue;
 
-public class ContentIf extends ContentBase implements Content, Open {
+public class ContentIf extends ContentTagBase implements Content, Open {
 	private static final Logger LOG = Logger.getLogger(ContentIf.class);
-	public static final TagType TAG = TagType.IF;
 
-	public static final String ATTR_NAME = "NAME";
-	public static final String ATTR_INDEXES = "INDEXES";
-	public static final String ATTR_TYPE = "TYPE";
-	public static final String ATTR_VALUE = "VALUE";
+	private static final ComparatorValue COMPARATOR_VALUES = new ComparatorValue();
 
-	public static enum Type {
-		EQ, EMPTY, NE, NONEMPTY
+	public static final String ATTR_EXPRESSION1 = "EXPRESSION1";
+	public static final String ATTR_EXPRESSION2 = "EXPRESSION2";
+	public static final String ATTR_OPERATOR = "OPERATOR";
+
+	public static enum Operator {
+		EQ, NE, LT, LE, GT, GE
 	}
 
-	private String name;
-	private String[] indexes;
-	private Type type;
-	private String value;
+	private Expression expression1;
+	private Expression expression2;
+	private Operator operator;
 
-	private Content content;
+	private Content contentTrue;
+	private Content contentFalse;
 
-	public ContentIf(Position position, Map<String, String> attributes) throws ContentParseException {
-		super(position);
+	public ContentIf(Position position, Map<String, String> attributes, ExpressionParser expressionParser)
+			throws ContentParseException {
+		super(position, TagType.IF);
 		LOG.trace("BEGIN");
 		try {
-
 			Map<String, String> attributesLocal = new HashMap<String, String>(attributes);
 
 			//
-			// NAME
+			// EXPRESSION1
 			//
-			if (attributesLocal.containsKey(ATTR_NAME)) {
-				String attributeValue = attributesLocal.remove(ATTR_NAME);
-				if (!isName(attributeValue)) {
-					throw new ContentParseException(position,
-							"Cannot evaluate the attribute [" + TAG + " " + ATTR_NAME + "] as a parameter name");
-				}
-				name = attributeValue;
-			} else {
-				throw new ContentParseException(position, "Missing attribute [" + TAG + " " + ATTR_NAME + "]");
-			}
+			attributeExpression(true, ATTR_EXPRESSION1, attributesLocal.remove(ATTR_EXPRESSION1), expressionParser);
 
 			//
-			// VALUE
+			// EXPRESSION2
 			//
-			if (attributesLocal.containsKey(ATTR_VALUE)) {
-				String attributeValue = attributesLocal.remove(ATTR_VALUE);
-				value = attributeValue;
-			}
+			attributeExpression(true, ATTR_EXPRESSION2, attributesLocal.remove(ATTR_EXPRESSION2), expressionParser);
 
 			//
-			// INDEXES
+			// OPERATOR
 			//
-			if (attributesLocal.containsKey(ATTR_INDEXES)) {
-				String attributeValue = attributesLocal.remove(ATTR_INDEXES);
-				try {
-					indexes = toArrayValue(attributeValue);
-				} catch (IllegalArgumentException ex) {
-					throw new ContentParseException(position, "Cannot evaluate the value of the attribute '"
-							+ ATTR_INDEXES + "' as a comma separated list of index names: " + ex.getMessage());
-				}
-			} else {
-				indexes = new String[0];
-			}
-
-			//
-			// TYPE
-			//
-			if (attributesLocal.containsKey(ATTR_TYPE)) {
-				String attributeValue = attributesLocal.remove(ATTR_TYPE);
-				try {
-					type = Type.valueOf(attributeValue);
-				} catch (Exception ex) {
-					throw new ContentParseException(position,
-							"The value of the attribute [" + TAG + " " + ATTR_TYPE + "] must be one of: " //
-									+ UtilsString.arrayToString(Type.values(), null, null, ","));
-				}
-			} else {
-				throw new ContentParseException(position, "Attribute [" + TAG + " " + ATTR_NAME + "] must be defined.");
-			}
-
-			switch (type) {
-			case EQ:
-			case NE:
-				if (value == null) {
-					throw new ContentParseException(position,
-							"The attribut " + ATTR_VALUE + " is expected when the value of the attribute [" + TAG + " "
-									+ ATTR_TYPE + "=\"" + type + "\"]");
-				}
-				break;
-
-			case EMPTY:
-			case NONEMPTY:
-				if (value != null) {
-					throw new ContentParseException(position,
-							"The attribut " + ATTR_VALUE + " may not be used when the value of the attribute [" + TAG
-									+ " " + ATTR_TYPE + "=\"" + type + "\"]");
-				}
-				break;
-			}
+			operator = attributeEnum(true, ATTR_OPERATOR, attributesLocal.remove(ATTR_OPERATOR), Operator.values());
 
 			checkUnknownAttributes(TAG, attributesLocal);
 			LOG.trace("OK");
@@ -119,54 +64,106 @@ public class ContentIf extends ContentBase implements Content, Open {
 		}
 	}
 
-	public void setContent(Content content) {
-		this.content = content;
+	public void addContent(Content content) throws ContentParseException {
+		if (contentTrue == null) {
+			contentTrue = content;
+		} else if (contentFalse == null) {
+			contentFalse = content;
+		} else {
+			throw new ContentParseException(position, "Contents true/false were already added to [" + TAG + "]");
+		}
+		this.contentTrue = content;
 	}
 
-	public String evaluate(ContextContent context) throws ContentEvaluateException {
-		Value value = context.getParameter(name, indexes);
+	public void validate(Context context) throws ContentParseException {
+		if (contentTrue != null) {
+			contentTrue.validate(context);
+		}
+		if (contentFalse != null) {
+			contentFalse.validate(context);
+		}
+	}
 
-		boolean evaluate = true;
-
-		switch (type) {
-		case EMPTY:
-			evaluate = value.isEmpty();
-			break;
-		case NONEMPTY:
-			evaluate = !value.isEmpty();
-			break;
-		case EQ:
-			evaluate = value.equals(value);
-			break;
-		case NE:
-			evaluate = !value.equals(value);
-			break;
-		default:
-			throw new IllegalStateException("Unsupported type of " + TAG + ": " + type);
+	public String evaluate(Context context) throws ContentEvaluateException {
+		Object object1;
+		Object object2;
+		try {
+			object1 = expression1.evaluate(context);
+		} catch (Exception ex) {
+			throw new ContentEvaluateException(position, "Cannot evaluate " + ATTR_EXPRESSION1 + ": "
+					+ expression1.toString() + " Problem: " + ex.getMessage(), ex);
+		}
+		try {
+			object2 = expression2.evaluate(context);
+		} catch (Exception ex) {
+			throw new ContentEvaluateException(position, "Cannot evaluate " + ATTR_EXPRESSION2 + ": "
+					+ expression2.toString() + " Problem: " + ex.getMessage(), ex);
 		}
 
-		if (context != null && evaluate) {
-			return content.evaluate(context);
+		boolean condition = true;
+		try {
+			switch (operator) {
+			case EQ:
+				condition = COMPARATOR_VALUES.compare(object1, object2) == 0;
+				break;
+			case NE:
+				condition = COMPARATOR_VALUES.compare(object1, object2) != 0;
+				break;
+			case LT:
+				condition = COMPARATOR_VALUES.compare(object1, object2) < 0;
+				break;
+			case LE:
+				condition = COMPARATOR_VALUES.compare(object1, object2) <= 0;
+				break;
+			case GT:
+				condition = COMPARATOR_VALUES.compare(object1, object2) > 0;
+				break;
+			case GE:
+				condition = COMPARATOR_VALUES.compare(object1, object2) >= 0;
+				break;
+			default:
+				throw new IllegalStateException(
+						"Unsupported value of [" + TAG + " " + ATTR_OPERATOR + "]: " + operator);
+			}
+		} catch (IllegalArgumentException ex) {
+			throw new ContentEvaluateException(position, "Cannot compare expressions. Problem: " + ex.getMessage(), ex);
+		}
+
+		if (condition) {
+			if (contentTrue != null) {
+				return contentTrue.evaluate(context);
+			} else {
+				return "";
+			}
 		} else {
-			return "";
+			if (contentFalse != null) {
+				return contentFalse.evaluate(context);
+			} else {
+				return "";
+			}
 		}
 	}
 
 	public String toString() {
+		Map<String, String> attributes = new LinkedHashMap<String, String>();
+
+		attributes.put(ATTR_OPERATOR, operator.toString());
+		attributes.put(ATTR_EXPRESSION1, expression1.toString());
+		attributes.put(ATTR_EXPRESSION2, expression2.toString());
+
 		StringBuffer buffer = new StringBuffer();
-		buffer.append('[').append(TAG);
-		buffer.append(" ").append(toStringAttribute(ATTR_NAME, name));
-		if (indexes != null && indexes.length != 0) {
-			buffer.append(" ")
-					.append(toStringAttribute(ATTR_INDEXES, UtilsString.arrayToString(indexes, null, null, ",")));
+		buffer.append(toStringTag(attributes));
+
+		if (contentTrue != null) {
+			buffer.append(contentTrue.toString());
 		}
 
-		buffer.append(" ").append(toStringAttribute(ATTR_TYPE, type.toString()));
-		buffer.append(']');
-		if (content != null) {
-			buffer.append(content.toString());
+		if (contentFalse != null) {
+			buffer.append("[" + TagType.ELSE + "]");
+			buffer.append(contentFalse.toString());
 		}
-		buffer.append("[END]");
+
+		buffer.append("[" + TagType.END + "]");
 		return buffer.toString();
 	}
 }

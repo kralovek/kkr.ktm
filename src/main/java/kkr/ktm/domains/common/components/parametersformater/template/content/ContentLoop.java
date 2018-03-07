@@ -6,15 +6,17 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import kkr.common.utils.UtilsString;
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
+import kkr.ktm.domains.common.components.context.Context;
+import kkr.ktm.domains.common.components.context.content.ContextContent;
+import kkr.ktm.domains.common.components.context.name.ContextName;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
+import kkr.ktm.domains.common.components.parametersformater.template.value.UtilsValue;
 
-public class ContentLoop extends ContentBase implements Content, Open {
+public class ContentLoop extends ContentTagBase implements Content, Open {
 	private static final Logger LOG = Logger.getLogger(ContentLoop.class);
-	public static final TagType TAG = TagType.LOOP;
 	public static final String ATTR_INDEX = "INDEX";
 	public static final String ATTR_INDEXES = "INDEXES";
 	public static final String ATTR_NAME = "NAME";
@@ -32,50 +34,26 @@ public class ContentLoop extends ContentBase implements Content, Open {
 	private Content content;
 
 	public ContentLoop(Position position, Map<String, String> attributes) throws ContentParseException {
-		super(position);
+		super(position, TagType.LOOP);
 		LOG.trace("BEGIN");
 		try {
 			Map<String, String> attributesLocal = new HashMap<String, String>(attributes);
 
 			//
-			// INDEX
-			//
-			if (attributesLocal.containsKey(ATTR_INDEX)) {
-				String attributeValue = attributesLocal.remove(ATTR_INDEX);
-				if (!isName(attributeValue)) {
-					throw new ContentParseException(position, "Cannot evaluate the value of the attribute '"
-							+ ATTR_INDEX + "' as a parameter name: " + name);
-				}
-				index = attributeValue;
-			} else {
-				throw new ContentParseException(null, "Missing attribute [" + TAG + " " + ATTR_INDEX + "]");
-			}
-			//
 			// NAME
 			//
-			if (attributes.containsKey(ATTR_NAME)) {
-				String attributeValue = attributesLocal.remove(ATTR_NAME);
-				if (!isName(attributeValue)) {
-					throw new ContentParseException(position,
-							"Cannot evaluate the attribute [" + TAG + " " + ATTR_NAME + "] as a parameter name");
-				}
-				name = attributeValue;
-			} else {
-				throw new ContentParseException(null, "Missing attribute [" + TAG + " " + ATTR_NAME + "]");
-			}
+			name = attributeName(true, ATTR_NAME, attributesLocal.remove(ATTR_NAME));
+
+			//
+			// INDEX
+			//
+			index = attributeName(true, ATTR_INDEX, attributesLocal.remove(ATTR_INDEX));
 
 			//
 			// INDEXES
 			//
-			if (attributes.containsKey(ATTR_INDEXES)) {
-				String attributeValue = attributesLocal.remove(ATTR_INDEXES);
-				try {
-					indexes = toArrayValue(attributeValue);
-				} catch (IllegalArgumentException ex) {
-					throw new ContentParseException(position, "Cannot evaluate the value of the attribute '"
-							+ ATTR_INDEXES + "' as a comma separated list of index names: " + ex.getMessage());
-				}
-			}
+			indexes = attributeNames(false, ATTR_INDEXES, attributesLocal.remove(ATTR_INDEXES));
+
 			//
 			// TYPE
 			//
@@ -98,7 +76,10 @@ public class ContentLoop extends ContentBase implements Content, Open {
 		}
 	}
 
-	public void setContent(Content content) {
+	public void addContent(Content content) throws ContentParseException {
+		if (this.content != null) {
+			throw new ContentParseException(position, "Content already added to [" + TAG + "]");
+		}
 		this.content = content;
 	}
 
@@ -106,19 +87,36 @@ public class ContentLoop extends ContentBase implements Content, Open {
 		return index;
 	}
 
-	public String evaluate(ContextContent context) throws ContentEvaluateException {
+	public void validate(Context context) throws ContentParseException {
+		validateIndexes(context, ATTR_INDEXES, indexes);
+
+		ContextName contextName = (ContextName) context;
+		if (content != null) {
+			if (contextName.isName(index)) {
+				throw new ContentParseException(position, "Bad value of attribute [" + TAG + " " + ATTR_INDEX
+						+ "]: Name of index is already used be somme parent: " + index);
+			}
+			contextName.addName(index);
+			content.validate(context);
+			contextName.removeName(index);
+		}
+	}
+
+	public String evaluate(Context context) throws ContentEvaluateException {
+		ContextContent contextContent = (ContextContent) context;
 		Integer count;
+		Integer[] indexValues = contextContent.getContextIndex().evaluateIndexes(indexes);
 		switch (type) {
 		case COUNT:
-			Value valueParameter = context.getParameter(name, indexes);
-			count = toInteger(valueParameter);
+			Object valueParameter = contextContent.getParameter(name, indexValues);
+			count = UtilsValue.toInteger(valueParameter);
 			if (count == null || count < 0) {
-				throw new ContentEvaluateException(position, "The value of the parameter " + name
-						+ " must be a non negativ integer: " + valueParameter.toString());
+				throw new ContentEvaluateException(position,
+						"The value of the parameter " + name + " must be a non negativ integer: " + valueParameter);
 			}
 			break;
 		case LENGTH:
-			count = context.getParameterSize(name, indexes);
+			count = contextContent.getParameterSize(name, indexValues);
 			break;
 		default:
 			throw new ContentEvaluateException(position, "Unsupported LOOP type: " + type);
@@ -126,17 +124,17 @@ public class ContentLoop extends ContentBase implements Content, Open {
 
 		StringBuffer buffer = new StringBuffer();
 
-		context.addIndex(index, 0);
+		contextContent.getContextIndex().addIndex(index, 0);
 
 		if (content != null) {
 			for (int indexValue = 0; indexValue < count; indexValue++) {
-				context.updateIndex(index, indexValue);
+				contextContent.getContextIndex().updateIndex(index, indexValue);
 				String text = content.evaluate(context);
 				buffer.append(text);
 			}
 		}
 
-		context.removeIndex(index);
+		contextContent.getContextIndex().removeIndex(index);
 
 		return buffer.toString();
 	}

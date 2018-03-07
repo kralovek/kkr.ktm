@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
+import kkr.ktm.domains.common.components.calculator.math.CalculatorMath;
+import kkr.ktm.domains.common.components.context.level.ContextLevel;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.ExpressionParser;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionParseException;
@@ -28,11 +30,12 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 	private static final Pattern PATTERN_NUMBER_START = Pattern.compile("^[0-9\\.].*");
 	private static final Pattern PATTERN_NUMBER = Pattern.compile("^(0?|[1-9][0-9]*)(\\.[0-9]*)?$");
-	private static final Pattern PATTERN_PARAMETER_START = Pattern.compile("^\\{.*");
 	private static final Pattern PATTERN_PARAMETER = Pattern
-			.compile("^\\{ *[a-zA-Z_][a-zA-Z0-9_.]*( *\\[.*\\]| *)*\\}$");
-	private static final Pattern PATTERN_FUNCTION_START = Pattern.compile("^[a-z_A-Z].*");
-	private static final Pattern PATTERN_FUNCTION = Pattern.compile("^[a-z_A-Z][a-z_A-Z0-9]* *\\(.*\\)$");
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*( *\\[.*\\]|)$");
+	private static final Pattern PATTERN_FUNCTION_START = Pattern
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)* *\\(.*");
+	private static final Pattern PATTERN_FUNCTION = Pattern
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)* *\\(.*\\)$");
 	private static final Pattern PATTERN_PARENTHESE_START = Pattern.compile("^\\(.*");
 	private static final Pattern PATTERN_PARENTHESE = Pattern.compile("^\\(.*\\)$");
 
@@ -263,7 +266,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			try {
 				ExpressionFunction expressionFunction = new ExpressionFunction(name,
-						expressions.toArray(new Expression[expressions.size()]));
+						expressions.toArray(new Expression[expressions.size()]), calculator);
 				LOG.trace("OK");
 				return expressionFunction;
 			} catch (Exception ex) {
@@ -277,15 +280,10 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	private Expression parseParameter(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
-			if (!PATTERN_PARAMETER_START.matcher(text).matches()) {
-				LOG.trace("OK");
-				return null;
-			}
-
 			if (!PATTERN_PARAMETER.matcher(text).matches()) {
 				throw new ExpressionParseException(position, "Literal is not a parameter", text);
 			}
-			String content = text.substring(1, text.length() - 1);
+			String content = text;
 
 			int iPos = content.indexOf('[');
 
@@ -380,13 +378,13 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 				return expression;
 			}
 
-			expression = parseParameter(position, text);
+			expression = parseFunction(position, text);
 			if (expression != null) {
 				LOG.trace("OK");
 				return expression;
 			}
 
-			expression = parseFunction(position, text);
+			expression = parseParameter(position, text);
 			if (expression != null) {
 				LOG.trace("OK");
 				return expression;
@@ -459,13 +457,16 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	public static final void main(String[] argv) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			// String text = "2^({A} + 2) + 2.5*{B} + 3*{C}/{D} + (4*{E} + 5*7*{F}/(6 +
-			// {G})) + sin({H}) + {PAR[1][{PAR2}][1 + 2*sin(8)]}";
-			String text = "1 + {PAR.1[1][{PAR2}][1 + 2*sin(8)]}";
+			String text = "2^(A + 2) + 2.5*B + 3*C/D + (4*E + 5*7*F/(6 + G)) + sin(H) + PAR[1][PAR2][1 + 2*sin(8)]";
+			// String text = "PAR.A1[1][PAR2][1 + 2*sin(8)]";
+			// String text = "PAR[sin(8)]";
 
 			LOG.info("Text: " + text);
 
+			CalculatorMath calculator = new CalculatorMath();
+			calculator.config();
 			ExpressionParserArithmetic parser = new ExpressionParserArithmetic();
+			parser.setCalculator(calculator);
 			parser.config();
 			Expression expression = parser.parseExpression(text);
 
@@ -474,13 +475,13 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			Map<String, Object> parameters = new HashMap<String, Object>();
 
-			parameters.put("PAR.1", new Object[] { 0, new Object[] { 0, 0, new Object[] { 0, 0, 4 } } });
+			parameters.put("PAR.A1", new Object[] { 0, new Object[] { 0, 0, new Object[] { 0, 0, 4 } } });
 			parameters.put("PAR2", 2.);
 
-			ContextArithmetic context = new ContextArithmetic();
-			context.addParameters(parameters);
+			ContextLevel context = new ContextLevel();
+			context.setParameters(parameters);
 
-			Number result = expression.evaluate(context);
+			Object result = expression.evaluate(context);
 
 			LOG.info("Result:     " + result);
 

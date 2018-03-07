@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression;
 
-import kkr.ktm.domains.common.components.expressionparser.ContextExpression;
+import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 
 public class ExpressionNumber implements Expression {
@@ -14,7 +14,7 @@ public class ExpressionNumber implements Expression {
 		this.value = value;
 	}
 
-	public Number evaluate(ContextExpression context) {
+	public Number evaluate(Context context) {
 		return value;
 	}
 

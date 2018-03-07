@@ -4,9 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import kkr.ktm.domains.common.components.parametersformater.template.value.Value;
-import kkr.ktm.domains.common.components.parametersformater.template.value.ValueDate;
-
 public class FormatDate extends FormatBase implements Format {
 	private DateFormat format;
 	private String pattern;
@@ -25,14 +22,14 @@ public class FormatDate extends FormatBase implements Format {
 		}
 	}
 
-	public String format(Value value) {
+	public String format(Object value) {
 		if (value == null) {
 			return "";
 		}
-		if (!(value instanceof ValueDate)) {
-			throw new IllegalArgumentException("Formated object is not a Date");
+		if (!(value instanceof Date)) {
+			throw new IllegalArgumentException("Formated object is not a Date: " + value);
 		}
-		return format.format(((ValueDate) value).getValue());
+		return format.format((Date) value);
 	}
 
 	public String toString() {
