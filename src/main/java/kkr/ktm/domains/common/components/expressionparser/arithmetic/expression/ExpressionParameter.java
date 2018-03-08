@@ -3,28 +3,29 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression
 import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.context.level.ContextLevel;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 
-public class ExpressionParameter implements Expression {
+public class ExpressionParameter extends ExpressionBase implements Expression {
 	private String name;
 	private Expression[] indexExpressions;
 
-	public ExpressionParameter(String name) {
-		super();
+	public ExpressionParameter(Position position, String name) {
+		super(position);
 		this.name = name;
 		indexExpressions = new Expression[0];
 	}
 
-	public ExpressionParameter(String name, Expression[] indexes) {
-		super();
+	public ExpressionParameter(Position position, String name, Expression[] indexes) {
+		super(position);
 		this.name = name;
 		this.indexExpressions = indexes;
 	}
 
 	public Object evaluate(Context context) throws ExpressionEvaluateException {
 		if (context != null && !(context instanceof ContextLevel)) {
-			throw new ExpressionEvaluateException("Unsupported context. Expect: " + ContextLevel.class.getName()
-					+ " Received: " + String.valueOf(context));
+			throw new ExpressionEvaluateException(position, toString(), "Unsupported context. Expect: "
+					+ ContextLevel.class.getName() + " Received: " + String.valueOf(context));
 		}
 		ContextLevel contextLevel = (ContextLevel) context;
 
@@ -37,17 +38,20 @@ public class ExpressionParameter implements Expression {
 				try {
 					object = indexExpressions[i].evaluate(context);
 				} catch (ExpressionEvaluateException ex) {
-					throw new ExpressionEvaluateException("Cannot evaluate parameter " + toString() + ". Index " + i
-							+ " is not evaluated as an integer: " + indexExpressions[i] + " Problem: "
-							+ ex.getMessage(), ex);
+					throw new ExpressionEvaluateException(position, toString(),
+							"Cannot evaluate parameter " + toString() + ". Index " + i
+									+ " is not evaluated as an integer: " + indexExpressions[i] + " Problem: "
+									+ ex.getMessage(),
+							ex);
 				}
 				Number number;
 				if (false //
 						|| object == null //
 						|| !(object instanceof Number)//
 						|| (number = (Number) object).doubleValue() != (double) number.intValue()) {
-					throw new ExpressionEvaluateException("Cannot evaluate parameter " + toString() + ". Index " + i
-							+ " is not evaluated as an integer: " + String.valueOf(object));
+					throw new ExpressionEvaluateException(position, toString(),
+							"Cannot evaluate parameter " + toString() + ". Index " + i
+									+ " is not evaluated as an integer: " + String.valueOf(object));
 				}
 				indexes[i] = number.intValue();
 			}
@@ -57,7 +61,7 @@ public class ExpressionParameter implements Expression {
 			Object value = contextLevel.getParameter(name, indexes);
 			return value;
 		} catch (Exception ex) {
-			throw new ExpressionEvaluateException(
+			throw new ExpressionEvaluateException(position, toString(),
 					"Cannot evaluate parameter: " + name + toStringIndexes(indexes) + " Problem: " + ex.getMessage(),
 					ex);
 		}

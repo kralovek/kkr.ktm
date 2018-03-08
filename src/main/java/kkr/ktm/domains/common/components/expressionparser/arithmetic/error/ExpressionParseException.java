@@ -34,10 +34,11 @@ public class ExpressionParseException extends BaseException {
 	}
 
 	public String toString() {
-		return "" //
-				+ (expression != null ? "Expression: '" + expression + "' " : "") //
-				+ "Position: " + position.toString() + " "//
-				+ "Part: '" + part + "' "//
-				+ "Error: " + getMessage();
+		return "EXPRESSION PARSER" //
+				+ "\n" + (expression != null ? "Expression: '" + expression + "' " : "") //
+				+ "\nPosition: " + position.toString() + " "//
+				+ "\nPart: '" + part + "' "//
+				+ "\nProblem: " + getMessage() //
+				+ "\n";
 	}
 }

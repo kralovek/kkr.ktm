@@ -21,7 +21,7 @@ public class ContextLevel implements Context {
 
 		if (!UtilsValue.isValidValue(objectLevel)) {
 			throw new IllegalArgumentException("The parameter " + name + toStringIndexes(indexValues, null)
-					+ " does not contain a scalar of allowed type: " + objectLevel);
+					+ " does not contain a scalar of allowed type: " + toStringLevel(objectLevel));
 		}
 
 		return objectLevel;
@@ -81,7 +81,27 @@ public class ContextLevel implements Context {
 				}
 			}
 		}
+
+		if (current != null && current.getClass().isArray()) {
+			Object[] array = (Object[]) current;
+			if (array.length == 0) {
+				current = null;
+			} else if (array.length == 1) {
+				current = array[0];
+			}
+		}
+
 		return current;
+	}
+
+	private String toStringLevel(Object object) {
+		if (object == null) {
+			return "(null)";
+		}
+		if (!object.getClass().isArray()) {
+			return String.valueOf(object);
+		}
+		return "(" + object.getClass().getSimpleName() + "): [" + ((Object[]) object).length + "]";
 	}
 
 	private String toStringIndexes(Integer[] indexes, Integer maxLevel) {

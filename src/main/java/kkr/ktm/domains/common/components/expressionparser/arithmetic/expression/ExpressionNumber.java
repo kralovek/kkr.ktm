@@ -2,12 +2,13 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression
 
 import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
 
-public class ExpressionNumber implements Expression {
+public class ExpressionNumber extends ExpressionBase implements Expression {
 	private Number value;
 
-	public ExpressionNumber(Number value) {
-		super();
+	public ExpressionNumber(Position position, Number value) {
+		super(position);
 		if (value == null) {
 			throw new IllegalArgumentException("Parameter may not be null");
 		}

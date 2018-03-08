@@ -45,12 +45,14 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 			//
 			// EXPRESSION1
 			//
-			attributeExpression(true, ATTR_EXPRESSION1, attributesLocal.remove(ATTR_EXPRESSION1), expressionParser);
+			expression1 = attributeExpression(true, ATTR_EXPRESSION1, attributesLocal.remove(ATTR_EXPRESSION1),
+					expressionParser);
 
 			//
 			// EXPRESSION2
 			//
-			attributeExpression(true, ATTR_EXPRESSION2, attributesLocal.remove(ATTR_EXPRESSION2), expressionParser);
+			expression2 = attributeExpression(true, ATTR_EXPRESSION2, attributesLocal.remove(ATTR_EXPRESSION2),
+					expressionParser);
 
 			//
 			// OPERATOR
@@ -72,7 +74,6 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 		} else {
 			throw new ContentParseException(position, "Contents true/false were already added to [" + TAG + "]");
 		}
-		this.contentTrue = content;
 	}
 
 	public void validate(Context context) throws ContentParseException {

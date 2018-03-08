@@ -141,14 +141,8 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 
 						Content contentTree = createContentTree(contentBodyList);
 						contentOpen.addContent(contentTree);
+						contentBodyList.clear();
 						continue;
-					}
-
-					if (content instanceof ContentElse) {
-						if (!(contentOpen instanceof ContentIf)) {
-							throw new ContentParseException(((Close) content).getPosition(),
-									"Missing opening Tag for a closing one");
-						}
 					}
 				}
 				if (open != 0) {
@@ -256,7 +250,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 		LOG.trace("BEGIN");
 		try {
 			Collection<Part> parts = new ArrayList<Part>();
-			Position position = new Position();
+			Position position = new Position(source);
 
 			StringBuffer buffer = new StringBuffer(source);
 			char[] chars = source.toCharArray();

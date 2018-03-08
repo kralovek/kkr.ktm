@@ -28,11 +28,11 @@ public class ComparatorValue implements Comparator<Object> {
 	}
 
 	public int compare(Object object1, Object object2) {
-		if (UtilsValue.isValidValue(object1)) {
-			throw new IllegalArgumentException("Unsupported valule: " + String.valueOf(object1));
+		if (!UtilsValue.isValidValue(object1)) {
+			throw new IllegalArgumentException("Unsupported value: " + String.valueOf(object1));
 		}
-		if (UtilsValue.isValidValue(object2)) {
-			throw new IllegalArgumentException("Unsupported valule: " + String.valueOf(object2));
+		if (!UtilsValue.isValidValue(object2)) {
+			throw new IllegalArgumentException("Unsupported value: " + String.valueOf(object2));
 		}
 
 		if (object1 instanceof Date && object2 instanceof Date) {

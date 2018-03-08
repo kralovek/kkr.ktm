@@ -14,9 +14,6 @@ import kkr.ktm.domains.common.components.formatter.Formatter;
 import kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType;
 import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
-import kkr.ktm.domains.common.components.parametersformater.template.format.Format;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatBase;
-import kkr.ktm.domains.common.components.parametersformater.template.format.FormatType;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
 
 public abstract class ContentTagBase extends ContentBase {
@@ -63,7 +60,7 @@ public abstract class ContentTagBase extends ContentBase {
 			return null;
 		}
 		for (T t : enm) {
-			if (enm.equals(t)) {
+			if (value.equals(t.toString())) {
 				return t;
 			}
 		}
@@ -133,34 +130,6 @@ public abstract class ContentTagBase extends ContentBase {
 		} catch (BaseException ex) {
 			throw new ContentParseException(position, "Attribute [" + TAG + " " + name
 					+ "] does not contain a valid expression: '" + value + "' Problem: " + ex.getMessage(), ex);
-		}
-	}
-
-	protected Format attributeFormat(boolean mandatory, String name, String value, FormatType formatType)
-			throws ContentParseException {
-		value = checkAttributeMandatory(mandatory, name, value);
-
-		if (UtilsString.isEmpty(value)) {
-			if (formatType != null && formatType != FormatType.AUTO) {
-				throw new ContentParseException(position,
-						"Attribute [" + TAG + " " + name + "] must be a valid Format string if the Fortmat Type is "
-								+ FormatType.AUTO + ": '" + value + "'");
-			}
-			formatType = FormatType.AUTO;
-		} else if (formatType == null) {
-			formatType = FormatType.VALUE;
-		}
-
-		if (value == null) {
-			formatType = FormatType.AUTO;
-		}
-		try {
-			Format format = FormatBase.newFormat(formatType, value);
-			return format;
-		} catch (Exception ex) {
-			throw new ContentParseException(position,
-					"Attribute [" + TAG + " " + name + "] must be a valid format string " + formatType + ": '" + value
-							+ "' Problem: " + ex.getMessage());
 		}
 	}
 

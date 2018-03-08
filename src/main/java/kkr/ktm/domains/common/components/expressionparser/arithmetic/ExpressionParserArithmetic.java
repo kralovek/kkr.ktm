@@ -229,7 +229,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			double value = Double.parseDouble(text);
-			Expression expressionNumber = new ExpressionNumber(value);
+			Expression expressionNumber = new ExpressionNumber(position, value);
 			LOG.trace("OK");
 			return expressionNumber;
 		} finally {
@@ -265,7 +265,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			try {
-				ExpressionFunction expressionFunction = new ExpressionFunction(name,
+				ExpressionFunction expressionFunction = new ExpressionFunction(position, name,
 						expressions.toArray(new Expression[expressions.size()]), calculator);
 				LOG.trace("OK");
 				return expressionFunction;
@@ -291,7 +291,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 
 			if (iPos == -1) {
 				name = content.trim();
-				ExpressionParameter expressionParameter = new ExpressionParameter(name);
+				ExpressionParameter expressionParameter = new ExpressionParameter(position, name);
 				LOG.trace("OK");
 				return expressionParameter;
 			} else {
@@ -341,7 +341,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 						contentIndexes);
 			}
 
-			ExpressionParameter expressionParameter = new ExpressionParameter(name,
+			ExpressionParameter expressionParameter = new ExpressionParameter(position, name,
 					expressions.toArray(new Expression[expressions.size()]));
 			LOG.trace("OK");
 			return expressionParameter;
@@ -422,7 +422,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 					continue;
 				}
 
-				expressionOperator = new ExpressionOperator( //
+				expressionOperator = new ExpressionOperator(position, //
 						addition.getOperator(), //
 						expressionOperator != null ? expressionOperator : expressionFirst, //
 						expression);
@@ -444,7 +444,7 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	}
 
 	public Expression parseExpression(String text) throws ExpressionParseException {
-		Position position = new Position();
+		Position position = new Position(text);
 		try {
 			Expression retval = parseOperator(position, text, LEVEL);
 			return retval;

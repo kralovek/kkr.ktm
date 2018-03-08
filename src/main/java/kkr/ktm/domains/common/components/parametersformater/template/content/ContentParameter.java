@@ -81,7 +81,13 @@ public class ContentParameter extends ContentTagBase implements Content {
 	public String evaluate(Context context) throws ContentEvaluateException {
 		ContextContent contextContent = (ContextContent) context;
 		Integer[] indexValues = contextContent.getContextIndex().evaluateIndexes(indexes);
-		Object value = contextContent.getParameter(name, indexValues);
+		Object value = null;
+		try {
+			value = contextContent.getParameter(name, indexValues);
+		} catch (Exception ex) {
+			throw new ContentEvaluateException(position,
+					"[" + TAG + "]: Cannot evaluate parameter: " + name + " Problem: " + ex.getMessage(), ex);
+		}
 		try {
 			String valueFormated = formatter.format(value);
 			return valueFormated;

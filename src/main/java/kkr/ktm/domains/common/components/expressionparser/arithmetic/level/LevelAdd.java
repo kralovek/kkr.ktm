@@ -16,8 +16,9 @@ public class LevelAdd implements Level {
 	public Expression first(Position position, Operator operator, Expression expression)
 			throws ExpressionParseException {
 		if (operator == OperatorAdd.MINUS) {
-			ExpressionNumber expressionNumber = new ExpressionNumber(0);
-			ExpressionOperator expressionOperator = new ExpressionOperator(operator, expressionNumber, expression);
+			ExpressionNumber expressionNumber = new ExpressionNumber(position, 0);
+			ExpressionOperator expressionOperator = new ExpressionOperator(position, operator, expressionNumber,
+					expression);
 			return expressionOperator;
 		}
 		return expression;

@@ -17,6 +17,10 @@ public class ContentParseException extends BaseException {
 	}
 
 	public String toString() {
-		return position.toString() + " " + getMessage();
+		return "" //
+				+ "\nCONTENT PARSER" //
+				+ "\nPosition: " + position.toString() //
+				+ "\nProblem: " + getMessage() //
+				+ "\n";
 	}
 }

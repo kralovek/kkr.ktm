@@ -78,7 +78,7 @@ public class ContentValue extends ContentTagBase implements Content {
 			return formatedValue;
 		} catch (ExpressionEvaluateException ex) {
 			throw new ContentEvaluateException(position,
-					"Cannot evaluate expression of teh tag [" + TAG + "]: " + expression.toString(), ex);
+					"Cannot evaluate expression of the tag [" + TAG + "]: " + expression.toString(), ex);
 		} catch (FormatterException ex) {
 			throw new ContentEvaluateException(position,
 					"[" + TAG + "]: Cannot format the value " + expressionValue + " Problem: " + ex.getMessage(), ex);
