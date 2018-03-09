@@ -32,6 +32,7 @@ import kkr.ktm.domains.common.components.parametersformater.template.part.Part;
 import kkr.ktm.domains.common.components.parametersformater.template.part.PartTag;
 import kkr.ktm.domains.common.components.parametersformater.template.part.PartText;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
+import kkr.ktm.utils.parser.Position;
 
 public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk implements ParametersFormatter {
 	private static final Logger LOG = Logger.getLogger(ParametersFormatterTemplate.class);

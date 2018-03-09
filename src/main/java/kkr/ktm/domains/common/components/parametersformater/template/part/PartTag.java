@@ -3,7 +3,7 @@ package kkr.ktm.domains.common.components.parametersformater.template.part;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
+import kkr.ktm.utils.parser.Position;
 
 public class PartTag extends PartBase implements Part {
 	private String name;

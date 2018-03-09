@@ -1,6 +1,6 @@
 package kkr.ktm.domains.common.components.parametersformater.template.part;
 
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
+import kkr.ktm.utils.parser.Position;
 
 public class PartText extends PartBase implements Part {
 

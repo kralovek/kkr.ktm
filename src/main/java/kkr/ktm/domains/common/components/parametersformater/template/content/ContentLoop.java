@@ -9,11 +9,11 @@ import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.context.content.ContextContent;
 import kkr.ktm.domains.common.components.context.name.ContextName;
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
 import kkr.ktm.domains.common.components.parametersformater.template.value.UtilsValue;
+import kkr.ktm.utils.parser.Position;
 
 public class ContentLoop extends ContentTagBase implements Content, Open {
 	private static final Logger LOG = Logger.getLogger(ContentLoop.class);

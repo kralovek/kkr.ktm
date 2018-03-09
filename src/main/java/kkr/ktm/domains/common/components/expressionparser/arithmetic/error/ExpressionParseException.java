@@ -1,7 +1,7 @@
 package kkr.ktm.domains.common.components.expressionparser.arithmetic.error;
 
 import kkr.common.errors.BaseException;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
+import kkr.ktm.utils.parser.Position;
 
 public class ExpressionParseException extends BaseException {
 

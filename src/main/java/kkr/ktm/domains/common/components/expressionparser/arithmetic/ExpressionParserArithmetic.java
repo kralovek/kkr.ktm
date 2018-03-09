@@ -22,6 +22,7 @@ import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.Level
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.LevelAdd;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.OperatorSeparator;
+import kkr.ktm.utils.parser.Position;
 
 // 1^2 + 2*{A} + 3*{B}/{C} + (4*{A} + 5*7*{D}/(6 + {C})) + SIN(8)
 
@@ -31,11 +32,11 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 	private static final Pattern PATTERN_NUMBER_START = Pattern.compile("^[0-9\\.].*");
 	private static final Pattern PATTERN_NUMBER = Pattern.compile("^(0?|[1-9][0-9]*)(\\.[0-9]*)?$");
 	private static final Pattern PATTERN_PARAMETER = Pattern
-			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*( *\\[.*\\]|)$");
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*(\\s*\\[.*\\]|)$");
 	private static final Pattern PATTERN_FUNCTION_START = Pattern
-			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)* *\\(.*");
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\\s*\\(.*");
 	private static final Pattern PATTERN_FUNCTION = Pattern
-			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)* *\\(.*\\)$");
+			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\\s*\\(.*\\)$");
 	private static final Pattern PATTERN_PARENTHESE_START = Pattern.compile("^\\(.*");
 	private static final Pattern PATTERN_PARENTHESE = Pattern.compile("^\\(.*\\)$");
 

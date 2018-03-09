@@ -6,9 +6,9 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import kkr.ktm.domains.common.components.context.Context;
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
+import kkr.ktm.utils.parser.Position;
 
 public class ContentComposed extends ContentBase implements Content {
 	private static final Logger LOG = Logger.getLogger(ContentComposed.class);

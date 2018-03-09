@@ -1,4 +1,4 @@
-package kkr.ktm.domains.common.components.parametersformater.template;
+package kkr.ktm.utils.parser;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -13,10 +13,10 @@ import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.Expre
 import kkr.ktm.domains.common.components.formatter.Formatter;
 import kkr.ktm.domains.common.components.formatter.FormatterException;
 import kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType;
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentEvaluateException;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
+import kkr.ktm.utils.parser.Position;
 
 public class ContentValue extends ContentTagBase implements Content {
 	private static final Logger LOG = Logger.getLogger(ContentValue.class);

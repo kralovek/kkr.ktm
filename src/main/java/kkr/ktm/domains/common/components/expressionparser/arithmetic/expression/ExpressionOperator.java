@@ -2,9 +2,9 @@ package kkr.ktm.domains.common.components.expressionparser.arithmetic.expression
 
 import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.Position;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
+import kkr.ktm.utils.parser.Position;
 
 public class ExpressionOperator extends ExpressionBase implements Expression {
 	private Operator operator;

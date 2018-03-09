@@ -12,9 +12,9 @@ import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.ExpressionParser;
 import kkr.ktm.domains.common.components.formatter.Formatter;
 import kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType;
-import kkr.ktm.domains.common.components.parametersformater.template.Position;
 import kkr.ktm.domains.common.components.parametersformater.template.error.ContentParseException;
 import kkr.ktm.domains.common.components.parametersformater.template.part.TagType;
+import kkr.ktm.utils.parser.Position;
 
 public abstract class ContentTagBase extends ContentBase {
 	private static final Pattern PATTERN_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_.]*$");
