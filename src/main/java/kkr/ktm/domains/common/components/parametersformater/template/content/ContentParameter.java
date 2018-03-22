@@ -103,7 +103,7 @@ public class ContentParameter extends ContentTagBase implements Content {
 		buffer.append(" ").append(toStringAttribute(ATTR_NAME, name));
 		if (indexes != null && indexes.length != 0) {
 			buffer.append(" ")
-					.append(toStringAttribute(ATTR_INDEXES, UtilsString.arrayToString(indexes, null, null, ",")));
+					.append(toStringAttribute(ATTR_INDEXES, UtilsString.toStringArray(indexes, null, null, ",")));
 		}
 
 		buffer.append(" ").append(toStringAttribute(ATTR_FORMAT_STRING, formatString));

@@ -282,7 +282,7 @@ public class ParametersFormatterTemplate extends ParametersFormatterTemplateFwk 
 					}
 
 					if (iPosStart != iPos) {
-						PartText partText = new PartText(position.movePosition(iPos),
+						PartText partText = new PartText(position.movePosition(iPosStart),
 								buffer.substring(iPosStart, iPos));
 						parts.add(partText);
 					}

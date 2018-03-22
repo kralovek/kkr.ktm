@@ -23,7 +23,8 @@ public class ExcelAdapterPoiFwk {
 				formatDate = new SimpleDateFormat(_formatDate);
 				formatDate.format(new Date());
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'formatDate' has bad value: " + _formatDate);
+				throw new ConfigurationException(
+						getClass().getSimpleName() + ": Parameter 'formatDate' has bad value: " + _formatDate);
 			}
 		}
 		if (_formatTime == null) {
@@ -34,7 +35,8 @@ public class ExcelAdapterPoiFwk {
 				formatTime = new SimpleDateFormat(_formatTime);
 				formatTime.format(new Date());
 			} catch (Exception ex) {
-				throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'formatTime' has bad value: " + _formatTime);
+				throw new ConfigurationException(
+						getClass().getSimpleName() + ": Parameter 'formatTime' has bad value: " + _formatTime);
 			}
 		}
 		configured = true;

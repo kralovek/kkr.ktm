@@ -145,7 +145,7 @@ public class ContentLoop extends ContentTagBase implements Content, Open {
 		buffer.append(" ").append(toStringAttribute(ATTR_NAME, name));
 		if (indexes != null && indexes.length != 0) {
 			buffer.append(" ")
-					.append(toStringAttribute(ATTR_INDEXES, UtilsString.arrayToString(indexes, null, null, ",")));
+					.append(toStringAttribute(ATTR_INDEXES, UtilsString.toStringArray(indexes, null, null, ",")));
 		}
 
 		buffer.append(" ").append(toStringAttribute(ATTR_INDEX, index.toString()));

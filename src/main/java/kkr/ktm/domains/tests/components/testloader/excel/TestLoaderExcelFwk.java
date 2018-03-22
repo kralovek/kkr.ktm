@@ -1,16 +1,16 @@
 package kkr.ktm.domains.tests.components.testloader.excel;
 
+import kkr.common.errors.ConfigurationException;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
-import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
-import kkr.common.errors.ConfigurationException;
+import kkr.ktm.domains.tests.components.valueparser.ValueParser;
 
 public abstract class TestLoaderExcelFwk {
 	private boolean configured;
 
 	protected ExcelAdapter excelAdapter;
 	protected StructureLoader structureLoader;
-	protected ValueGenerator valueGenerator;
+	protected ValueParser valueParser;
 
 	public void config() throws ConfigurationException {
 		configured = false;
@@ -20,8 +20,8 @@ public abstract class TestLoaderExcelFwk {
 		if (excelAdapter == null) {
 			throw new ConfigurationException("Parameter 'excelAdapter' is not configured");
 		}
-		if (valueGenerator == null) {
-			throw new ConfigurationException("Parameter 'valueGenerator' is not configured");
+		if (valueParser == null) {
+			throw new ConfigurationException("Parameter 'valueParser' is not configured");
 		}
 
 		configured = true;
@@ -49,11 +49,11 @@ public abstract class TestLoaderExcelFwk {
 		this.excelAdapter = excelAdapter;
 	}
 
-	public ValueGenerator getValueGenerator() {
-		return valueGenerator;
+	public ValueParser getValueParser() {
+		return valueParser;
 	}
 
-	public void setValueGenerator(ValueGenerator valueGenerator) {
-		this.valueGenerator = valueGenerator;
+	public void setValueParser(ValueParser valueParser) {
+		this.valueParser = valueParser;
 	}
 }

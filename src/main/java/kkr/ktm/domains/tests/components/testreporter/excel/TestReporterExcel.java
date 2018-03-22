@@ -3,10 +3,12 @@ package kkr.ktm.domains.tests.components.testreporter.excel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -25,15 +27,17 @@ import kkr.ktm.domains.excel.data.ExcelIdCell;
 import kkr.ktm.domains.excel.data.KtmStyle;
 import kkr.ktm.domains.excel.data.Orientation;
 import kkr.ktm.domains.excel.data.Status;
-import kkr.ktm.domains.excel.data.StructureParameter;
+import kkr.ktm.domains.excel.data.StructureParameterE;
+import kkr.ktm.domains.excel.data.StructureParameterO;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
 import kkr.ktm.domains.tests.components.testreporter.TestReporter;
+import kkr.ktm.domains.tests.components.valueparser.Flag;
+import kkr.ktm.domains.tests.components.valueparser.ValueParseException;
 import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.domains.tests.data.TestOutput;
 import kkr.ktm.domains.tests.data.TestResult;
-import kkr.ktm.domains.tests.data.ValuePattern;
 
 public class TestReporterExcel extends TestReporterExcelFwk implements TestReporter {
 	private static final Logger LOG = Logger.getLogger(TestReporterExcel.class);
@@ -311,36 +315,66 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 				TestOutput testOutput = (TestOutput) test;
 				ExcelPosition excelPositionCell = excelPositionSheet.clone();
 
-				Iterator<StructureParameter> iteratorO = structureSheet.iteratorParametersO();
+				Iterator<StructureParameterO> iteratorO = structureSheet.iteratorParametersO();
 				while (iteratorO.hasNext()) {
-					StructureParameter structureParameterO = iteratorO.next();
-					updateExcelPosition(excelPositionCell, structureTest.getIndex(), structureParameterO.getIndex(),
-							structureSheet.getOrientation());
+					StructureParameterO structureParameterO = iteratorO.next();
 
-					TCell tCellO = loadCell(tSheet, structureTest.getIndex(), structureParameterO.getIndex(),
-							structureSheet.getOrientation());
-					Object valueSourceO = testOutput.getDataOutput().get(structureParameterO.getName());
-					Object valueTargetO = valueGenerator.formatValue(excelPositionCell, valueSourceO);
+					StructureParameterE structureParameterE = structureSheet
+							.findParameterE(structureParameterO.getName());
 
-					StructureParameter parameterInfoE = structureSheet.findParameterE(structureParameterO.getName());
-					if (parameterInfoE != null) {
-						ExcelPosition excelPositionCellE = excelPositionCell.clone();
-						updateExcelPosition(excelPositionCellE, structureTest.getIndex(), parameterInfoE.getIndex(),
-								structureSheet.getOrientation());
-						TCell tCellE = loadCell(tSheet, structureTest.getIndex(), parameterInfoE.getIndex(),
+					Object valueO = testOutput.getDataOutput().get(structureParameterO.getName());
+
+					if (structureParameterE != null) {
+						updateExcelPosition(excelPositionCell, structureTest.getIndex(), structureParameterE.getIndex(),
 								structureSheet.getOrientation());
 
-						boolean resultValue = writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE,
-								valueSourceO, valueTargetO, catalogStyles);
-						if (!resultValue) {
+						TCell tCellE = loadCell(tSheet, structureTest.getIndex(), structureParameterE.getIndex(),
+								structureSheet.getOrientation());
+						Object valueE = excelAdapter.getValue(tCellE);
+
+						Collection<Flag> flags = new ArrayList<Flag>();
+						Object formattedValueE = convertValueE(excelPositionCell, valueE, flags);
+
+						boolean comparison = valueParser.compareValue(valueO, formattedValueE, flags);
+						if (!comparison) {
 							status = Status.KO;
 						}
+
+						Object formattedValueO = convertValueO(valueO, valueE);
+
+						Iterator<Integer> indexesO = structureParameterO.iteratorIndexes();
+						while (indexesO.hasNext()) {
+							Integer indexO = indexesO.next();
+							TCell tCellO = loadCell(tSheet, structureTest.getIndex(), indexO,
+									structureSheet.getOrientation());
+
+							excelPositionCell.setRow(tCellO.getRow());
+							excelPositionCell.setColumn(tCellO.getColumn());
+
+							writeValue(excelPositionCell, tWorkbook, tSheet, tCellO, tCellE, formattedValueO,
+									comparison, catalogStyles);
+						}
 					} else {
-						writeValue(excelPositionCell, tCellO, valueTargetO, catalogStyles);
+						Iterator<Integer> indexesO = structureParameterO.iteratorIndexes();
+						while (indexesO.hasNext()) {
+							Integer indexO = indexesO.next();
+							TCell tCellO = loadCell(tSheet, structureTest.getIndex(), indexO,
+									structureSheet.getOrientation());
+
+							excelPositionCell.setRow(tCellO.getRow());
+							excelPositionCell.setColumn(tCellO.getColumn());
+
+							writeValue(excelPositionCell, tCellO, valueO, catalogStyles);
+						}
 					}
 				}
 			} else {
 				status = Status.SKIP;
+			}
+
+			Status dynStatus = loadDynStatusTest(excelPositionSheet, tSheet, structureSheet, structureTest, status);
+			if (dynStatus != null) {
+				status = dynStatus;
 			}
 
 			writeStatusTest(excelPositionSheet, tSheet, structureSheet, structureTest, status, catalogStyles);
@@ -354,30 +388,87 @@ public class TestReporterExcel extends TestReporterExcelFwk implements TestRepor
 		}
 	}
 
-	private void writeValue(ExcelPosition excelPositionCell, TCell tCellO, Object value, CatalogStyles catalogStyles)
-			throws BaseException {
-		excelAdapter.setValue(tCellO, value);
-		applyStyle(tCellO, KtmStyle.OUTPUT, catalogStyles);
+	private Status loadDynStatusTest(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet,
+			StructureTest structureTest, Status status) throws BaseException {
+		if (status != Status.OK || structureSheet.getIndexDynStatus() == null) {
+			return null;
+		}
+		TCell tCell = loadCell(tSheet, structureTest.getIndex(), structureSheet.getIndexDynStatus(),
+				structureSheet.getOrientation());
+
+		String value = excelAdapter.getStringValue(tCell);
+		if (value == null || value.isEmpty()) {
+			return null;
+		}
+
+		try {
+			return Status.valueOf(value);
+		} catch (Exception ex) {
+			ExcelPosition excelPosition = excelPositionSheet.clone();
+			excelPosition.setRow(tCell.getRow());
+			excelPosition.setColumn(tCell.getColumn());
+			throw new ExcelException(excelPosition, "Bad value of DynStatus: " + value, ex);
+		}
 	}
 
-	private boolean writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, TCell tCellO,
-			TCell tCellE, Object valueSourceO, Object valueTargetO, CatalogStyles catalogStyles) throws BaseException {
-		Object valueSourceE = excelAdapter.getValue(tCellE);
-		ValuePattern patternSourceE = valueGenerator.parsePattern(excelPositionCell, valueSourceE);
+	private void writeValue(ExcelPosition excelPositionCell, //
+			TCell tCellO, Object valueO, //
+			CatalogStyles catalogStyles) throws BaseException {
+		Object valueFormatted = valueO;
+		if (valueO != null && (valueO.getClass().isArray() || valueO instanceof String)) {
+			valueFormatted = valueFormatter.formatValue(valueO);
+		}
+		excelAdapter.setValue(tCellO, valueFormatted);
+	}
 
-		boolean result = valueGenerator.compareValues(excelPositionCell, patternSourceE, valueSourceO);
+	private void writeValue(ExcelPosition excelPositionCell, TWorkbook tWorkbook, TSheet tSheet, //
+			TCell tCellO, TCell tCellE, Object valueO, boolean comparison, //
+			CatalogStyles catalogStyles) throws BaseException {
+		Object valueFormatted = valueO;
+		if (valueO != null && valueO.getClass().isArray()) {
+			valueFormatted = valueFormatter.formatValue(valueO);
+		}
+		excelAdapter.setValue(tCellO, tCellE, valueFormatted);
 
-		excelAdapter.setValue(tCellO, valueTargetO);
-
-		if (result) {
+		if (comparison) {
 			applyStyle(tCellE, KtmStyle.EXPECTED_OK, catalogStyles);
 			applyStyle(tCellO, KtmStyle.OUTPUT_OK, catalogStyles);
 		} else {
 			applyStyle(tCellE, KtmStyle.EXPECTED_KO, catalogStyles);
 			applyStyle(tCellO, KtmStyle.OUTPUT_KO, catalogStyles);
 		}
+	}
 
-		return result;
+	private Object convertValueE(ExcelPosition excelPosition, Object value, Collection<Flag> outputParameters)
+			throws BaseException {
+		if (value != null && value instanceof String) {
+			try {
+				return valueParser.parseValueFlag((String) value, outputParameters);
+			} catch (ValueParseException ex) {
+				throw new ExcelException(excelPosition, "Value has bad format", ex);
+			}
+		}
+		return value;
+	}
+
+	private Object convertValueO(Object valueO, Object valueE) {
+		if (valueE == null || valueO == null || valueE.getClass().isArray() || valueO.getClass().isArray()
+				|| valueE instanceof String || valueE instanceof Pattern || !(valueO instanceof String)) {
+			return valueO;
+		}
+		try {
+			if (valueE instanceof Boolean) {
+				return valueParser.parseValueBoolean((String) valueO);
+			} else if (valueE instanceof Number) {
+				return valueParser.parseValueNumber((String) valueO);
+			}
+			if (valueE instanceof Date) {
+				return valueParser.parseValueDate((String) valueO);
+			}
+		} catch (Exception ex) {
+			// Nothing to do
+		}
+		return valueO;
 	}
 
 	private void writeStatusTest(ExcelPosition excelPositionSheet, TSheet tSheet, StructureSheet structureSheet,

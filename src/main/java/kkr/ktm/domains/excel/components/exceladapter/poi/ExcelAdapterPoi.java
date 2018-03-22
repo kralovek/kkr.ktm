@@ -23,6 +23,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import kkr.common.errors.BaseException;
 import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsDate;
+import kkr.common.utils.UtilsNumber;
 import kkr.common.utils.UtilsResource;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.exceladapter.TCell;
@@ -85,8 +87,10 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 	}
 
 	private void setDateTimeFormat(TWorkbookPoi tWorkbookPoi) {
-		short fDate = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat().getFormat(formatDate.toPattern());
-		short fTime = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat().getFormat(formatTime.toPattern());
+		short fDate = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat()
+				.getFormat(formatDate.toPattern());
+		short fTime = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat()
+				.getFormat(formatTime.toPattern());
 		short fInteger = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat().getFormat("0");
 		short fDouble = tWorkbookPoi.getWorkbook().getCreationHelper().createDataFormat().getFormat("0.00");
 
@@ -170,7 +174,8 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 					inputStream = null;
 				}
 			} catch (IOException ex) {
-				throw new TechnicalException("Cannot close the workbook: " + tWorkbookPoi.getFile().getAbsolutePath(), ex);
+				throw new TechnicalException("Cannot close the workbook: " + tWorkbookPoi.getFile().getAbsolutePath(),
+						ex);
 			} finally {
 				UtilsResource.closeResource(inputStream);
 			}
@@ -331,6 +336,7 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 		Sheet sheet = tSheetPoi.getSheet();
 
 		Cell cell = null;
+
 		Row row = sheet.getRow(irow);
 		if (row == null) {
 			return null;
@@ -383,6 +389,9 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 		FormulaEvaluator evaluator = tCellPoi.getPoiSheet().getPoiWorkbook().getEvaluator();
 		CellValue cellValue = null;
 		try {
+			if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+				evaluator.evaluateFormulaCell(cell);
+			}
 			cellValue = evaluator.evaluate(cell);
 		} catch (Exception ex) {
 			String message = "Cannot evaluate the cell value: " + cell.toString();
@@ -397,26 +406,19 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 		}
 
 		switch (cellValue.getCellType()) {
-			case Cell.CELL_TYPE_BOOLEAN :
-				return cellValue.getBooleanValue();
-			case Cell.CELL_TYPE_NUMERIC : {
-				Date date = toDate(cell, cellValue);
-				if (date == null) {
-					Double valueDouble = cellValue.getNumberValue();
-					long valueLong = valueDouble.longValue();
-					Double valueLongDouble = new Double(valueLong);
-					if (valueDouble.equals(valueLongDouble)) {
-						return valueLong;
-					} else {
-						return valueDouble;
-					}
-				} else {
-					return date;
-				}
+		case Cell.CELL_TYPE_BOOLEAN:
+			return cellValue.getBooleanValue();
+		case Cell.CELL_TYPE_NUMERIC: {
+			Date date = toDate(cell, cellValue);
+			if (date == null) {
+				return UtilsNumber.reduceNumber(cellValue.getNumberValue());
+			} else {
+				return date;
 			}
-			case Cell.CELL_TYPE_STRING :
-			default :
-				return cellValue.getStringValue();
+		}
+		case Cell.CELL_TYPE_STRING:
+		default:
+			return cellValue.getStringValue();
 		}
 	}
 
@@ -494,17 +496,24 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 
 	public void setValue(TCell tCell, TCell tCellTemplate, Object value) {
 		setValue(tCell, value);
-		if (tCellTemplate != null) {
+		if (tCellTemplate != null && value != null) {
 			TCellPoi tCellPoiTemplate = (TCellPoi) tCellTemplate;
 			Cell cellTemplate = tCellPoiTemplate.getCell();
 
 			TCellPoi tCellPoi = (TCellPoi) tCell;
 			Cell cell = tCellPoi.getCell();
 
-			if (cell != null && cellTemplate != null) {
-				CellStyle cellStyle = cell.getCellStyle();
-				CellStyle cellStyleTemplate = cellTemplate.getCellStyle();
-				cellStyle.setDataFormat(cellStyleTemplate.getDataFormat());
+			if (value instanceof Number) {
+				try {
+					Object valueT = getValue(tCellTemplate);
+					if (cell != null && cellTemplate != null && valueT != null && valueT instanceof Number) {
+						CellStyle cellStyle = cell.getCellStyle();
+						CellStyle cellStyleTemplate = cellTemplate.getCellStyle();
+						cellStyle.setDataFormat(cellStyleTemplate.getDataFormat());
+					}
+				} catch (Exception ex) {
+					// Nothing to do
+				}
 			}
 		}
 	}
@@ -527,7 +536,11 @@ public class ExcelAdapterPoi extends ExcelAdapterPoiFwk implements ExcelAdapter 
 				cell.setCellValue(valueDate);
 
 				CellStyle cellStyleNew = workbook.createCellStyle();
-				cellStyleNew.setDataFormat(tWorkbookPoi.getFormatDate());
+				if (UtilsDate.isTime(valueDate)) {
+					cellStyleNew.setDataFormat(tWorkbookPoi.getFormatTime());
+				} else {
+					cellStyleNew.setDataFormat(tWorkbookPoi.getFormatDate());
+				}
 				cell.setCellStyle(cellStyleNew);
 			} else if (value instanceof Number) {
 				Number valueNumber = (Number) value;

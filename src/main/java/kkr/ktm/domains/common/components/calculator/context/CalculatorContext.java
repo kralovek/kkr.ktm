@@ -8,7 +8,7 @@ import kkr.ktm.domains.common.components.calculator.CalculatorException;
 public class CalculatorContext extends CalculatorContextFwk implements Calculator {
 	private static final Logger LOG = Logger.getLogger(CalculatorContext.class);
 
-	private static final String FUNCTION_LENGTH = "SIZE";
+	private static final String FUNCTION_LENGTH = "LENGTH";
 
 	private int calculateLENGTH(Object... arguments) throws CalculatorException {
 		if (arguments == null || arguments.length != 1) {

@@ -5,8 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import kkr.ktm.domains.excel.data.ExcelIdCell;
+import kkr.ktm.domains.excel.data.Io;
 import kkr.ktm.domains.excel.data.Orientation;
-import kkr.ktm.domains.excel.data.StructureParameter;
+import kkr.ktm.domains.excel.data.StructureParameterE;
+import kkr.ktm.domains.excel.data.StructureParameterI;
+import kkr.ktm.domains.excel.data.StructureParameterO;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 
@@ -25,6 +28,8 @@ public class StructureSheetImpl implements StructureSheet {
 
 	Integer indexStatus;
 
+	Integer indexDynStatus;
+
 	Integer indexName;
 
 	Integer indexDescription;
@@ -34,10 +39,9 @@ public class StructureSheetImpl implements StructureSheet {
 
 	private Map<String, StructureTest> tests = new LinkedHashMap<String, StructureTest>();
 
-	private Map<String, StructureParameter> parametersI = new LinkedHashMap<String, StructureParameter>();
-	// TODO: more instances of parameters O possible ... how to do it?
-	private Map<String, StructureParameter> parametersO = new LinkedHashMap<String, StructureParameter>();
-	private Map<String, StructureParameter> parametersE = new LinkedHashMap<String, StructureParameter>();
+	private Map<String, StructureParameterI> parametersI = new LinkedHashMap<String, StructureParameterI>();
+	private Map<String, StructureParameterE> parametersE = new LinkedHashMap<String, StructureParameterE>();
+	private Map<String, StructureParameterO> parametersO = new LinkedHashMap<String, StructureParameterO>();
 
 	public StructureSheetImpl(String name, Orientation orientation) {
 		this.name = name;
@@ -56,15 +60,15 @@ public class StructureSheetImpl implements StructureSheet {
 		return tests.values().iterator();
 	}
 
-	public Iterator<StructureParameter> iteratorParametersI() {
+	public Iterator<StructureParameterI> iteratorParametersI() {
 		return parametersI.values().iterator();
 	}
 
-	public Iterator<StructureParameter> iteratorParametersO() {
+	public Iterator<StructureParameterO> iteratorParametersO() {
 		return parametersO.values().iterator();
 	}
 
-	public Iterator<StructureParameter> iteratorParametersE() {
+	public Iterator<StructureParameterE> iteratorParametersE() {
 		return parametersE.values().iterator();
 	}
 
@@ -96,15 +100,15 @@ public class StructureSheetImpl implements StructureSheet {
 		return tests.get(code);
 	}
 
-	public StructureParameter findParameterI(String name) {
+	public StructureParameterI findParameterI(String name) {
 		return parametersI.get(name);
 	}
 
-	public StructureParameter findParameterO(String name) {
+	public StructureParameterO findParameterO(String name) {
 		return parametersO.get(name);
 	}
 
-	public StructureParameter findParameterE(String name) {
+	public StructureParameterE findParameterE(String name) {
 		return parametersE.get(name);
 	}
 
@@ -131,26 +135,35 @@ public class StructureSheetImpl implements StructureSheet {
 		case STATUS:
 			indexStatus = index;
 			break;
+		case DYNSTATUS:
+			indexDynStatus = index;
+			break;
 
 		default:
 			break;
 		}
 	}
 
-	public void addParameter(StructureParameter structureParameter) {
-		switch (structureParameter.getIo()) {
+	public void addParameter(Io io, String name, int index) {
+		switch (io) {
 		case I:
-			parametersI.put(structureParameter.getName(), structureParameter);
-			break;
-		case O:
-			parametersO.put(structureParameter.getName(), structureParameter);
+			StructureParameterI structureParameterI = new StructureParameterI(name, index);
+			parametersI.put(name, structureParameterI);
 			break;
 		case E:
-			parametersE.put(structureParameter.getName(), structureParameter);
+			StructureParameterE structureParameterE = new StructureParameterE(name, index);
+			parametersE.put(name, structureParameterE);
 			break;
-
+		case O:
+			StructureParameterO structureParameterO = parametersO.get(name);
+			if (structureParameterO == null) {
+				structureParameterO = new StructureParameterO(name);
+				parametersO.put(name, structureParameterO);
+			}
+			structureParameterO.addIndex(index);
+			break;
 		default:
-			throw new IllegalArgumentException("Unsupported IO: " + structureParameter.getIo());
+			throw new IllegalArgumentException("Unsupported IO: " + io);
 		}
 	}
 
@@ -176,6 +189,10 @@ public class StructureSheetImpl implements StructureSheet {
 
 	public Integer getIndexStatus() {
 		return indexStatus;
+	}
+
+	public Integer getIndexDynStatus() {
+		return indexDynStatus;
 	}
 
 	public Integer getIndexName() {

@@ -19,11 +19,13 @@ import kkr.ktm.domains.excel.components.exceladapter.TSheet;
 import kkr.ktm.domains.excel.components.exceladapter.TWorkbook;
 import kkr.ktm.domains.excel.data.Io;
 import kkr.ktm.domains.excel.data.Orientation;
-import kkr.ktm.domains.excel.data.StructureParameter;
+import kkr.ktm.domains.excel.data.StructureParameterE;
+import kkr.ktm.domains.excel.data.StructureParameterI;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
 import kkr.ktm.domains.tests.components.testloader.TestLoader;
+import kkr.ktm.domains.tests.components.valueparser.ValueParseException;
 import kkr.ktm.domains.tests.data.TestInput;
 
 public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
@@ -182,14 +184,28 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 
 			Object value = excelAdapter.getValue(tCell);
 
-			Object retval;
+			Object retval = value;
 			switch (io) {
 			case I:
-				retval = valueGenerator.parseValue(excelPosition, value);
+				if (value != null && value instanceof String) {
+					try {
+						retval = valueParser.parseValue((String) value);
+					} catch (ValueParseException ex) {
+						throw new ExcelException(excelPosition, "Value I is in bad format: '" + (String) value + "'",
+								ex);
+					}
+				}
 				break;
 
 			case E:
-				retval = valueGenerator.parsePattern(excelPosition, value);
+				if (value != null && value instanceof String) {
+					try {
+						retval = valueParser.parseValueFlag((String) value, null);
+					} catch (ValueParseException ex) {
+						throw new ExcelException(excelPosition, "Value E is in bad format: '" + (String) value + "'",
+								ex);
+					}
+				}
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected IO: " + io);
@@ -229,17 +245,17 @@ public class TestLoaderExcel extends TestLoaderExcelFwk implements TestLoader {
 			testInputExcel.setOrderInSheet(structureTest.getIndex());
 			testInputExcel.setOrder(structureTest.getOrder());
 
-			Iterator<StructureParameter> iteratorI = structureSheet.iteratorParametersI();
+			Iterator<StructureParameterI> iteratorI = structureSheet.iteratorParametersI();
 			while (iteratorI.hasNext()) {
-				StructureParameter structureParameterI = iteratorI.next();
+				StructureParameterI structureParameterI = iteratorI.next();
 				Object value = readValue(excelPosition, tSheet, structureTest.getIndex(),
 						structureParameterI.getIndex(), structureSheet.getOrientation(), Io.I);
 				testInputExcel.getDataInput().put(structureParameterI.getName(), value);
 			}
 
-			Iterator<StructureParameter> iteratorE = structureSheet.iteratorParametersE();
+			Iterator<StructureParameterE> iteratorE = structureSheet.iteratorParametersE();
 			while (iteratorE.hasNext()) {
-				StructureParameter structureParameterE = iteratorE.next();
+				StructureParameterE structureParameterE = iteratorE.next();
 				// Read and forget - just for checking
 				readValue(excelPosition, tSheet, structureTest.getIndex(), structureParameterE.getIndex(),
 						structureSheet.getOrientation(), Io.E);

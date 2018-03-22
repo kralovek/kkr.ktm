@@ -18,6 +18,6 @@ public class ContentEvaluateException extends BaseException {
 	}
 
 	public String toString() {
-		return position.toString() + " " + getMessage();
+		return position.toString() + "\n" + getMessage();
 	}
 }

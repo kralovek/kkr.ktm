@@ -21,7 +21,7 @@ import kkr.ktm.domains.excel.data.Active;
 import kkr.ktm.domains.excel.data.Io;
 import kkr.ktm.domains.excel.data.Orientation;
 import kkr.ktm.domains.excel.data.Status;
-import kkr.ktm.domains.excel.data.StructureParameter;
+import kkr.ktm.domains.excel.data.StructureParameterE;
 import kkr.ktm.domains.excel.data.StructureSheet;
 import kkr.ktm.domains.excel.data.StructureTest;
 import kkr.ktm.domains.excel.data.StructureWorkbook;
@@ -83,8 +83,8 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 			ExcelPosition excelPosition = excelPositionSheet.clone();
 			Set<SystemParameter> systemParameters = new HashSet<SystemParameter>();
 
-			for (int i = 0; isLimitParameter(tSheet, i); i++) {
-				if (isIgnoredParameter(i)) {
+			for (int index = 0; isLimitParameter(tSheet, index); index++) {
+				if (isIgnoredParameter(index)) {
 					continue;
 				}
 
@@ -93,7 +93,7 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 				//
 				Io io;
 				{
-					TCell tCellIo = loadCell(tSheet, i, indexIo);
+					TCell tCellIo = loadCell(tSheet, index, indexIo);
 					String valueIo = excelAdapter.getStringValue(tCellIo);
 					if (UtilsString.isEmpty(valueIo)) {
 						continue;
@@ -101,53 +101,47 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 					try {
 						io = Io.valueOf(valueIo);
 					} catch (Exception ex) {
-						updateExcelPosition(excelPosition, i, indexIo);
+						updateExcelPosition(excelPosition, index, indexIo);
 						throw new ExcelException(excelPosition, "Bad value on the Io: '" + valueIo + "'");
 					}
 				}
 
-				StructureParameter structureParameter = new StructureParameter(i);
-				structureParameter.setIo(io);
-
 				//
 				// PARAMETER
 				//
+				String name;
 				{
-					updateExcelPosition(excelPosition, i, indexParameter);
-					TCell tCellParameter = loadCell(tSheet, i, indexParameter);
-					String valueParameter = excelAdapter.getStringValue(tCellParameter);
-					if (UtilsString.isEmpty(valueParameter)) {
+					updateExcelPosition(excelPosition, index, indexParameter);
+					TCell tCellParameter = loadCell(tSheet, index, indexParameter);
+					name = excelAdapter.getStringValue(tCellParameter);
+					if (UtilsString.isEmpty(name)) {
 						throw new ExcelException(excelPosition, "The parameter name is empty");
 					}
-
-					structureParameter.setName(valueParameter);
 
 					switch (io) {
 					case S:
 						try {
-							SystemParameter systemParameter = SystemParameter.valueOf(valueParameter);
+							SystemParameter systemParameter = SystemParameter.valueOf(name);
 							if (systemParameters.contains(systemParameter)) {
 								throw new ExcelException(excelPosition,
-										"The parameter " + io + " is not unique: " + valueParameter);
+										"The parameter " + io + " is not unique: " + name);
 							}
 							systemParameters.add(systemParameter);
-							structureSheet.addSystemParameter(systemParameter, i);
+							structureSheet.addSystemParameter(systemParameter, index);
 						} catch (ExcelException ex) {
 							throw ex;
 						} catch (Exception ex) {
-							throw new ExcelException(excelPosition, "Unsupported system parameter: " + valueParameter);
+							throw new ExcelException(excelPosition, "Unsupported system parameter: " + name);
 						}
 						continue;
 					case E:
-						if (structureSheet.findParameterE(structureParameter.getName()) != null) {
-							throw new ExcelException(excelPosition,
-									"The parameter " + io + " is not unique: " + valueParameter);
+						if (structureSheet.findParameterE(name) != null) {
+							throw new ExcelException(excelPosition, "The parameter " + io + " is not unique: " + name);
 						}
 						break;
 					case I:
-						if (structureSheet.findParameterI(structureParameter.getName()) != null) {
-							throw new ExcelException(excelPosition,
-									"The parameter " + io + " is not unique: " + valueParameter);
+						if (structureSheet.findParameterI(name) != null) {
+							throw new ExcelException(excelPosition, "The parameter " + io + " is not unique: " + name);
 						}
 						break;
 					default:
@@ -157,15 +151,15 @@ public abstract class StructureLoaderBase extends StructureLoaderBaseFwk impleme
 				//
 				// END
 				//
-				structureSheet.addParameter(structureParameter);
+				structureSheet.addParameter(io, name, index);
 			}
 
 			//
 			// VERIFICATIONS
 			//
-			Iterator<StructureParameter> iterator = structureSheet.iteratorParametersE();
+			Iterator<StructureParameterE> iterator = structureSheet.iteratorParametersE();
 			while (iterator.hasNext()) {
-				StructureParameter structureParameterE = iterator.next();
+				StructureParameterE structureParameterE = iterator.next();
 				if (structureSheet.findParameterO(structureParameterE.getName()) == null) {
 					updateExcelPosition(excelPosition, structureParameterE.getIndex(), indexParameter);
 					throw new ExcelException(excelPosition,

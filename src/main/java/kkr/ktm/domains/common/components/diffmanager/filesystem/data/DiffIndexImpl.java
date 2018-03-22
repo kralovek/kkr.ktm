@@ -30,6 +30,6 @@ public class DiffIndexImpl implements DiffIndex, Comparable<DiffIndex> {
 
 	public String toString() {
 		Date date = new Date(ms);
-		return "[DATE: " + DATE_FORMAT.format(date) + "]";
+		return DATE_FORMAT.format(date);
 	}
 }

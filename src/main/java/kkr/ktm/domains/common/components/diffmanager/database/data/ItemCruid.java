@@ -58,6 +58,51 @@ public class ItemCruid {
 		diffItemImpl.setStatus(diffStatus);
 
 		for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+			Object value = entry.getValue();
+			if (value != null) {
+				if (value instanceof Date) {
+					value = new Date(((Date) value).getTime());
+				} else if (value instanceof Number) {
+					Number number = (Number) value;
+					double d = number.doubleValue();
+					long l = number.longValue();
+					if (d == (double) l) {
+						short s = number.shortValue();
+						if (s == (short) l) {
+							value = s;
+						} else if (number.intValue() == (int) l) {
+							value = number.intValue();
+						} else {
+							value = l;
+						}
+					} else {
+						float f = number.floatValue();
+						if (f == (float) d) {
+							value = f;
+						} else {
+							value = d;
+						}
+					}
+				} else if (entry.getValue() instanceof Boolean) {
+					// Nothing to do
+				} else {
+					value = String.valueOf(entry.getValue());
+				}
+			}
+			diffItemImpl.getParameters().put(entry.getKey(), value);
+		}
+
+		return diffItemImpl;
+	}
+
+	public DiffItem toItem_ORG() {
+		DiffItemImpl diffItemImpl = new DiffItemImpl();
+
+		diffItemImpl.setIndex(index);
+		diffItemImpl.setName(name);
+		diffItemImpl.setStatus(diffStatus);
+
+		for (Map.Entry<String, Object> entry : parameters.entrySet()) {
 			String value;
 			if (entry.getValue() == null) {
 				value = "";

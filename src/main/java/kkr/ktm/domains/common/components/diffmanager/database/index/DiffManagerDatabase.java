@@ -153,25 +153,26 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 				String queryRep = query;
 
 				switch (typeSort) {
-					case Types.TIMESTAMP :
-					case Types.DATE :
-					case Types.TIME : {
-						Timestamp timestamp = new Timestamp(index);
-						statement.setTimestamp(1, timestamp);
-						queryRep = query.replaceFirst("\\?", toStringSqlDate(index));
-						break;
-					}
-					case Types.NUMERIC :
-					case Types.INTEGER :
-					case Types.DECIMAL : {
-						statement.setLong(1, index);
-						queryRep = query.replaceFirst("\\?", "'" + index + "'");
-						break;
-					}
-					default : {
-						throw new ConfigurationException("The sortColumn " + tableInfo.getName() + "." + tableInfo.getColumnSort()
-								+ " is not timestamp or a decimal number: type=" + typeSort);
-					}
+				case Types.TIMESTAMP:
+				case Types.DATE:
+				case Types.TIME: {
+					Timestamp timestamp = new Timestamp(index);
+					statement.setTimestamp(1, timestamp);
+					queryRep = query.replaceFirst("\\?", toStringSqlDate(index));
+					break;
+				}
+				case Types.NUMERIC:
+				case Types.INTEGER:
+				case Types.DOUBLE:
+				case Types.DECIMAL: {
+					statement.setLong(1, index);
+					queryRep = query.replaceFirst("\\?", "'" + index + "'");
+					break;
+				}
+				default: {
+					throw new ConfigurationException("The sortColumn " + tableInfo.getName() + "."
+							+ tableInfo.getColumnSort() + " is not timestamp or a decimal number: type=" + typeSort);
+				}
 				}
 
 				LOG.debug("QUERY: " + queryRep);
@@ -186,17 +187,17 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 					long indexSort = 0;
 
 					switch (typeSort) {
-						case Types.TIMESTAMP :
-						case Types.DATE :
-						case Types.TIME : {
-							Date dateSort = resultSet.getTimestamp(tableInfo.getColumnSort());
-							dateSort = roundDateToMs(dateSort);
-							indexSort = dateSort.getTime();
-							break;
-						}
-						default : {
-							indexSort = resultSet.getLong(tableInfo.getColumnSort());
-						}
+					case Types.TIMESTAMP:
+					case Types.DATE:
+					case Types.TIME: {
+						Date dateSort = resultSet.getTimestamp(tableInfo.getColumnSort());
+						dateSort = roundDateToMs(dateSort);
+						indexSort = dateSort.getTime();
+						break;
+					}
+					default: {
+						indexSort = resultSet.getLong(tableInfo.getColumnSort());
+					}
 					}
 
 					DiffIndexImpl indexSortImpl = new DiffIndexImpl();
@@ -207,28 +208,28 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 						String columnName = metaData.getColumnName(i);
 
 						switch (metaData.getColumnType(i)) {
-							case Types.DATE :
-							case Types.TIME :
-							case Types.TIMESTAMP : {
-								Date valueDate = resultSet.getTimestamp(i);
-								itemCruid.getParameters().put(columnName, valueDate);
-								break;
-							}
-							case Types.DECIMAL :
-							case Types.INTEGER : {
-								Object object = resultSet.getObject(i);
-								itemCruid.getParameters().put(columnName, object);
-								break;
-							}
-							case Types.NUMERIC :
-							case Types.DOUBLE : {
-								Object object = resultSet.getObject(i);
-								itemCruid.getParameters().put(columnName, object);
-								break;
-							}
-							default :
-								String value = resultSet.getString(i);
-								itemCruid.getParameters().put(columnName, value);
+						case Types.DATE:
+						case Types.TIME:
+						case Types.TIMESTAMP: {
+							Date valueDate = resultSet.getTimestamp(i);
+							itemCruid.getParameters().put(columnName, valueDate);
+							break;
+						}
+						case Types.DECIMAL:
+						case Types.INTEGER: {
+							Object object = resultSet.getObject(i);
+							itemCruid.getParameters().put(columnName, object);
+							break;
+						}
+						case Types.NUMERIC:
+						case Types.DOUBLE: {
+							Object object = resultSet.getObject(i);
+							itemCruid.getParameters().put(columnName, object);
+							break;
+						}
+						default:
+							String value = resultSet.getString(i);
+							itemCruid.getParameters().put(columnName, value);
 						}
 					}
 					groupCruid.add(itemCruid);
@@ -289,37 +290,38 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 					long index = 0;
 
 					switch (typeSort) {
-						case Types.TIMESTAMP :
-						case Types.DATE :
-						case Types.TIME : {
-							Date date = resultSet.getTimestamp("LAST_MODIFIED");
-							if (date != null) {
-								date = roundDateToMs(date);
-								LOG.debug("Value sort: " + DATE_FORMAT_TODATE.format(date));
-								index = date.getTime();
-							} else {
-								LOG.debug("Table is empty");
-								index = 0;
-							}
-							break;
+					case Types.TIMESTAMP:
+					case Types.DATE:
+					case Types.TIME: {
+						Date date = resultSet.getTimestamp("LAST_MODIFIED");
+						if (date != null) {
+							date = roundDateToMs(date);
+							LOG.debug("Value sort: " + DATE_FORMAT_TODATE.format(date));
+							index = date.getTime();
+						} else {
+							LOG.debug("Table is empty");
+							index = 0;
 						}
-						case Types.NUMERIC :
-						case Types.INTEGER :
-						case Types.DECIMAL : {
-							Object object = resultSet.getObject("LAST_MODIFIED");
-							if (object != null) {
-								index = resultSet.getLong("LAST_MODIFIED");
-								LOG.debug("Value sort: " + index);
-							} else {
-								LOG.debug("Table is empty");
-								index = 0;
-							}
-							break;
+						break;
+					}
+					case Types.NUMERIC:
+					case Types.INTEGER:
+					case Types.DECIMAL: {
+						Object object = resultSet.getObject("LAST_MODIFIED");
+						if (object != null) {
+							index = resultSet.getLong("LAST_MODIFIED");
+							LOG.debug("Value sort: " + index);
+						} else {
+							LOG.debug("Table is empty");
+							index = 0;
 						}
-						default : {
-							throw new ConfigurationException("The sortColumn " + tableInfo.getName() + "." + tableInfo.getColumnSort()
-									+ " is not timestamp or a decimal number: type=" + typeSort);
-						}
+						break;
+					}
+					default: {
+						throw new ConfigurationException(
+								"The sortColumn " + tableInfo.getName() + "." + tableInfo.getColumnSort()
+										+ " is not timestamp or a decimal number: type=" + typeSort);
+					}
 					}
 
 					DiffIndexImpl diffIndexImpl = new DiffIndexImpl();

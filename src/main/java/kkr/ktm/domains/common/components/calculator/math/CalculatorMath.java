@@ -63,7 +63,7 @@ public class CalculatorMath extends CalculatorMathFwk implements Calculator {
 			for (int i = 0; i < arguments.length; i++) {
 				if (arguments[i] == null || !(arguments[i] instanceof Number)) {
 					throw new CalculatorException("All arguments of Math function must be numbers: " + function + "("
-							+ UtilsString.arrayToString(arguments, null, null, ",") + ")");
+							+ UtilsString.toStringArray(arguments, null, null, ",") + ")");
 				}
 				argumentNumbers[i] = (Number) arguments[i];
 			}

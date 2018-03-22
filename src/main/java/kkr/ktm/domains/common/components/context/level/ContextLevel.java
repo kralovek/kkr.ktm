@@ -111,9 +111,9 @@ public class ContextLevel implements Context {
 				for (int i = 0; i < indexesReduced.length; i++) {
 					indexesReduced[i] = indexes[i];
 				}
-				return UtilsString.arrayToString(indexesReduced, "[", "]", ",");
+				return UtilsString.toStringArray(indexesReduced, "[", "]", ",");
 			}
-			return UtilsString.arrayToString(indexes, "[", "]", ",");
+			return UtilsString.toStringArray(indexes, "[", "]", ",");
 		} else {
 			return "";
 		}

@@ -12,19 +12,19 @@ public interface StructureSheet {
 
 	Iterator<StructureTest> iteratorTests();
 
-	Iterator<StructureParameter> iteratorParametersI();
+	Iterator<StructureParameterI> iteratorParametersI();
 
-	Iterator<StructureParameter> iteratorParametersO();
+	Iterator<StructureParameterO> iteratorParametersO();
 
-	Iterator<StructureParameter> iteratorParametersE();
+	Iterator<StructureParameterE> iteratorParametersE();
 
 	StructureTest findTest(String code);
 
-	StructureParameter findParameterI(String name);
+	StructureParameterI findParameterI(String name);
 
-	StructureParameter findParameterO(String name);
+	StructureParameterO findParameterO(String name);
 
-	StructureParameter findParameterE(String name);
+	StructureParameterE findParameterE(String name);
 
 	ExcelIdCell getIndexStatusSheetOk();
 
@@ -32,7 +32,7 @@ public interface StructureSheet {
 
 	ExcelIdCell getIndexStatusSheetSkip();
 
-	void addParameter(StructureParameter structureParameter);
+	void addParameter(Io io, String name, int index);
 
 	void addSystemParameter(SystemParameter systemParameter, int index);
 
@@ -47,6 +47,8 @@ public interface StructureSheet {
 	Integer getIndexGroup();
 
 	Integer getIndexStatus();
+
+	Integer getIndexDynStatus();
 
 	Integer getIndexName();
 

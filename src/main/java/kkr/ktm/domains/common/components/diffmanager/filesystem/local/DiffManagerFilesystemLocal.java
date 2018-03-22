@@ -68,7 +68,8 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 				for (DiffItem itemState : groupState.getItems()) {
 					DiffItemImpl existingItem = findItem(existingItems, itemState.getName());
 					if (existingItem != null) {
-						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex()).getMs()) {
+						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex())
+								.getMs()) {
 							existingItems.remove(existingItem);
 						} else {
 							existingItem.setStatus(DiffStatus.UPD);
@@ -162,7 +163,8 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 		}
 	}
 
-	private static List<DiffItemImpl> getItems(File dirRoot, File dir, long index, Pattern pattern) throws BaseException {
+	private static List<DiffItemImpl> getItems(File dirRoot, File dir, long index, Pattern pattern)
+			throws BaseException {
 		List<DiffItemImpl> items = new ArrayList<DiffItemImpl>();
 		File[] files = dir.listFiles();
 
@@ -209,7 +211,8 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 		return relativePath;
 	}
 
-	private static long getLastModifiedDirectory(File dirRoot, File dir, long lastModified, Pattern pattern) throws BaseException {
+	private static long getLastModifiedDirectory(File dirRoot, File dir, long lastModified, Pattern pattern)
+			throws BaseException {
 		File[] files = dir.listFiles();
 
 		if (files == null) {
@@ -252,5 +255,9 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 		} else {
 			return code + "." + name;
 		}
+	}
+
+	public String toString() {
+		return "[" + code + "]: " + UtilsString.toStringCollection(dirInfos, null, null, ",");
 	}
 }

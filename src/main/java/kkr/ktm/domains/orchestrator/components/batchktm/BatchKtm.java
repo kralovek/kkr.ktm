@@ -66,11 +66,11 @@ public class BatchKtm extends BatchKtmFwk {
 					}
 
 					Date dateEnd = new Date();
-					String dateDetla = UtilsString.toStringDateDelta(dateBegin, dateEnd);
+					String dateDelta = UtilsString.toStringDateDelta(dateBegin, dateEnd);
 
 					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_BEGIN, dateBegin);
 					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_END, dateEnd);
-					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_DELTA, dateDetla);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_DELTA, dateDelta);
 
 					Status status = testReporter.reportTest(testOutput, batchId);
 
@@ -100,7 +100,7 @@ public class BatchKtm extends BatchKtmFwk {
 							throw new IllegalStateException("Unsupported DiffStatus: " + status);
 					}
 
-					LOG.info(dateDetla);
+					LOG.info(dateDelta);
 				} catch (StopException ex) {
 					LOG.info(DATE_FORMAT.format(dateBegin) + " * STOP *");
 

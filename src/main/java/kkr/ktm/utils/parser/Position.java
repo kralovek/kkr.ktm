@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Position {
+	private static final String TAB = "    ";
+	private static final String TAB_LINE = "____";
+	private static final String TAB_POINT = "^___";
 	private List<String> contentLines = new ArrayList<String>();
 	private int iLine = 0;
 	private int iPosition = 0;
@@ -62,20 +65,36 @@ public class Position {
 
 	public String toString() {
 		StringBuffer buffer = new StringBuffer("[" + String.valueOf(iLine) + "," + String.valueOf(iPosition) + "]");
+		StringBuffer bufferContent = new StringBuffer();
+		StringBuffer bufferLine = new StringBuffer();
+
 		if (contentLines != null && iLine < contentLines.size()) {
 			String contentLine = contentLines.get(iLine);
-			buffer.append("\n" + contentLine + "\n");
-			for (int i = 0; i < contentLine.length(); i++) {
+			char[] contentChars = contentLine.toCharArray();
+
+			for (int i = 0; i < contentChars.length; i++) {
 				if (i + 1 != contentLine.length() || contentLine.charAt(i) != '\r') {
-					if (i != iPosition) {
-						buffer.append('_');
+					if (contentChars[i] != '\t') {
+						bufferContent.append(contentChars[i]);
+						if (i != iPosition) {
+							bufferLine.append('_');
+						} else {
+							bufferLine.append('^');
+						}
 					} else {
-						buffer.append('^');
+						bufferContent.append(TAB);
+						if (i != iPosition) {
+							bufferLine.append(TAB_LINE);
+						} else {
+							bufferLine.append(TAB_POINT);
+						}
 					}
 				}
 			}
-			buffer.append('\n');
 		}
-		return buffer.toString();
+		return "" //
+				+ "[" + String.valueOf(iLine) + "," + String.valueOf(iPosition) + "]" //
+				+ "\n" + bufferContent.toString() //
+				+ "\n" + bufferLine.toString();
 	}
 }

@@ -65,7 +65,7 @@ public abstract class ContentTagBase extends ContentBase {
 			}
 		}
 		throw new ContentParseException(position, "Attribute [" + TAG + " " + name + "] has bad value: '" + value
-				+ "' Allowed values: " + UtilsString.arrayToString(enm, null, null, ","));
+				+ "' Allowed values: " + UtilsString.toStringArray(enm, null, null, ","));
 	}
 
 	protected String attributeName(boolean mandatory, String name, String value) throws ContentParseException {
@@ -136,7 +136,7 @@ public abstract class ContentTagBase extends ContentBase {
 	protected void checkUnknownAttributes(TagType tag, Map<String, String> attributes) throws ContentParseException {
 		if (!attributes.isEmpty()) {
 			throw new ContentParseException(position, "Unknown attributes "
-					+ UtilsString.listToString(attributes.keySet(), null, null, ",") + " in the tag " + tag);
+					+ UtilsString.toStringCollection(attributes.keySet(), null, null, ",") + " in the tag " + tag);
 		}
 	}
 

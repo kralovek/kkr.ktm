@@ -9,16 +9,18 @@ import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.excel.components.catalogstyles.CatalogStylesFactory;
 import kkr.ktm.domains.excel.components.exceladapter.ExcelAdapter;
 import kkr.ktm.domains.excel.components.structureloader.StructureLoader;
-import kkr.ktm.domains.excel.components.valuegenerator.ValueGenerator;
 import kkr.ktm.domains.excel.utils.UtilsExcel;
+import kkr.ktm.domains.tests.components.valueformatter.ValueFormatter;
+import kkr.ktm.domains.tests.components.valueparser.ValueParser;
 
 public abstract class TestReporterExcelFwk {
 	private boolean configured;
 
 	protected ExcelAdapter excelAdapter;
 	protected StructureLoader structureLoader;
-	protected ValueGenerator valueGenerator;
 	protected CatalogStylesFactory catalogStylesFactory;
+	protected ValueParser valueParser;
+	protected ValueFormatter valueFormatter;
 
 	protected File dir;
 
@@ -58,8 +60,13 @@ public abstract class TestReporterExcelFwk {
 		if (structureLoader == null) {
 			throw new ConfigurationException("Parameter 'structureLoader' is not configured");
 		}
-		if (valueGenerator == null) {
-			throw new ConfigurationException("Parameter 'valueGenerator' is not configured");
+		if (valueParser == null) {
+			throw new ConfigurationException(
+					getClass().getSimpleName() + ": Parameter 'valueParser' is not configured");
+		}
+		if (valueFormatter == null) {
+			throw new ConfigurationException(
+					getClass().getSimpleName() + ": Parameter 'valueFormatter' is not configured");
 		}
 		if (catalogStylesFactory == null) {
 			throw new ConfigurationException("Parameter 'catalogStylesFactory' is not configured");
@@ -84,15 +91,19 @@ public abstract class TestReporterExcelFwk {
 		reviewRowHeader = UtilsExcel.adaptAndCheckRowId(getClass(), _reviewRowHeader, "reviewRowHeader");
 		reviewRowFirst = UtilsExcel.adaptAndCheckRowId(getClass(), _reviewRowFirst, "reviewRowFirst");
 		reviewColumnName = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnName, "reviewColumnName");
-		reviewColumnStatusTotal = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusTotal, "reviewColumnStatusTotal");
-		reviewColumnStatusOk = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusOk, "reviewColumnStatusOk");
-		reviewColumnStatusKo = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusKo, "reviewColumnStatusKo");
-		reviewColumnStatusSkip = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusSkip, "reviewColumnStatusSkip");
+		reviewColumnStatusTotal = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusTotal,
+				"reviewColumnStatusTotal");
+		reviewColumnStatusOk = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusOk,
+				"reviewColumnStatusOk");
+		reviewColumnStatusKo = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusKo,
+				"reviewColumnStatusKo");
+		reviewColumnStatusSkip = UtilsExcel.adaptAndCheckColumnId(getClass(), _reviewColumnStatusSkip,
+				"reviewColumnStatusSkip");
 
 		if (review) {
 			if (UtilsString.isEmpty(reviewSheet)) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is activated and the parameter 'reviewSheet' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is activated and the parameter 'reviewSheet' is not configured");
 			}
 
 			if (reviewRowHeader == null) {
@@ -100,28 +111,28 @@ public abstract class TestReporterExcelFwk {
 			}
 
 			if (reviewRowFirst == null) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is adtivated and the parameter 'reviewRowFirst' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is adtivated and the parameter 'reviewRowFirst' is not configured");
 			}
 
 			if (reviewColumnName == null) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is adtivated and the parameter 'reviewColumnName' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is adtivated and the parameter 'reviewColumnName' is not configured");
 			}
 
 			if (reviewColumnStatusOk == null) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is adtivated and the parameter 'reviewColumnStatusOk' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is adtivated and the parameter 'reviewColumnStatusOk' is not configured");
 			}
 
 			if (reviewColumnStatusKo == null) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is adtivated and the parameter 'reviewColumnStatusKo' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is adtivated and the parameter 'reviewColumnStatusKo' is not configured");
 			}
 
 			if (reviewColumnStatusSkip == null) {
-				throw new ConfigurationException(
-						getClass().getSimpleName() + ": Review is adtivated and the parameter 'reviewColumnStatusSkip' is not configured");
+				throw new ConfigurationException(getClass().getSimpleName()
+						+ ": Review is adtivated and the parameter 'reviewColumnStatusSkip' is not configured");
 			}
 		}
 
@@ -167,14 +178,6 @@ public abstract class TestReporterExcelFwk {
 
 	public void setDir(File dir) {
 		this.dir = dir;
-	}
-
-	public ValueGenerator getValueGenerator() {
-		return valueGenerator;
-	}
-
-	public void setValueGenerator(ValueGenerator valueGenerator) {
-		this.valueGenerator = valueGenerator;
 	}
 
 	public Integer getReviewRowFirst() {
@@ -255,5 +258,21 @@ public abstract class TestReporterExcelFwk {
 
 	public void setCatalogStylesFactory(CatalogStylesFactory catalogStylesFactory) {
 		this.catalogStylesFactory = catalogStylesFactory;
+	}
+
+	public ValueParser getValueParser() {
+		return valueParser;
+	}
+
+	public void setValueParser(ValueParser valueParser) {
+		this.valueParser = valueParser;
+	}
+
+	public ValueFormatter getValueFormatter() {
+		return valueFormatter;
+	}
+
+	public void setValueFormatter(ValueFormatter valueFormatter) {
+		this.valueFormatter = valueFormatter;
 	}
 }
