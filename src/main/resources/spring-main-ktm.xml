@@ -36,13 +36,13 @@
 		class="kkr.ktm.domains.tests.components.testloader.excel.TestLoaderExcel">
 		<property name="excelAdapter" ref="excelAdapter" />
 		<property name="structureLoader" ref="structureLoader" />
-		<property name="valueGenerator" ref="valueGenerator" />
+		<property name="valueParser" ref="valueParser" />
 	</bean>
 
 	<bean id="excelAdapter"
 		class="kkr.ktm.domains.excel.components.exceladapter.poi.ExcelAdapterPoi">
-		<property name="formatDate" value="dd/MM/yyyy HH:mm:ss" />
-		<property name="formatTime" value="" />
+		<property name="formatDate" value="dd/MM/yyyy" />
+		<property name="formatTime" value="HH:mm:ss dd/MM/yyyy" />
 	</bean>
 
 	<bean abstract="true" id="structureLoaderBase">
@@ -94,21 +94,14 @@
 		</property>
 	</bean>
 
-	<bean id="valueGenerator"
-		class="kkr.ktm.domains.excel.components.valuegenerator.generic.ValueGeneratorGeneric">
-		<property name="excelAdapter" ref="excelAdapter" />
-		<property name="dateFormat" value="dd/MM/yyyy HH:mm:ss" />
-	</bean>
-
-
-	<bean id="testReporterEmpty" class="kkr.ktm.domains.tests.components.testreporter.empty.TestReporterEmpty" />
+	<bean id="testReporterEmpty"
+		class="kkr.ktm.domains.tests.components.testreporter.empty.TestReporterEmpty" />
 
 	<bean id="testReporterExcel"
 		class="kkr.ktm.domains.tests.components.testreporter.excel.TestReporterExcel">
 		<property name="excelAdapter" ref="excelAdapter" />
 
 		<property name="structureLoader" ref="structureLoader" />
-		<property name="valueGenerator" ref="valueGenerator" />
 		<property name="catalogStylesFactory" ref="catalogStylesFactory" />
 
 		<property name="dir" value="ktm/output" />
@@ -123,6 +116,9 @@
 		<property name="reviewColumnStatusOk" value="E" />
 		<property name="reviewColumnStatusKo" value="F" />
 		<property name="reviewColumnStatusSkip" value="G" />
+
+		<property name="valueParser" ref="valueParser" />
+		<property name="valueFormatter" ref="valueFormatter" />
 	</bean>
 
 	<bean abstract="true" id="abstractStyle"
@@ -241,5 +237,24 @@
 			</bean>
 		</property>
 	</bean>
+
+	<bean id="valueParser"
+		class="kkr.ktm.domains.tests.components.valueparser.generic.ValueParserGeneric">
+		<property name="dateFormats">
+			<list>
+				<value>HH:mm:ss dd/MM/yyyy</value>
+				<value>HH:mm dd/MM/yyyy</value>
+				<value>dd/MM/yyyy</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="valueFormatter"
+		class="kkr.ktm.domains.tests.components.valueformatter.generic.ValueFormatterGeneric">
+		<property name="dateTimeFormat" value="HH:mm:ss dd/MM/yyyy" />
+		<property name="dateFormat" value="dd/MM/yyyy" />
+		<property name="decimalPoint" value="." />
+	</bean>
+
 </beans>
     
