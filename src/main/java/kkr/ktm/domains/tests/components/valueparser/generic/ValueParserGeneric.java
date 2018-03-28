@@ -172,13 +172,14 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 
 	private Object parseValue(Position position, String content) throws ValueParseException {
 		if (!content.isEmpty()) {
-			if (content.charAt(0) == CHAR_PATTERN_QUOT) {
+			char c = content.charAt(0);
+			if (c == CHAR_PATTERN_QUOT) {
 				return parseValuePattern(position, content);
-			}
-			if (content.charAt(0) == CHAR_ARRAY_OPEN) {
+			} else //
+			if (c == CHAR_ARRAY_OPEN) {
 				return parseValueArray(position, content);
-			}
-			if (content.charAt(0) == CHAR_TEXT_QUOT) {
+			} else //
+			if (c == CHAR_TEXT_QUOT) {
 				return parseValueText(position, content);
 			}
 		}
@@ -187,7 +188,7 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 
 	private Object[] parseValueArray(Position position, String content) throws ValueParseException {
 		if (content.charAt(0) != CHAR_ARRAY_OPEN || content.charAt(content.length() - 1) != CHAR_ARRAY_CLOSE) {
-			throw new ValueParseException(position, "Pattern must be closed in {}");
+			throw new ValueParseException(position, "Array must be closed in " + CHAR_ARRAY_OPEN + CHAR_ARRAY_CLOSE);
 		}
 
 		Collection<Object> parts = new ArrayList<Object>();
@@ -199,13 +200,23 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 		int open = 0;
 		Character quotation = null;
 		boolean escaped = false;
+		boolean quotationUsed = false;
+		boolean textUsed = false;
+
 		for (; iPos < chars.length - 1; iPos++) {
 			if (escaped) {
 				escaped = false;
 				continue;
 			}
+
+			if (quotationUsed && quotation == null && !isSpace(chars[iPos])) {
+				throw new ValueParseException(position.movePosition(iPos),
+						"Value cannot be quoted partially: '" + content + "'");
+			}
+
 			if (chars[iPos] == '\\') {
 				escaped = true;
+				textUsed = true;
 				continue;
 			}
 
@@ -217,8 +228,7 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 				continue;
 			}
 
-			if (chars[iPos] == CHAR_PATTERN_QUOT || chars[iPos] == CHAR_TEXT_QUOT) {
-				quotation = chars[iPos];
+			if (isSpace(chars[iPos])) {
 				continue;
 			}
 
@@ -236,7 +246,22 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 				Object object = parseValue(position.movePosition(iPosBegin), item);
 				parts.add(object);
 				iPosBegin = iPos + 1;
+				quotationUsed = false;
+				continue;
 			}
+
+			if (chars[iPos] == CHAR_PATTERN_QUOT || chars[iPos] == CHAR_TEXT_QUOT) {
+				quotation = chars[iPos];
+				if (textUsed) {
+					throw new ValueParseException(position.movePosition(iPos),
+							"Value cannot be quoted partially: '" + content + "'");
+				}
+				quotationUsed = true;
+				textUsed = false;
+				continue;
+			}
+
+			textUsed = true;
 		}
 
 		if (escaped) {
@@ -263,6 +288,10 @@ public class ValueParserGeneric extends ValueComparator implements ValueParser {
 		Object[] retval = parts.toArray();
 
 		return retval;
+	}
+
+	private boolean isSpace(char c) {
+		return Character.isWhitespace(c);
 	}
 
 	private Pattern parseValuePattern(Position position, String content) throws ValueParseException {
