@@ -18,6 +18,7 @@ import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionNumber;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionOperator;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionParameter;
+import kkr.ktm.domains.common.components.expressionparser.arithmetic.expression.ExpressionText;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.Level;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.level.LevelAdd;
 import kkr.ktm.domains.common.components.expressionparser.arithmetic.operator.Operator;
@@ -39,6 +40,8 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			.compile("^([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\\s*\\(.*\\)$");
 	private static final Pattern PATTERN_PARENTHESE_START = Pattern.compile("^\\(.*");
 	private static final Pattern PATTERN_PARENTHESE = Pattern.compile("^\\(.*\\)$");
+	private static final Pattern PATTERN_TEXT_START = Pattern.compile("^\".*");
+	private static final Pattern PATTERN_TEXT = Pattern.compile("^\".*\"$");
 
 	private static LevelAdd LEVEL = new LevelAdd();
 
@@ -351,6 +354,54 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
+	private Expression parseText(Position position, String text) throws ExpressionParseException {
+		LOG.trace("BEGIN");
+		try {
+			if (!PATTERN_TEXT_START.matcher(text).matches()) {
+				LOG.trace("OK");
+				return null;
+			}
+
+			if (!PATTERN_TEXT.matcher(text).matches()) {
+				throw new ExpressionParseException(position, "Literal is not a text enclosed in \"\"", text);
+			}
+
+			String value = text.substring(1, text.length() - 1);
+			int iPos = 1;
+			if (value.contains("\"")) {
+				StringBuffer buffer = new StringBuffer();
+				boolean escaped = false;
+				char[] chars = value.toCharArray();
+				for (int i = 0; i < chars.length; i++, iPos++) {
+					if (escaped) {
+						buffer.append(chars[i]);
+						continue;
+					}
+					if (chars[i] == '\\') {
+						escaped = true;
+						continue;
+					}
+					if (chars[i] == '"') {
+						throw new ExpressionParseException(position.movePosition(iPos), "Non masked \" in the text",
+								text);
+					}
+					buffer.append(chars[i]);
+				}
+				if (escaped) {
+					throw new ExpressionParseException(position.movePosition(iPos),
+							"Text terminates by escape character", text);
+				}
+				value = buffer.toString();
+			}
+
+			ExpressionText expressionText = new ExpressionText(position, value);
+			LOG.trace("OK");
+			return expressionText;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
 	private Expression parseLiteral(Position position, String text) throws ExpressionParseException {
 		LOG.trace("BEGIN: [" + position.getPosition() + "] '" + text + "'");
 		try {
@@ -368,6 +419,12 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 			}
 
 			Expression expression = parseParentheses(position, text);
+			if (expression != null) {
+				LOG.trace("OK");
+				return expression;
+			}
+
+			expression = parseText(position, text);
 			if (expression != null) {
 				LOG.trace("OK");
 				return expression;
@@ -455,13 +512,47 @@ public class ExpressionParserArithmetic extends ExpressionParserArithmeticFwk im
 		}
 	}
 
-	public static final void main(String[] argv) throws BaseException {
+	public static final void main1(String[] argv) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			String text = "2^(A + 2) + 2.5*B + 3*C/D + (4*E + 5*7*F/(6 + G)) + sin(H) + PAR[1][PAR2][1 + 2*sin(8)]";
 			// String text = "PAR.A1[1][PAR2][1 + 2*sin(8)]";
 			// String text = "PAR[sin(8)]";
 
+			LOG.info("Text: " + text);
+
+			CalculatorMath calculator = new CalculatorMath();
+			calculator.config();
+			ExpressionParserArithmetic parser = new ExpressionParserArithmetic();
+			parser.setCalculator(calculator);
+			parser.config();
+			Expression expression = parser.parseExpression(text);
+
+			LOG.info("Expression: " + text);
+			LOG.info("Formated:   " + expression.toString());
+
+			Map<String, Object> parameters = new HashMap<String, Object>();
+
+			parameters.put("PAR.A1", new Object[] { 0, new Object[] { 0, 0, new Object[] { 0, 0, 4 } } });
+			parameters.put("PAR2", 2.);
+
+			ContextLevel context = new ContextLevel();
+			context.setParameters(parameters);
+
+			Object result = expression.evaluate(context);
+
+			LOG.info("Result:     " + result);
+
+			LOG.trace("OK");
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public static final void main(String[] argv) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			String text = "\"Ahoj\"";
 			LOG.info("Text: " + text);
 
 			CalculatorMath calculator = new CalculatorMath();
