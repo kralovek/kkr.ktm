@@ -17,19 +17,16 @@ public class CalculatorText extends CalculatorTextFwk implements Calculator {
 					+ (arguments != null ? arguments.length : 0));
 		}
 
-		if (!(arguments[0] instanceof String)) {
+		if (arguments[0] == null) {
+			return 0;
+		}
 
+		if (!(arguments[0] instanceof String)) {
 			throw new CalculatorException("Function " + FUNCTION_LENGTH
 					+ " expects argument of type String but it received: " + (String) arguments[0]);
 		}
 
-		int retval;
-		if (arguments[0] != null && !arguments[0].getClass().isArray()) {
-			retval = 1;
-		} else {
-			Object[] array = (Object[]) arguments[0];
-			retval = array.length != 0 ? array.length : 1;
-		}
+		int retval = ((String) arguments[0]).length();
 		return retval;
 	}
 

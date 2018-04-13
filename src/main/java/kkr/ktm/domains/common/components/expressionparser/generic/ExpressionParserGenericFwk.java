@@ -6,7 +6,7 @@ import kkr.ktm.domains.common.components.calculator.Calculator;
 public abstract class ExpressionParserGenericFwk {
 	private boolean configured;
 
-	private static final char DEFAULT_QUOTE = '"';
+	private static final char DEFAULT_QUOTE = '\'';
 
 	protected Calculator calculator;
 	protected Character symbolQuote;

@@ -370,7 +370,8 @@ public class ExpressionParserGeneric extends ExpressionParserGenericFwk implemen
 			}
 
 			if (!PATTERN_TEXT.matcher(text).matches()) {
-				throw new ExpressionParseException(position, "Literal is not a text enclosed in \"\"", text);
+				throw new ExpressionParseException(position,
+						"Literal is not a text enclosed in " + symbolQuote + symbolQuote, text);
 			}
 
 			String value = text.substring(1, text.length() - 1);
