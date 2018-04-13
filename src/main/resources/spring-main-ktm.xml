@@ -185,7 +185,7 @@
 		class="kkr.ktm.domains.common.components.parametersformater.template.ParametersFormatterTemplate">
 		<property name="expressionParser">
 			<bean
-				class="kkr.ktm.domains.common.components.expressionparser.arithmetic.ExpressionParserArithmetic">
+				class="kkr.ktm.domains.common.components.expressionparser.generic.ExpressionParserGeneric">
 				<property name="calculator">
 					<bean
 						class="kkr.ktm.domains.common.components.calculator.byprefix.CalculatorByPrefix">
@@ -199,6 +199,11 @@
 								<entry key="CONTEXT">
 									<bean
 										class="kkr.ktm.domains.common.components.calculator.context.CalculatorContext">
+									</bean>
+								</entry>
+								<entry key="TEXT">
+									<bean
+										class="kkr.ktm.domains.common.components.calculator.text.CalculatorText">
 									</bean>
 								</entry>
 							</map>

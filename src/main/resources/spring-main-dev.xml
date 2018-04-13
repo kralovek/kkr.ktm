@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    "
+	default-init-method="config">
+
+	<bean id="batchDev"
+		class="kkr.ktm.domains.orchestrator.components.batchdev.BatchDev">
+		<property name="expressionParser"
+			ref="expressionParserGeneric"></property>
+	</bean>
+
+	<bean id="expressionParserGeneric"
+		class="kkr.ktm.domains.common.components.expressionparser.generic.ExpressionParserGeneric">
+		<property name="calculator">
+			<bean
+				class="kkr.ktm.domains.common.components.calculator.byprefix.CalculatorByPrefix">
+				<property name="calculators">
+					<map>
+						<entry key="MATH">
+							<bean
+								class="kkr.ktm.domains.common.components.calculator.math.CalculatorMath">
+							</bean>
+						</entry>
+						<entry key="CONTEXT">
+							<bean
+								class="kkr.ktm.domains.common.components.calculator.context.CalculatorContext">
+							</bean>
+						</entry>
+						<entry key="TEXT">
+							<bean
+								class="kkr.ktm.domains.common.components.calculator.text.CalculatorText">
+							</bean>
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="formatterFactory"
+		class="kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType">
+		<property name="formatterFactoryAuto">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
+		</property>
+		<property name="formatterFactoryDate">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.date.FormatterFactoryDate" />
+		</property>
+		<property name="formatterFactoryDecimal">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.decimal.FormatterFactoryDecimal" />
+		</property>
+		<property name="formatterFactoryInteger">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.integer.FormatterFactoryInteger" />
+		</property>
+		<property name="formatterFactoryString">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.string.FormatterFactoryString" />
+		</property>
+		<property name="formatterFactoryBoolean">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
+		</property>
+	</bean>
+
+	<bean id="valueParser"
+		class="kkr.ktm.domains.tests.components.valueparser.generic.ValueParserGeneric">
+		<property name="dateFormats">
+			<list>
+				<value>HH:mm:ss dd/MM/yyyy</value>
+				<value>HH:mm dd/MM/yyyy</value>
+				<value>dd/MM/yyyy</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="valueFormatter"
+		class="kkr.ktm.domains.tests.components.valueformatter.generic.ValueFormatterGeneric">
+		<property name="dateTimeFormat" value="HH:mm:ss dd/MM/yyyy" />
+		<property name="dateFormat" value="dd/MM/yyyy" />
+		<property name="decimalPoint" value="." />
+	</bean>
+
+</beans>
