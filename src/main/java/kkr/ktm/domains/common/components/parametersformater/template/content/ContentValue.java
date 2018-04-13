@@ -9,7 +9,7 @@ import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.context.Context;
 import kkr.ktm.domains.common.components.expressionparser.Expression;
 import kkr.ktm.domains.common.components.expressionparser.ExpressionParser;
-import kkr.ktm.domains.common.components.expressionparser.arithmetic.error.ExpressionEvaluateException;
+import kkr.ktm.domains.common.components.expressionparser.generic.error.ExpressionEvaluateException;
 import kkr.ktm.domains.common.components.formatter.Formatter;
 import kkr.ktm.domains.common.components.formatter.FormatterException;
 import kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType;

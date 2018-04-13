@@ -24,13 +24,18 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 	public static final String ATTR_EXPRESSION2 = "EXPRESSION2";
 	public static final String ATTR_OPERATOR = "OPERATOR";
 
+	public static enum OperatorType {
+		BILATERAL, UNILATERAL
+	}
+
 	public static enum Operator {
-		EQ, NE, LT, LE, GT, GE
+		EQ, NE, LT, LE, GT, GE, EMPTY, NEMPTY
 	}
 
 	private Expression expression1;
 	private Expression expression2;
 	private Operator operator;
+	private OperatorType operatorType;
 
 	private Content contentTrue;
 	private Content contentFalse;
@@ -43,6 +48,12 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 			Map<String, String> attributesLocal = new HashMap<String, String>(attributes);
 
 			//
+			// OPERATOR
+			//
+			operator = attributeEnum(true, ATTR_OPERATOR, attributesLocal.remove(ATTR_OPERATOR), Operator.values());
+			operatorType = operatorType(operator);
+
+			//
 			// EXPRESSION1
 			//
 			expression1 = attributeExpression(true, ATTR_EXPRESSION1, attributesLocal.remove(ATTR_EXPRESSION1),
@@ -51,18 +62,32 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 			//
 			// EXPRESSION2
 			//
-			expression2 = attributeExpression(true, ATTR_EXPRESSION2, attributesLocal.remove(ATTR_EXPRESSION2),
-					expressionParser);
+			expression2 = attributeExpression(operatorType == OperatorType.BILATERAL, ATTR_EXPRESSION2,
+					attributesLocal.remove(ATTR_EXPRESSION2), expressionParser);
 
-			//
-			// OPERATOR
-			//
-			operator = attributeEnum(true, ATTR_OPERATOR, attributesLocal.remove(ATTR_OPERATOR), Operator.values());
+			if (operatorType != OperatorType.BILATERAL) {
+				throw new ContentParseException(position,
+						"Attribute [" + TAG + " " + ATTR_EXPRESSION2 + "] may not be used with UNILATERAL operator");
+			}
 
 			checkUnknownAttributes(TAG, attributesLocal);
 			LOG.trace("OK");
 		} finally {
 			LOG.trace("END");
+		}
+	}
+
+	private OperatorType operatorType(Operator operator) {
+		switch (operator) {
+		case EQ:
+		case NE:
+		case LT:
+		case LE:
+		case GT:
+		case GE:
+			return OperatorType.BILATERAL;
+		default:
+			return OperatorType.UNILATERAL;
 		}
 	}
 
@@ -85,7 +110,35 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 		}
 	}
 
-	public String evaluate(Context context) throws ContentEvaluateException {
+	private boolean evaluateOperatorUnilateral(Context context) throws ContentEvaluateException {
+		Object object;
+		try {
+			object = expression1.evaluate(context);
+		} catch (Exception ex) {
+			throw new ContentEvaluateException(position, "Cannot evaluate " + ATTR_EXPRESSION1 + ": "
+					+ expression1.toString() + " Problem: " + ex.getMessage(), ex);
+		}
+
+		boolean condition = true;
+		try {
+			switch (operator) {
+			case EMPTY:
+				condition = evaluateIsEmpty(object);
+				break;
+			case NEMPTY:
+				condition = !evaluateIsEmpty(object);
+				break;
+			default:
+				throw new IllegalStateException(
+						"Unsupported value of [" + TAG + " " + ATTR_OPERATOR + "]: " + operator);
+			}
+		} catch (IllegalArgumentException ex) {
+			throw new ContentEvaluateException(position, "Cannot compare expressions. Problem: " + ex.getMessage(), ex);
+		}
+		return condition;
+	}
+
+	private boolean evaluateOperatorBilateral(Context context) throws ContentEvaluateException {
 		Object object1;
 		Object object2;
 		try {
@@ -129,6 +182,24 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 		} catch (IllegalArgumentException ex) {
 			throw new ContentEvaluateException(position, "Cannot compare expressions. Problem: " + ex.getMessage(), ex);
 		}
+		return condition;
+	}
+
+	public String evaluate(Context context) throws ContentEvaluateException {
+		boolean condition;
+
+		switch (operatorType) {
+		case UNILATERAL:
+			condition = evaluateOperatorUnilateral(context);
+			break;
+
+		case BILATERAL:
+			condition = evaluateOperatorBilateral(context);
+			break;
+
+		default:
+			throw new IllegalStateException("Unsupported operatorType: " + operatorType);
+		}
 
 		if (condition) {
 			if (contentTrue != null) {
@@ -143,6 +214,10 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 				return "";
 			}
 		}
+	}
+
+	private boolean evaluateIsEmpty(Object value) {
+		return value == null || value instanceof String && ((String) value).isEmpty();
 	}
 
 	public String toString() {
