@@ -1,7 +1,5 @@
 package kkr.ktm.domains.common.components.diffmanager.database.trigger;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,25 +8,15 @@ import kkr.common.errors.ConfigurationException;
 import kkr.ktm.utils.UtilsKtm;
 
 public abstract class DiffManagerDatabaseTriggerFwk {
-	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-
 	private boolean configured;
 	protected String code;
 	protected List<TableInfo> tableInfos;
 	protected DataSource dataSource;
 
-	private String dateFormat;
-	protected DateFormat patternDate;
-
 	public void config() throws ConfigurationException {
 		configured = false;
 		if (tableInfos == null) {
 			tableInfos = new ArrayList<TableInfo>();
-		}
-		if (dateFormat != null) {
-			patternDate = new SimpleDateFormat(dateFormat);
-		} else {
-			patternDate = new SimpleDateFormat(DATE_FORMAT);
 		}
 		code = UtilsKtm.checkEntityName(code, "code");
 		configured = true;
@@ -62,13 +50,5 @@ public abstract class DiffManagerDatabaseTriggerFwk {
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
 	}
 }

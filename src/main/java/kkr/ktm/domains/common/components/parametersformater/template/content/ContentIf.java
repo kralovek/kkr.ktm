@@ -65,7 +65,7 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 			expression2 = attributeExpression(operatorType == OperatorType.BILATERAL, ATTR_EXPRESSION2,
 					attributesLocal.remove(ATTR_EXPRESSION2), expressionParser);
 
-			if (operatorType != OperatorType.BILATERAL) {
+			if (expression2 != null && operatorType != OperatorType.BILATERAL) {
 				throw new ContentParseException(position,
 						"Attribute [" + TAG + " " + ATTR_EXPRESSION2 + "] may not be used with UNILATERAL operator");
 			}
@@ -225,7 +225,9 @@ public class ContentIf extends ContentTagBase implements Content, Open {
 
 		attributes.put(ATTR_OPERATOR, operator.toString());
 		attributes.put(ATTR_EXPRESSION1, expression1.toString());
-		attributes.put(ATTR_EXPRESSION2, expression2.toString());
+		if (expression2 != null) {
+			attributes.put(ATTR_EXPRESSION2, expression2.toString());
+		}
 
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(toStringTag(attributes));

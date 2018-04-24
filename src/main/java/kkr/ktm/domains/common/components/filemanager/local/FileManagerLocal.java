@@ -13,18 +13,16 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.log4j.Logger;
 
-import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
 import kkr.common.errors.TechnicalException;
+import kkr.common.utils.UtilsFile;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 
 public class FileManagerLocal extends FileManagerLocalFwk implements FileManager {
-	private static final Logger LOG = Logger
-			.getLogger(FileManagerLocal.class);
+	private static final Logger LOG = Logger.getLogger(FileManagerLocal.class);
 
-
-	public void contentToFile(String content, String filename, String encoding,
-			String dir) throws BaseException {
+	public void contentToFile(String content, String filename, String encoding, String dir) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -32,8 +30,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 			File file = new File(dirTarget, filename);
 			contentToFile(content, file, encoding);
 
-			File fileTrace = generateTraceFile(content, new Date(), filename,
-					encoding);
+			File fileTrace = generateTraceFile(content, new Date(), filename, encoding);
 			if (fileTrace != null) {
 				contentToFile(content, fileTrace, encoding);
 			}
@@ -44,8 +41,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 		}
 	}
 
-	public void contentToGzFile(String content, String filename,
-			String encoding, String dir) throws BaseException {
+	public void contentToGzFile(String content, String filename, String encoding, String dir) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -53,8 +49,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 			File file = new File(dirTarget, filename);
 			contentToGzFile(content, file, encoding);
 
-			File fileTrace = generateTraceFile(content, new Date(), filename,
-					encoding);
+			File fileTrace = generateTraceFile(content, new Date(), filename, encoding);
 			if (fileTrace != null) {
 				contentToGzFile(content, fileTrace, encoding);
 			}
@@ -65,13 +60,34 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 		}
 	}
 
-	private void contentToFile(String content, File file, String encoding)
-			throws BaseException {
+	public String fileToContent(String filename, String encoding, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			throw new TechnicalException("fileToContent is not implemented");
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public boolean isFile(String filename, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			File file = new File(dir, filename);
+			boolean retval = file.isFile();
+			LOG.trace("OK");
+			return retval;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	private void contentToFile(String content, File file, String encoding) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			FileOutputStream fos = null;
 			OutputStreamWriter osw = null;
 			try {
+				UtilsFile.createFileDirectory(file);
 				fos = new FileOutputStream(file);
 				if ("UTF-8".equals(encoding)) {
 					writeBomUtf8(fos);
@@ -86,8 +102,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 				fos.close();
 				fos = null;
 			} catch (IOException ex) {
-				throw new TechnicalException("Impossible to create the file: "
-						+ file.getAbsolutePath(), ex);
+				throw new TechnicalException("Impossible to create the file: " + file.getAbsolutePath(), ex);
 			} finally {
 				closeResource(osw);
 				closeResource(fos);
@@ -98,8 +113,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 		}
 	}
 
-	private void contentToGzFile(String content, File file, String encoding)
-			throws BaseException {
+	private void contentToGzFile(String content, File file, String encoding) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			FileOutputStream fos = null;
@@ -125,8 +139,7 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 				fos.close();
 				fos = null;
 			} catch (IOException ex) {
-				throw new TechnicalException("Impossible to create the file: "
-						+ file.getAbsolutePath(), ex);
+				throw new TechnicalException("Impossible to create the file: " + file.getAbsolutePath(), ex);
 			} finally {
 				closeResource(osw);
 				closeResource(gzos);
@@ -152,33 +165,27 @@ public class FileManagerLocal extends FileManagerLocalFwk implements FileManager
 		fos.flush();
 	}
 
-	private File generateTraceFile(String content, Date date, String filename,
-			String encoding) throws BaseException {
+	private File generateTraceFile(String content, Date date, String filename, String encoding) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			File file = null;
 			if (traceDataFile != null) {
-				String traceDataFileAdapted = traceDataFile.replace("%0",
-						filename);
+				String traceDataFileAdapted = traceDataFile.replace("%0", filename);
 
 				DateFormat traceDataPattern = null;
 				try {
-					traceDataPattern = new SimpleDateFormat(
-							traceDataFileAdapted);
+					traceDataPattern = new SimpleDateFormat(traceDataFileAdapted);
 				} catch (Exception ex) {
-					throw new ConfigurationException(getClass().getSimpleName()
-							+ ": Parameter traceDataFile has bad value: "
-							+ ex.getMessage());
+					throw new ConfigurationException(
+							getClass().getSimpleName() + ": Parameter traceDataFile has bad value: " + ex.getMessage());
 				}
 				String path = traceDataPattern.format(date);
 				file = new File(path);
 				LOG.debug("Logging the Data file to: " + file.toString());
-				if (file.getParentFile() != null
-						&& !file.getParentFile().isDirectory()
+				if (file.getParentFile() != null && !file.getParentFile().isDirectory()
 						&& !file.getParentFile().mkdirs()) {
 					throw new TechnicalException(
-							"Cannot create the directory: "
-									+ file.getParentFile().getAbsolutePath());
+							"Cannot create the directory: " + file.getParentFile().getAbsolutePath());
 				}
 
 				contentToFile(content, file, encoding);

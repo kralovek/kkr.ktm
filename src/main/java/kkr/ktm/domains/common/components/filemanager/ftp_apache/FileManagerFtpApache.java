@@ -21,47 +21,42 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 
-import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
 import kkr.common.errors.TechnicalException;
 import kkr.common.utils.UtilsFile;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
 public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements FileManager {
 	private static final Logger LOG = Logger.getLogger(FileManagerFtpApache.class);
 
-	public void contentToFile(String content, String filename, String encoding,
-			String dir) throws BaseException {
+	public void contentToFile(String content, String filename, String encoding, String dir) throws BaseException {
 		contentToFile(content, filename, encoding, dir, false);
 	}
 
-	public void contentToGzFile(String content, String filename,
-			String encoding, String dir) throws BaseException {
+	public void contentToGzFile(String content, String filename, String encoding, String dir) throws BaseException {
 		contentToFile(content, filename, encoding, dir, true);
 	}
 
-	private void contentToFile(String content, String filename,
-			String encoding, String dir, boolean gz) throws BaseException {
+	private void contentToFile(String content, String filename, String encoding, String dir, boolean gz)
+			throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 			generateTraceFile(content, new Date(), filename, encoding);
 
-			FTPClient client = UtilsFtp.connect(ftpHost, ftpPort, ftpLogin,
-					ftpPassword);
+			FTPClient client = UtilsFtp.connect(ftpHost, ftpPort, ftpLogin, ftpPassword);
 
 			try {
 				changeDirectory(client, dir);
 
 				try {
 					if (!client.setFileType(FTP.BINARY_FILE_TYPE)) {
-						throw new TechnicalException(
-								"Impossible to change the tranfer type");
+						throw new TechnicalException("Impossible to change the tranfer type");
 					}
 				} catch (IOException ex) {
-					throw new TechnicalException(
-							"Impossible to change the tranfer type", ex);
+					throw new TechnicalException("Impossible to change the tranfer type", ex);
 				}
 
 				InputStream inputStream = null;
@@ -70,25 +65,20 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 				Reader reader = null;
 				try {
 					try {
-						inputStream = new ByteArrayInputStream(
-								content.getBytes());
+						inputStream = new ByteArrayInputStream(content.getBytes());
 
-						reader = new BufferedReader(new InputStreamReader(
-								inputStream, encoding), 8 * 1024);
+						reader = new BufferedReader(new InputStreamReader(inputStream, encoding), 8 * 1024);
 
 					} catch (IOException ex) {
-						throw new TechnicalException(
-								"Impossible to read the content string", ex);
+						throw new TechnicalException("Impossible to read the content string", ex);
 					}
 
 					try {
 						outputStream = client.appendFileStream(filename);
 
 						if (outputStream == null) {
-							throw new TechnicalException(
-									"Impossible to create the file: " + filename
-											+ " in the remote directory: " + dir + ". Connection problem"
-									);
+							throw new TechnicalException("Impossible to create the file: " + filename
+									+ " in the remote directory: " + dir + ". Connection problem");
 						}
 
 						if (gz) {
@@ -99,13 +89,10 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 							writeBomUtf8(outputStream);
 						}
 
-						writer = new BufferedWriter(new OutputStreamWriter(
-								outputStream, encoding), 8 * 1024);
+						writer = new BufferedWriter(new OutputStreamWriter(outputStream, encoding), 8 * 1024);
 					} catch (IOException ex) {
 						throw new TechnicalException(
-								"Impossible to create the file: " + filename
-										+ " in the remote directory: " + dir,
-								ex);
+								"Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
 					}
 
 					try {
@@ -121,9 +108,7 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 						inputStream = null;
 					} catch (IOException ex) {
 						throw new TechnicalException(
-								"Impossible to copy the local file: "
-										+ filename + " to remote directory: "
-										+ dir);
+								"Impossible to copy the local file: " + filename + " to remote directory: " + dir);
 					}
 				} finally {
 					closeRessource(writer);
@@ -147,17 +132,13 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 		}
 	}
 
-	private void changeDirectory(FTPClient client, String dirRemote)
-			throws BaseException {
+	private void changeDirectory(FTPClient client, String dirRemote) throws BaseException {
 		try {
 			if (!client.changeWorkingDirectory(dirRemote)) {
-				throw new TechnicalException(
-						"The remote directory does not exist: " + dirRemote);
+				throw new TechnicalException("The remote directory does not exist: " + dirRemote);
 			}
 		} catch (IOException ex) {
-			throw new TechnicalException(
-					"Imposible to change the remote directory to: " + dirRemote,
-					ex);
+			throw new TechnicalException("Imposible to change the remote directory to: " + dirRemote, ex);
 		}
 	}
 
@@ -180,33 +161,27 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 		}
 	}
 
-	private File generateTraceFile(String content, Date date, String filename,
-			String encoding) throws BaseException {
+	private File generateTraceFile(String content, Date date, String filename, String encoding) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			File file = null;
 			if (traceDataFile != null) {
-				String traceDataFileAdapted = traceDataFile.replace("%0",
-						filename);
+				String traceDataFileAdapted = traceDataFile.replace("%0", filename);
 
 				DateFormat traceDataPattern = null;
 				try {
-					traceDataPattern = new SimpleDateFormat(
-							traceDataFileAdapted);
+					traceDataPattern = new SimpleDateFormat(traceDataFileAdapted);
 				} catch (Exception ex) {
-					throw new ConfigurationException(getClass().getSimpleName()
-							+ ": Parameter traceDataFile has bad value: "
-							+ ex.getMessage());
+					throw new ConfigurationException(
+							getClass().getSimpleName() + ": Parameter traceDataFile has bad value: " + ex.getMessage());
 				}
 				String path = traceDataPattern.format(date);
 				file = new File(path);
 				LOG.debug("Logging the Data file to: " + file.toString());
-				if (file.getParentFile() != null
-						&& !file.getParentFile().isDirectory()
+				if (file.getParentFile() != null && !file.getParentFile().isDirectory()
 						&& !file.getParentFile().mkdirs()) {
 					throw new TechnicalException(
-							"Cannot create the directory: "
-									+ file.getParentFile().getAbsolutePath());
+							"Cannot create the directory: " + file.getParentFile().getAbsolutePath());
 				}
 
 				UtilsFile.contentToFile(content, file);
@@ -214,6 +189,24 @@ public class FileManagerFtpApache extends FileManagerFtpApacheFwk implements Fil
 
 			LOG.trace("OK");
 			return file;
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public String fileToContent(String filename, String encoding, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			throw new TechnicalException("fileToContent is not implemented");
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public boolean isFile(String filename, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			throw new TechnicalException("isFile is not implemented");
 		} finally {
 			LOG.trace("END");
 		}

@@ -1,9 +1,8 @@
 package kkr.ktm.domains.common.components.templateloader;
 
 import kkr.common.errors.BaseException;
-import kkr.ktm.domains.tests.data.Test;
 
 public interface TemplateLoader {
 
-	public String loadTemplate(Test test) throws BaseException;
+	public String loadTemplate(String name) throws BaseException;
 }

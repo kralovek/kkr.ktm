@@ -26,10 +26,10 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
-import kkr.ktm.domains.common.components.filemanager.FileManager;
 import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
 import kkr.common.errors.TechnicalException;
+import kkr.ktm.domains.common.components.filemanager.FileManager;
 
 public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileManager {
 	private static final Logger LOG = Logger.getLogger(FileManagerSFtpJsch.class);
@@ -42,7 +42,8 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 		contentToFile(content, filename, encoding, dir, true);
 	}
 
-	private void contentToFile(String content, String filename, String encoding, String dir, boolean gz) throws BaseException {
+	private void contentToFile(String content, String filename, String encoding, String dir, boolean gz)
+			throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -98,13 +99,15 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 
 						writer = new BufferedWriter(new OutputStreamWriter(outputStream, encoding), 8 * 1024);
 					} catch (IOException ex) {
-						throw new TechnicalException("Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
+						throw new TechnicalException(
+								"Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
 					}
 
 					try {
 						copyFiles(reader, writer);
 					} catch (IOException ex) {
-						throw new TechnicalException("Impossible to copy the local file: " + filename + " to remote directory: " + dir);
+						throw new TechnicalException(
+								"Impossible to copy the local file: " + filename + " to remote directory: " + dir);
 					}
 
 					LOG.trace("File sent");
@@ -137,7 +140,8 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 					try {
 						sftpChannel.get(filename, fileTrace.getAbsolutePath());
 					} catch (SftpException ex) {
-						throw new TechnicalException("Cannot create the trace file: " + fileTrace.getAbsolutePath(), ex);
+						throw new TechnicalException("Cannot create the trace file: " + fileTrace.getAbsolutePath(),
+								ex);
 					}
 				}
 
@@ -146,11 +150,14 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 				session.disconnect();
 				session = null;
 			} catch (SftpException ex) {
-				throw new TechnicalException("Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
+				throw new TechnicalException(
+						"Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
 			} catch (JSchException ex) {
-				throw new TechnicalException("Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
+				throw new TechnicalException(
+						"Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
 			} catch (IOException ex) {
-				throw new TechnicalException("Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
+				throw new TechnicalException(
+						"Impossible to create the file: " + filename + " in the remote directory: " + dir, ex);
 			} finally {
 				if (sftpChannel != null) {
 					sftpChannel.disconnect();
@@ -161,6 +168,24 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 			}
 
 			LOG.trace("OK");
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public boolean isFile(String filename, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			throw new TechnicalException("isFile is not implemented");
+		} finally {
+			LOG.trace("END");
+		}
+	}
+
+	public String fileToContent(String filename, String encoding, String dir) throws BaseException {
+		LOG.trace("BEGIN");
+		try {
+			throw new TechnicalException("fileToContent is not implemented");
 		} finally {
 			LOG.trace("END");
 		}
@@ -204,13 +229,16 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 				try {
 					traceDataPattern = new SimpleDateFormat(traceDataFileAdapted);
 				} catch (Exception ex) {
-					throw new ConfigurationException(getClass().getSimpleName() + ": Parameter traceDataFile has bad value: " + ex.getMessage());
+					throw new ConfigurationException(
+							getClass().getSimpleName() + ": Parameter traceDataFile has bad value: " + ex.getMessage());
 				}
 				String path = traceDataPattern.format(date);
 				file = new File(path);
 				LOG.debug("Logging the Data file to: " + file.toString());
-				if (file.getParentFile() != null && !file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) {
-					throw new TechnicalException("Cannot create the directory: " + file.getParentFile().getAbsolutePath());
+				if (file.getParentFile() != null && !file.getParentFile().isDirectory()
+						&& !file.getParentFile().mkdirs()) {
+					throw new TechnicalException(
+							"Cannot create the directory: " + file.getParentFile().getAbsolutePath());
 				}
 			}
 
@@ -222,7 +250,7 @@ public class FileManagerSFtpJsch extends FileManagerSFtpJschFwk implements FileM
 	}
 
 	private static void writeBomUtf8(OutputStream fos) throws IOException {
-		fos.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
+		fos.write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 		fos.flush();
 	}
 }

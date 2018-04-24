@@ -17,34 +17,33 @@ public class TableInfoFwk {
 	protected List<String> columnsPK;
 
 	protected Boolean joinStatus;
-	
+
 	public void config() throws ConfigurationException {
 		configured = false;
 		if (schema == null) {
 			// OK
 		}
 		if (name == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter name is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'name' is not configured");
 		}
 		if (ktmSchema == null) {
 			ktmSchema = schema;
 		}
+
+		if (ktmName != null && ktmNamePrefix != null) {
+			throw new ConfigurationException(getClass().getSimpleName()
+					+ ": Only one of parameters 'ktmName' and 'ktmNamePrefix' may be configured");
+		}
 		if (ktmNamePrefix != null) {
 			ktmName = ktmNamePrefix + name;
-		} else {
-			ktmName = name;
 		}
-		if (name == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter name is not configured");
+		if (ktmName == null) {
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'ktmName' is not configured");
 		}
 		if (columnsPK == null) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter columnsPK is not configured");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter 'columnsPK' is not configured");
 		} else if (columnsPK.size() == 0) {
-			throw new ConfigurationException(getClass().getSimpleName()
-					+ ": Parameter-list columnsPK may not be empty");
+			throw new ConfigurationException(getClass().getSimpleName() + ": Parameter-list 'columnsPK' is empty");
 		}
 		if (joinStatus == null) {
 			joinStatus = false;
@@ -54,8 +53,7 @@ public class TableInfoFwk {
 
 	public void testConfigured() {
 		if (!configured) {
-			throw new IllegalStateException(this.getClass().getName()
-					+ ": The component is not configured");
+			throw new IllegalStateException(this.getClass().getName() + ": The component is not configured");
 		}
 	}
 
@@ -89,6 +87,14 @@ public class TableInfoFwk {
 
 	public void setKtmSchema(String ktmSchema) {
 		this.ktmSchema = ktmSchema;
+	}
+
+	public String getKtmName() {
+		return ktmName;
+	}
+
+	public void setKtmName(String ktmName) {
+		this.ktmName = ktmName;
 	}
 
 	public String getKtmNamePrefix() {

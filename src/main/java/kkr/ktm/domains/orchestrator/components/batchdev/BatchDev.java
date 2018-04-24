@@ -12,7 +12,7 @@ public class BatchDev extends BatchDevFwk {
 	public void run() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			String text = "TEXT.LENGTH('abcd')";
+			String text = "TEXT.CONCAT('abcd', 'xyz', 123)";
 
 			Expression expression = expressionParser.parseExpression(text);
 

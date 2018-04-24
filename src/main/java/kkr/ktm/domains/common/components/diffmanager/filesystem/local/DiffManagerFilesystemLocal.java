@@ -20,7 +20,6 @@ import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffEntityI
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexImpl;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
-import kkr.ktm.domains.tests.data.Test;
 
 public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk implements DiffManager {
 	private static final Logger LOG = Logger.getLogger(DiffManagerFilesystemLocal.class);
@@ -33,7 +32,7 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 		}
 	};
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -123,7 +122,7 @@ public class DiffManagerFilesystemLocal extends DiffManagerFilesystemLocalFwk im
 		return null;
 	}
 
-	public List<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public List<DiffEntity> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();

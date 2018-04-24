@@ -28,7 +28,6 @@ import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.database.data.DiffEntityImpl;
 import kkr.ktm.domains.common.components.diffmanager.database.data.DiffItemImpl;
-import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.utils.database.ConstantsDatabase;
 
 public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
@@ -91,7 +90,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 	}
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> entities) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Collection<DiffEntity> entities) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -124,7 +123,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 		}
 	}
 
-	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public Collection<DiffEntity> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -226,8 +225,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 	}
 
 	private String getTriggeredTableSchemaName(TableInfo tableInfo) {
-		return (tableInfo.getKtmSchema() != null ? tableInfo.getKtmSchema() + "." : "") + tableInfo.getKtmNamePrefix()
-				+ tableInfo.getName();
+		return (tableInfo.getKtmSchema() != null ? tableInfo.getKtmSchema() + "." : "") + tableInfo.getKtmName();
 	}
 
 	private void cleanTriggeredTable(DiffIndexImpl index, TableInfo tableInfo, Connection connection)
@@ -446,7 +444,7 @@ public class DiffManagerDatabaseTrigger extends DiffManagerDatabaseTriggerFwk
 	}
 
 	private String toString(Timestamp timestamp) {
-		return "to_timestamp('" + DATE_FORMAT_TODATE.format(timestamp) + "','YYYYMMDD HH24MISS FF')";
+		return "TO_TIMESTAMP('" + DATE_FORMAT_TODATE.format(timestamp) + "','YYYYMMDD HH24MISS FF')";
 	}
 
 	private boolean isPK(TableInfo tableInfo, String column) {

@@ -29,7 +29,6 @@ import kkr.ktm.domains.common.components.diffmanager.data.DiffItem;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffStatus;
 import kkr.ktm.domains.common.components.diffmanager.database.data.DiffEntityImpl;
 import kkr.ktm.domains.common.components.diffmanager.database.data.ItemCruid;
-import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.utils.database.ConstantsDatabase;
 
 public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffManager, ConstantsDatabase {
@@ -38,7 +37,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 
 	private static final DateFormat DATE_FORMAT_TODATE = new SimpleDateFormat("yyyyMMdd HHmmss SSS");
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -82,7 +81,7 @@ public class DiffManagerDatabase extends DiffManagerDatabaseFwk implements DiffM
 		return null;
 	}
 
-	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public Collection<DiffEntity> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();

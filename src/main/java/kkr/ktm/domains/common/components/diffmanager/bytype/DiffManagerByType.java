@@ -10,18 +10,17 @@ import org.apache.log4j.Logger;
 import kkr.common.errors.BaseException;
 import kkr.ktm.domains.common.components.diffmanager.DiffManager;
 import kkr.ktm.domains.common.components.diffmanager.data.DiffEntity;
-import kkr.ktm.domains.tests.data.Test;
 
-public class DiffManagerByType extends DiffManagerByTypeFwk implements DiffManager {
+public class DiffManagerByType extends DiffManagerByTypeFwk {
 	private static final Logger LOG = Logger.getLogger(DiffManagerByType.class);
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(String type, Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Collection<DiffManager> diffManagers = findDiffManagers(test);
+			Collection<DiffManager> diffManagers = findDiffManagers(type);
 			Collection<DiffEntity> retval = new ArrayList<DiffEntity>();
 			for (DiffManager diffManager : diffManagers) {
-				Collection<DiffEntity> diffEntities = diffManager.loadDiffs(test, groupStates);
+				Collection<DiffEntity> diffEntities = diffManager.loadDiffs(groupStates);
 				retval.addAll(diffEntities);
 			}
 			LOG.trace("OK");
@@ -31,13 +30,13 @@ public class DiffManagerByType extends DiffManagerByTypeFwk implements DiffManag
 		}
 	}
 
-	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public Collection<DiffEntity> loadCurrents(String type) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			Collection<DiffManager> diffManagers = findDiffManagers(test);
+			Collection<DiffManager> diffManagers = findDiffManagers(type);
 			Collection<DiffEntity> retval = new ArrayList<DiffEntity>();
 			for (DiffManager diffManager : diffManagers) {
-				Collection<DiffEntity> diffEntities = diffManager.loadCurrents(test);
+				Collection<DiffEntity> diffEntities = diffManager.loadCurrents();
 				retval.addAll(diffEntities);
 			}
 			LOG.trace("OK");
@@ -47,10 +46,10 @@ public class DiffManagerByType extends DiffManagerByTypeFwk implements DiffManag
 		}
 	}
 
-	private Collection<DiffManager> findDiffManagers(Test test) {
+	private Collection<DiffManager> findDiffManagers(String type) {
 		Collection<DiffManager> retval = new ArrayList<DiffManager>();
 		for (Map.Entry<Pattern, DiffManager> entry : diffManagers.entrySet()) {
-			if (entry.getKey().matcher(test.getType()).matches()) {
+			if (entry.getKey().matcher(type).matches()) {
 				retval.add(entry.getValue());
 			}
 		}

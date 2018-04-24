@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
+import kkr.common.utils.UtilsNumber;
 import kkr.ktm.domains.common.components.calculator.Calculator;
 import kkr.ktm.domains.common.components.calculator.byprefix.CalculatorByPrefix;
 import kkr.ktm.domains.common.components.calculator.context.CalculatorContext;
@@ -240,7 +241,10 @@ public class ExpressionParserGeneric extends ExpressionParserGenericFwk implemen
 			}
 
 			double value = Double.parseDouble(text);
-			Expression expressionNumber = new ExpressionNumber(position, value);
+
+			Number number = UtilsNumber.reduceNumber(value);
+
+			Expression expressionNumber = new ExpressionNumber(position, number);
 			LOG.trace("OK");
 			return expressionNumber;
 		} finally {

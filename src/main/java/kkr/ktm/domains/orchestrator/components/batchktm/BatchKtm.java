@@ -1,4 +1,5 @@
 package kkr.ktm.domains.orchestrator.components.batchktm;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import org.apache.log4j.Logger;
 
 import kkr.common.errors.BaseException;
+import kkr.common.utils.UtilsJson;
 import kkr.common.utils.UtilsString;
 import kkr.ktm.domains.excel.data.Status;
 import kkr.ktm.domains.tests.data.TestInput;
@@ -22,6 +24,7 @@ public class BatchKtm extends BatchKtmFwk {
 	private static final String PARAM_OUT_TIME_BEGIN = "TIME.BEGIN";
 	private static final String PARAM_OUT_TIME_END = "TIME.END";
 	private static final String PARAM_OUT_TIME_DELTA = "TIME.DELTA";
+	private static final String PARAM_OUT_JSON = "JSON";
 
 	public void run(String batchId, String source) throws BaseException {
 		LOG.trace("BEGIN");
@@ -50,7 +53,8 @@ public class BatchKtm extends BatchKtmFwk {
 				LOG.info("..................................................................");
 
 				Date dateBegin = new Date();
-				LOG.info(DATE_FORMAT.format(dateBegin) + " Test: (" + iTest + "/" + testsCount + ") " + testInput.toString());
+				LOG.info(DATE_FORMAT.format(dateBegin) + " Test: (" + iTest + "/" + testsCount + ") "
+						+ testInput.toString());
 
 				if (groupsSkip.contains(testInput.getGroup())) {
 					LOG.info(DATE_FORMAT.format(dateBegin) + " - SKIP -");
@@ -62,7 +66,7 @@ public class BatchKtm extends BatchKtmFwk {
 					TestOutput testOutput = testLancer.lanceTest(testInput);
 
 					if (testOutput == null) {
-						throw new IllegalStateException("Testlancer returned NULL TestOutput");
+						throw new IllegalStateException("Testlancer returned TestOutput NULL");
 					}
 
 					Date dateEnd = new Date();
@@ -71,33 +75,35 @@ public class BatchKtm extends BatchKtmFwk {
 					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_BEGIN, dateBegin);
 					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_END, dateEnd);
 					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_TIME_DELTA, dateDelta);
+					String JSON = UtilsJson.toJSON(testOutput);
+					testOutput.getDataOutput().put(sysPrefix + PARAM_OUT_JSON, JSON);
 
 					Status status = testReporter.reportTest(testOutput, batchId);
 
 					switch (status) {
-						case OK :
-							resultOk++;
-							LOG.info(DATE_FORMAT.format(dateBegin) + " *  OK  *");
-							break;
+					case OK:
+						resultOk++;
+						LOG.info(DATE_FORMAT.format(dateBegin) + " *  OK  *");
+						break;
 
-						case KO :
-							resultKo++;
-							LOG.info(DATE_FORMAT.format(dateBegin) + "### KO ###");
-							if (testInput.getGroup() != null) {
-								groupsSkip.add(testInput.getGroup());
-							}
-							break;
+					case KO:
+						resultKo++;
+						LOG.info(DATE_FORMAT.format(dateBegin) + "### KO ###");
+						if (testInput.getGroup() != null) {
+							groupsSkip.add(testInput.getGroup());
+						}
+						break;
 
-						case SKIP :
-							resultSkip++;
-							LOG.info(DATE_FORMAT.format(dateBegin) + " - SKIP - ");
-							if (testInput.getGroup() != null) {
-								groupsSkip.add(testInput.getGroup());
-							}
-							break;
+					case SKIP:
+						resultSkip++;
+						LOG.info(DATE_FORMAT.format(dateBegin) + " - SKIP - ");
+						if (testInput.getGroup() != null) {
+							groupsSkip.add(testInput.getGroup());
+						}
+						break;
 
-						default :
-							throw new IllegalStateException("Unsupported DiffStatus: " + status);
+					default:
+						throw new IllegalStateException("Unsupported DiffStatus: " + status);
 					}
 
 					LOG.info(dateDelta);

@@ -23,7 +23,6 @@ import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexIm
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.base.DiffManagerFtpBaseFwk;
-import kkr.ktm.domains.tests.data.Test;
 import kkr.ktm.utils.ftp.UtilsFtp;
 
 public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
@@ -35,7 +34,7 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 		}
 	};
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -73,14 +72,16 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 			long date = groupState != null ? ((DiffIndexImpl) groupState.getLastIndex()).getMs() : 0;
 			List<DiffItem> diffItems = null;
 			if (dirInfo.isContent() && groupState != null && groupState.getItems() != null) {
-				Collection<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+				Collection<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0,
+						dirInfo.getPattern());
 
 				diffItems = new ArrayList<DiffItem>();
 
 				for (DiffItem itemState : groupState.getItems()) {
 					DiffItemImpl existingItem = findItem(existingItems, itemState.getName());
 					if (existingItem != null) {
-						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex()).getMs()) {
+						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex())
+								.getMs()) {
 							existingItems.remove(existingItem);
 						} else {
 							existingItem.setStatus(DiffStatus.UPD);
@@ -94,7 +95,8 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 				diffItems.addAll(existingItems);
 				Collections.sort(diffItems, comparatorItem);
 			} else {
-				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date, dirInfo.getPattern());
+				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date,
+						dirInfo.getPattern());
 				diffItems = new ArrayList<DiffItem>();
 				diffItems.addAll(existingItems);
 			}
@@ -121,7 +123,7 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 		return null;
 	}
 
-	public List<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public List<DiffEntity> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -160,7 +162,8 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 	private DiffEntity loadCurrent(FTPClient client, DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0,
+					dirInfo.getPattern());
 			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
@@ -172,7 +175,8 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 		}
 	}
 
-	private static List<DiffItemImpl> getItems(FTPClient client, String dirRoot, String dir, long index, Pattern pattern) throws BaseException {
+	private static List<DiffItemImpl> getItems(FTPClient client, String dirRoot, String dir, long index,
+			Pattern pattern) throws BaseException {
 		List<DiffItemImpl> items = new ArrayList<DiffItemImpl>();
 
 		FTPFile[] files = null;
@@ -231,8 +235,8 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 		return null;
 	}
 
-	private static long getLastModifiedDirectory(FTPClient client, String dirRoot, String dir, long lastModified, Pattern pattern)
-			throws BaseException {
+	private static long getLastModifiedDirectory(FTPClient client, String dirRoot, String dir, long lastModified,
+			Pattern pattern) throws BaseException {
 
 		FTPFile[] files = null;
 		try {
@@ -254,7 +258,8 @@ public class DiffManagerFtpApache extends DiffManagerFtpBaseFwk {
 					LOG.debug("Ignored file: " + file);
 					continue;
 				}
-				lastModified = lastModified >= file.getTimestamp().getTimeInMillis() ? lastModified : file.getTimestamp().getTimeInMillis();
+				lastModified = lastModified >= file.getTimestamp().getTimeInMillis() ? lastModified
+						: file.getTimestamp().getTimeInMillis();
 			} else if (file.isDirectory()) {
 				String path = dir + file.getName() + PATH_SEPARATOR;
 				long lastModifiedLocal = getLastModifiedDirectory(client, dirRoot, path, lastModified, pattern);

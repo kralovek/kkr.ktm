@@ -29,7 +29,6 @@ import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffIndexIm
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DiffItemImpl;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.data.DirInfo;
 import kkr.ktm.domains.common.components.diffmanager.filesystem.ftp.base.DiffManagerFtpBase;
-import kkr.ktm.domains.tests.data.Test;
 
 public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 	private static final String UNIX_PATH_SEPARATOR = "/";
@@ -63,7 +62,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 		}
 	}
 
-	public Collection<DiffEntity> loadDiffs(Test test, Collection<DiffEntity> groupStates) throws BaseException {
+	public Collection<DiffEntity> loadDiffs(Collection<DiffEntity> groupStates) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -98,14 +97,16 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 			long date = groupState != null ? ((DiffIndexImpl) groupState.getLastIndex()).getMs() : 0;
 			List<DiffItem> diffItems = null;
 			if (dirInfo.isContent() && groupState != null && groupState.getItems() != null) {
-				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), 0,
+						dirInfo.getPattern());
 
 				diffItems = new ArrayList<DiffItem>();
 
 				for (DiffItem itemState : groupState.getItems()) {
 					DiffItemImpl existingItem = findItem(existingItems, itemState.getName());
 					if (existingItem != null) {
-						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex()).getMs()) {
+						if (((DiffIndexImpl) existingItem.getIndex()).getMs() <= ((DiffIndexImpl) itemState.getIndex())
+								.getMs()) {
 							existingItems.remove(existingItem);
 						} else {
 							existingItem.setStatus(DiffStatus.UPD);
@@ -119,7 +120,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 				diffItems.addAll(existingItems);
 				Collections.sort(diffItems, comparatorItem);
 			} else {
-				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date, dirInfo.getPattern());
+				List<DiffItemImpl> existingItems = getItems(client, dirInfo.getPath(), dirInfo.getPath(), date,
+						dirInfo.getPattern());
 				diffItems = new ArrayList<DiffItem>();
 				diffItems.addAll(existingItems);
 			}
@@ -157,7 +159,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 		return lastModified;
 	}
 
-	private static List<DiffItemImpl> getItems(Client client, String dirRoot, String dir, long index, Pattern pattern) throws BaseException {
+	private static List<DiffItemImpl> getItems(Client client, String dirRoot, String dir, long index, Pattern pattern)
+			throws BaseException {
 		List<DiffItemImpl> items = new ArrayList<DiffItemImpl>();
 
 		Vector<LsEntry> files = null;
@@ -206,7 +209,7 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 		return items;
 	}
 
-	public Collection<DiffEntity> loadCurrents(Test test) throws BaseException {
+	public Collection<DiffEntity> loadCurrents() throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
@@ -242,7 +245,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 	private DiffEntity loadCurrent(Client client, DirInfo dirInfo) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
-			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0, dirInfo.getPattern());
+			long lastModified = getLastModifiedDirectory(client, dirInfo.getPath(), dirInfo.getPath(), 0,
+					dirInfo.getPattern());
 			DiffEntityImpl group = new DiffEntityImpl(adaptEntityName(dirInfo.getName()));
 			DiffIndexImpl diffIndexImpl = new DiffIndexImpl();
 			diffIndexImpl.setMs(lastModified);
@@ -254,7 +258,8 @@ public class DiffManagerSFtpJsch extends DiffManagerFtpBase {
 		}
 	}
 
-	private static long getLastModifiedDirectory(Client client, String dirRoot, String dir, long lastModified, Pattern pattern) throws BaseException {
+	private static long getLastModifiedDirectory(Client client, String dirRoot, String dir, long lastModified,
+			Pattern pattern) throws BaseException {
 
 		Vector<LsEntry> files = null;
 		try {

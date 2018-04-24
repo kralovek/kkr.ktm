@@ -13,20 +13,19 @@ import kkr.common.errors.BaseException;
 import kkr.common.errors.ConfigurationException;
 import kkr.common.errors.TechnicalException;
 import kkr.ktm.domains.common.components.templateloader.TemplateLoader;
-import kkr.ktm.domains.tests.data.Test;
 
 public class TemplateLoaderFile extends TemplateLoaderFileFwk implements TemplateLoader {
 	private static final Logger LOG = Logger.getLogger(TemplateLoaderFile.class);
 
 	private static final String EXTENSION = ".tpl";
 
-	public String loadTemplate(Test test) throws BaseException {
+	public String loadTemplate(String name) throws BaseException {
 		LOG.trace("BEGIN");
 		try {
 			testConfigured();
 			File fileTemplate = null;
 			for (File dir : dirs) {
-				fileTemplate = createFilepath(dir, test.getType());
+				fileTemplate = createFilepath(dir, name);
 				if (fileTemplate.isFile()) {
 					break;
 				} else {
@@ -34,7 +33,7 @@ public class TemplateLoaderFile extends TemplateLoaderFileFwk implements Templat
 				}
 			}
 			if (fileTemplate == null) {
-				throw new ConfigurationException("No template found for the code: " + test.getType());
+				throw new ConfigurationException("No template found for the code: " + name);
 			}
 			LOG.debug("Loading the template: " + fileTemplate);
 			String retval = loadContent(fileTemplate);
