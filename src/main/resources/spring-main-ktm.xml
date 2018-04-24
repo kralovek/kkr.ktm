@@ -204,6 +204,7 @@
 								<entry key="TEXT">
 									<bean
 										class="kkr.ktm.domains.common.components.calculator.text.CalculatorText">
+										<property name="formatter" ref="formatterByType" />
 									</bean>
 								</entry>
 							</map>
@@ -212,34 +213,70 @@
 				</property>
 			</bean>
 		</property>
-		<property name="formatterFactory">
+		<property name="formatterFactory" ref="formatterFactoryByType" />
+	</bean>
+
+	<bean id="formatterByType"
+		class="kkr.ktm.domains.common.components.formatter.bytype.FormatterByType">
+		<property name="formatterAuto">
 			<bean
-				class="kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType">
-				<property name="formatterFactoryAuto">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
-				</property>
-				<property name="formatterFactoryDate">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.date.FormatterFactoryDate" />
-				</property>
-				<property name="formatterFactoryDecimal">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.decimal.FormatterFactoryDecimal" />
-				</property>
-				<property name="formatterFactoryInteger">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.integer.FormatterFactoryInteger" />
-				</property>
-				<property name="formatterFactoryString">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.string.FormatterFactoryString" />
-				</property>
-				<property name="formatterFactoryBoolean">
-					<bean
-						class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
-				</property>
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterAuto" />
+		</property>
+		<property name="formatterDate">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.date.FormatterDate">
+				<property name="pattern" value="HH:mm:ss dd/MM/yyyy" />
 			</bean>
+		</property>
+		<property name="formatterDecimal">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.decimal.FormatterDecimal">
+				<property name="pattern" value="%f" />
+			</bean>
+		</property>
+		<property name="formatterInteger">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.integer.FormatterInteger">
+				<property name="pattern" value="%05d" />
+			</bean>
+		</property>
+		<property name="formatterString">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.string.FormatterString">
+				<property name="pattern" value="%s" />
+			</bean>
+		</property>
+		<property name="formatterBoolean">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterAuto" />
+		</property>
+	</bean>
+
+	<bean id="formatterFactoryByType"
+		class="kkr.ktm.domains.common.components.formatter.bytype.FormatterFactoryByType">
+		<property name="formatterFactoryAuto">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
+		</property>
+		<property name="formatterFactoryDate">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.date.FormatterFactoryDate" />
+		</property>
+		<property name="formatterFactoryDecimal">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.decimal.FormatterFactoryDecimal" />
+		</property>
+		<property name="formatterFactoryInteger">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.integer.FormatterFactoryInteger" />
+		</property>
+		<property name="formatterFactoryString">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.string.FormatterFactoryString" />
+		</property>
+		<property name="formatterFactoryBoolean">
+			<bean
+				class="kkr.ktm.domains.common.components.formatter.auto.FormatterFactoryAuto" />
 		</property>
 	</bean>
 
